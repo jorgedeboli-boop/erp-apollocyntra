@@ -1,0 +1,14 @@
+# Mac
+.DS_Store
+
+# Configuraciones con datos sensibles
+*.env
+.env.*
+
+# Dependencias
+/node_modules/
+/vendor/
+
+# Logs y temporales
+*.log
+.cache/
