@@ -25,6 +25,6 @@ git commit -F "$commit_msg_file"
 git push
 
 echo "🚀 Actualizando servidor..."
-ssh apollocyntra@vl24696.dinaserver.com "cd /home/apollocyntra/erp && git fetch origin && git reset --hard origin/main"
+ssh quintagracia@vl24696.dinaserver.com "cd /home/quintagracia/erp-apollocyntra && git fetch origin && git reset --hard origin/main"
 
 echo "✅ ¡Todo actualizado!"

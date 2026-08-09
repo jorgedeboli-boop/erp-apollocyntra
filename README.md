@@ -10,4 +10,4 @@ Aplicación web ERP para Apollo Cyntra (`erp.apollocyntra.app`).
 ## Repositorio
 
 - GitHub: `git@github.com:jorgedeboli-boop/erp-apollocyntra.git`
-- Servidor: `/home/apollocyntra/erp` en `vl24696.dinaserver.com`
+- Servidor: `/home/quintagracia/erp-apollocyntra` en `vl24696.dinaserver.com`
