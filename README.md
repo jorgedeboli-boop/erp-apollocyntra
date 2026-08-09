@@ -2,6 +2,11 @@
 
 Aplicación web ERP para Apollo Cyntra (`erp.apollocyntra.app`).
 
+## Configuración inicial (solo una vez)
+
+1. Autentica GitHub CLI: `gh auth login`
+2. Ejecuta `./setup-completo.sh` — crea el repo en GitHub, sube el código y clona en el servidor.
+
 ## Despliegue
 
 1. Ejecuta la tarea de VS Code **🚀 Deploy a servidor**, o lanza `./deploy.sh` desde la terminal.
