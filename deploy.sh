@@ -24,7 +24,44 @@ printf "%s\n" "$mensaje" > "$commit_msg_file"
 git commit -F "$commit_msg_file"
 git push
 
-echo "🚀 Actualizando servidor..."
-ssh quintagracia@vl24696.dinaserver.com "cd /home/quintagracia/erp-apollocyntra && git fetch origin && git reset --hard origin/main"
+echo "🚀 Subiendo archivos por FTP al hosting..."
 
-echo "✅ ¡Todo actualizado!"
+SFTP_CONFIG=".vscode/sftp.json"
+if [[ ! -f "$SFTP_CONFIG" ]]; then
+  echo "❌ No se encontró $SFTP_CONFIG"
+  exit 1
+fi
+
+read -r FTP_HOST FTP_USER FTP_PASS FTP_PATH <<< "$(python3 - <<'PY'
+import json
+with open(".vscode/sftp.json", encoding="utf-8") as f:
+    cfg = json.load(f)
+print(cfg["host"], cfg["username"], cfg["password"], cfg.get("remotePath", ""))
+PY
+)"
+
+/opt/homebrew/bin/lftp -c "
+set ftp:ssl-allow no
+set cmd:fail-exit yes
+open -u ${FTP_USER},${FTP_PASS} ${FTP_HOST}
+lcd $(pwd)
+cd ${FTP_PATH:-/}
+mirror -R \
+  --parallel=4 \
+  --exclude .git/ \
+  --exclude .vscode/ \
+  --exclude .DS_Store \
+  --exclude include/config.php \
+  --exclude include/API_KEY_CLAUDE.txt \
+  --exclude node_modules/ \
+  --exclude vendor/ \
+  --exclude photos/ \
+  --exclude invoices/ \
+  --exclude-glob *.sql \
+  --exclude-glob *.bak \
+  --exclude-glob *.zip \
+  --exclude-glob *.log
+quit
+"
+
+echo "✅ ¡Todo actualizado en GitHub y en el servidor FTP!"
