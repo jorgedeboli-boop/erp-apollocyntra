@@ -1,6 +1,9 @@
 # Mac
 .DS_Store
 
+# Metadata Dreamweaver / SFTP (no subir)
+**/_notes/
+
 # Configuraciones con datos sensibles (BD, contraseñas)
 include/config.php
 include/API_KEY_CLAUDE.txt

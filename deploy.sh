@@ -51,6 +51,7 @@ mirror -R \
   --exclude .git/ \
   --exclude .vscode/ \
   --exclude .DS_Store \
+  --exclude-glob **_notes/** \
   --exclude include/config.php \
   --exclude include/API_KEY_CLAUDE.txt \
   --exclude node_modules/ \
