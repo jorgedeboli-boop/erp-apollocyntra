@@ -1,0 +1,18 @@
+<?php
+/**
+ * Plantilla de configuración. Copia como include/config.php (el real está en .gitignore).
+ */
+
+// define('DB_HOST', 'localhost');
+// define('DB_USER', '');
+// define('DB_PASS', '');
+// define('DB_NAME', '');
+// define('APP_ID', '444');
+// define('APP_URL', 'https://formacion.ejemplo.com');
+
+/**
+ * Wizard tutorial de formación (solo con APP_ID 444).
+ * true  = overlays, APIs y redirección post-login activos.
+ * false = app de formación sin wizard.
+ */
+define('FORMACION_WIZARD_ENABLED', true);

@@ -1,0 +1,1297 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Escáner de Documentos</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tesseract.js/5.0.4/tesseract.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tensorflow/4.2.0/tf.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 28px;
+        }
+
+        .camera-section {
+            margin-bottom: 30px;
+            text-align: center;
+            position: relative;
+        }
+
+        .orientation-guide {
+            display: inline-block;
+            margin: 10px 0;
+            padding: 10px 20px;
+            background: #e8f5e8;
+            border: 2px dashed #4CAF50;
+            border-radius: 10px;
+            font-weight: bold;
+            color: #2e7d32;
+        }
+
+        .document-frame {
+            position: relative;
+            display: inline-block;
+            margin: 10px 0;
+        }
+
+        .frame-overlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80%;
+            height: 50%;
+            border: 3px dashed #4CAF50;
+            border-radius: 10px;
+            pointer-events: none;
+            z-index: 10;
+            background: rgba(76, 175, 80, 0.1);
+        }
+
+        .frame-text {
+            position: absolute;
+            top: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #4CAF50;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .upload-options {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin: 20px 0;
+        }
+
+        .camera-button {
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 18px;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: transform 0.2s, background 0.3s;
+            min-width: 160px;
+        }
+
+        .camera-button:hover {
+            transform: translateY(-2px);
+            background: linear-gradient(45deg, #45a049, #4CAF50);
+        }
+
+        .camera-button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        #uploadFile {
+            background: linear-gradient(45deg, #2196F3, #1976D2);
+        }
+
+        #uploadFile:hover {
+            background: linear-gradient(45deg, #1976D2, #2196F3);
+        }
+
+        #video {
+            width: 100%;
+            max-width: 500px;
+            height: 280px;
+            border-radius: 10px;
+            margin: 10px 0;
+            display: none;
+            object-fit: cover;
+            aspect-ratio: 16/9;
+        }
+
+        #canvas {
+            width: 100%;
+            max-width: 500px;
+            height: auto;
+            border-radius: 10px;
+            margin: 10px 0;
+            border: 3px solid #4CAF50;
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            #video {
+                max-width: 100%;
+                height: 220px;
+            }
+        }
+
+        .status {
+            text-align: center;
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 10px;
+            font-weight: bold;
+        }
+
+        .status.processing {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .form-section {
+            margin-top: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #333;
+            font-weight: bold;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #4CAF50;
+        }
+
+        .ai-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .ai-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            margin: 5px;
+        }
+
+        .confidence-meter {
+            background: #f0f0f0;
+            border-radius: 10px;
+            height: 8px;
+            width: 100px;
+            overflow: hidden;
+            display: inline-block;
+            margin-left: 10px;
+        }
+
+        .confidence-fill {
+            height: 100%;
+            border-radius: 10px;
+            transition: width 0.3s ease;
+        }
+
+        .confidence-high { background: #4CAF50; }
+        .confidence-medium { background: #FF9800; }
+        .confidence-low { background: #f44336; }
+
+        .ai-suggestions {
+            background: #e3f2fd;
+            border: 1px solid #2196F3;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+
+        .ai-suggestions h4 {
+            color: #1976D2;
+            margin: 0 0 10px 0;
+        }
+
+        .suggestion-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 5px 0;
+            color: #333;
+        }
+
+        .field-validation {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 5px;
+        }
+
+        .validation-icon {
+            font-size: 16px;
+        }
+
+        .validation-message {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .document-type {
+            background: #e3f2fd;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: bold;
+            color: #1976d2;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: #f0f0f0;
+            border-radius: 3px;
+            overflow: hidden;
+            margin: 20px 0;
+            display: none;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4CAF50, #45a049);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .instructions {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border-left: 4px solid #4CAF50;
+        }
+
+        .instructions h3 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .instructions ul {
+            color: #666;
+            line-height: 1.6;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+                padding: 20px;
+            }
+            
+            h1 {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📱 Escáner de Documentos</h1>
+        
+        <div class="ai-section">
+            <div class="ai-indicator">
+                🤖 IA Activada: Reconocimiento Inteligente
+            </div>
+            <div class="ai-indicator">
+                ⚡ Mejora automática de imagen
+            </div>
+            <div class="ai-indicator">
+                🎯 Validación inteligente de datos
+            </div>
+        </div>
+
+        <div class="instructions">
+            <h3>Instrucciones:</h3>
+            <ul>
+                <li><strong>Opción 1 - Cámara:</strong> Asegúrate de tener buena iluminación</li>
+                <li><strong>Opción 2 - Subir imagen:</strong> Selecciona una foto clara del documento</li>
+                <li>Coloca el documento sobre una superficie plana</li>
+                <li><strong>Mantén el documento en posición HORIZONTAL</strong></li>
+                <li>Asegúrate de que el documento completo esté en el encuadre</li>
+                <li>Evita reflejos y sombras</li>
+                <li>Mantén la cámara paralela al documento</li>
+            </ul>
+        </div>
+
+        <div class="camera-section">
+            <div class="orientation-guide">
+                📄 Coloca el documento en posición HORIZONTAL 📄
+            </div>
+            
+            <div class="upload-options">
+                <button id="startCamera" class="camera-button">📷 Usar Cámara</button>
+                <button id="uploadFile" class="camera-button">📁 Subir Imagen</button>
+                <input type="file" id="fileInput" accept="image/*" style="display: none;">
+            </div>
+            
+            <button id="capturePhoto" class="camera-button" style="display: none;">📸 Capturar Foto</button>
+            <button id="retake" class="camera-button" style="display: none;">🔄 Repetir</button>
+            
+            <div class="document-frame">
+                <video id="video" autoplay playsinline></video>
+                <canvas id="canvas"></canvas>
+                <div class="frame-overlay" id="frameOverlay" style="display: none;">
+                    <div class="frame-text">Coloca aquí el documento</div>
+                </div>
+            </div>
+            
+            <div class="progress-bar" id="progressBar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+        </div>
+
+        <div id="status" class="status" style="display: none;"></div>
+
+        <div class="form-section" id="formSection" style="display: none;">
+            <div class="document-type" id="documentType"></div>
+            
+            <div id="aiSuggestions" class="ai-suggestions" style="display: none;">
+                <h4>🤖 Sugerencias de IA</h4>
+                <div id="suggestionsList"></div>
+            </div>
+            
+            <div class="form-group">
+                <label for="documentNumber">Número de Documento:</label>
+                <input type="text" id="documentNumber" name="documentNumber">
+                <div class="field-validation" id="numberValidation"></div>
+            </div>
+            
+            <div class="form-group">
+                <label for="name">Nombre:</label>
+                <input type="text" id="name" name="name">
+                <div class="field-validation" id="nameValidation"></div>
+            </div>
+            
+            <div class="form-group">
+                <label for="surname">Apellidos:</label>
+                <input type="text" id="surname" name="surname">
+                <div class="field-validation" id="surnameValidation"></div>
+            </div>
+            
+            <div class="form-group">
+                <label for="birthDate">Fecha de Nacimiento:</label>
+                <input type="text" id="birthDate" name="birthDate">
+                <div class="field-validation" id="birthDateValidation"></div>
+            </div>
+            
+            <div class="form-group">
+                <label for="expirationDate">Fecha de Caducidad:</label>
+                <input type="text" id="expirationDate" name="expirationDate">
+                <div class="field-validation" id="expirationValidation"></div>
+            </div>
+            
+            <div class="form-group">
+                <label for="nationality">Nacionalidad:</label>
+                <input type="text" id="nationality" name="nationality">
+                <div class="field-validation" id="nationalityValidation"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class DocumentAI {
+            constructor() {
+                this.confidenceThresholds = {
+                    high: 0.8,
+                    medium: 0.6,
+                    low: 0.4
+                };
+            }
+
+            // Mejora inteligente de imagen usando filtros avanzados
+            async enhanceImage(canvas) {
+                const ctx = canvas.getContext('2d');
+                const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                
+                // Aplicar filtros de IA
+                let enhanced = this.applyContrastEnhancement(imageData);
+                enhanced = this.applyNoiseReduction(enhanced);
+                enhanced = this.applySharpening(enhanced);
+                
+                ctx.putImageData(enhanced, 0, 0);
+                return canvas;
+            }
+
+            applyContrastEnhancement(imageData) {
+                const data = imageData.data;
+                const factor = 1.5; // Factor de contraste
+                
+                for (let i = 0; i < data.length; i += 4) {
+                    // Mejorar contraste RGB
+                    data[i] = Math.min(255, Math.max(0, (data[i] - 128) * factor + 128));
+                    data[i + 1] = Math.min(255, Math.max(0, (data[i + 1] - 128) * factor + 128));
+                    data[i + 2] = Math.min(255, Math.max(0, (data[i + 2] - 128) * factor + 128));
+                }
+                
+                return imageData;
+            }
+
+            applyNoiseReduction(imageData) {
+                // Filtro de reducción de ruido simple
+                const data = imageData.data;
+                const width = imageData.width;
+                const height = imageData.height;
+                const newData = new Uint8ClampedArray(data);
+                
+                for (let y = 1; y < height - 1; y++) {
+                    for (let x = 1; x < width - 1; x++) {
+                        for (let c = 0; c < 3; c++) {
+                            const idx = (y * width + x) * 4 + c;
+                            const sum = data[idx - 4] + data[idx] + data[idx + 4] + 
+                                       data[idx - width * 4] + data[idx + width * 4];
+                            newData[idx] = sum / 5;
+                        }
+                    }
+                }
+                
+                return new ImageData(newData, width, height);
+            }
+
+            applySharpening(imageData) {
+                const data = imageData.data;
+                const width = imageData.width;
+                const height = imageData.height;
+                const newData = new Uint8ClampedArray(data);
+                
+                // Kernel de sharpening
+                const kernel = [-1, -1, -1, -1, 9, -1, -1, -1, -1];
+                
+                for (let y = 1; y < height - 1; y++) {
+                    for (let x = 1; x < width - 1; x++) {
+                        for (let c = 0; c < 3; c++) {
+                            let sum = 0;
+                            for (let ky = -1; ky <= 1; ky++) {
+                                for (let kx = -1; kx <= 1; kx++) {
+                                    const idx = ((y + ky) * width + (x + kx)) * 4 + c;
+                                    const kernelIdx = (ky + 1) * 3 + (kx + 1);
+                                    sum += data[idx] * kernel[kernelIdx];
+                                }
+                            }
+                            const newIdx = (y * width + x) * 4 + c;
+                            newData[newIdx] = Math.min(255, Math.max(0, sum));
+                        }
+                    }
+                }
+                
+                return new ImageData(newData, width, height);
+            }
+
+            // Validación inteligente de datos extraídos
+            validateDocumentData(data) {
+                const validations = {};
+                
+                // Validar número de documento
+                if (data.number) {
+                    validations.number = this.validateDocumentNumber(data.number, data.type);
+                }
+                
+                // Validar nombre
+                if (data.name) {
+                    validations.name = this.validateName(data.name);
+                }
+                
+                // Validar apellidos
+                if (data.surname) {
+                    validations.surname = this.validateName(data.surname);
+                }
+                
+                // Validar fechas
+                if (data.birthDate) {
+                    validations.birthDate = this.validateDate(data.birthDate, 'birth');
+                }
+                
+                if (data.expiration) {
+                    validations.expiration = this.validateDate(data.expiration, 'expiration');
+                }
+                
+                // Validar nacionalidad
+                if (data.nationality) {
+                    validations.nationality = this.validateNationality(data.nationality);
+                }
+                
+                return validations;
+            }
+
+            validateDocumentNumber(number, type) {
+                const patterns = {
+                    dni: /^\d{8}[A-Z]$/,
+                    nie: /^[XYZ]\d{7}[A-Z]$/,
+                    cif: /^[ABCDEFGHJNPQRSUVW]\d{7}[0-9A-J]$/,
+                    passport: /^[A-Z]{3}\d{6}$/
+                };
+                
+                if (!patterns[type]) {
+                    return { confidence: 0.5, message: 'Tipo de documento desconocido', icon: '❓' };
+                }
+                
+                if (patterns[type].test(number)) {
+                    return { confidence: 0.95, message: 'Formato correcto', icon: '✅' };
+                } else {
+                    return { confidence: 0.2, message: 'Formato incorrecto', icon: '❌' };
+                }
+            }
+
+            validateName(name) {
+                const cleanName = name.trim();
+                
+                if (cleanName.length < 2) {
+                    return { confidence: 0.1, message: 'Muy corto', icon: '❌' };
+                }
+                
+                if (cleanName.length > 50) {
+                    return { confidence: 0.3, message: 'Muy largo', icon: '⚠️' };
+                }
+                
+                if (!/^[A-ZÁÉÍÓÚÑ\s\-]+$/i.test(cleanName)) {
+                    return { confidence: 0.4, message: 'Caracteres inválidos', icon: '⚠️' };
+                }
+                
+                return { confidence: 0.9, message: 'Formato válido', icon: '✅' };
+            }
+
+            validateDate(dateStr, type) {
+                const dateFormats = [
+                    /^(\d{1,2})[\/\-\.](\d{1,2})[\/\-\.](\d{4})$/,
+                    /^(\d{4})[\/\-\.](\d{1,2})[\/\-\.](\d{1,2})$/
+                ];
+                
+                let match = null;
+                let day, month, year;
+                
+                for (const format of dateFormats) {
+                    match = dateStr.match(format);
+                    if (match) {
+                        if (format === dateFormats[0]) {
+                            [, day, month, year] = match;
+                        } else {
+                            [, year, month, day] = match;
+                        }
+                        break;
+                    }
+                }
+                
+                if (!match) {
+                    return { confidence: 0.1, message: 'Formato de fecha inválido', icon: '❌' };
+                }
+                
+                const date = new Date(year, month - 1, day);
+                const now = new Date();
+                
+                if (date.getDate() != day || date.getMonth() != month - 1 || date.getFullYear() != year) {
+                    return { confidence: 0.2, message: 'Fecha inválida', icon: '❌' };
+                }
+                
+                if (type === 'birth') {
+                    if (date > now) {
+                        return { confidence: 0.1, message: 'Fecha futura', icon: '❌' };
+                    }
+                    if (now.getFullYear() - date.getFullYear() > 120) {
+                        return { confidence: 0.3, message: 'Fecha muy antigua', icon: '⚠️' };
+                    }
+                }
+                
+                if (type === 'expiration') {
+                    if (date < now) {
+                        return { confidence: 0.7, message: 'Documento caducado', icon: '⚠️' };
+                    }
+                }
+                
+                return { confidence: 0.95, message: 'Fecha válida', icon: '✅' };
+            }
+
+            validateNationality(nationality) {
+                const commonNationalities = [
+                    'ARGENTINA', 'ESPAÑA', 'COLOMBIA', 'VENEZUELA', 'PERÚ', 'ECUADOR',
+                    'URUGUAY', 'CHILE', 'BOLIVIA', 'PARAGUAY', 'BRASIL', 'MÉXICO',
+                    'ESTADOS UNIDOS', 'FRANCIA', 'ITALIA', 'ALEMANIA', 'REINO UNIDO'
+                ];
+                
+                const upper = nationality.toUpperCase();
+                if (commonNationalities.includes(upper)) {
+                    return { confidence: 0.95, message: 'Nacionalidad válida', icon: '✅' };
+                }
+                
+                if (/^[A-ZÁÉÍÓÚÑ\s]+$/i.test(nationality)) {
+                    return { confidence: 0.7, message: 'Posible nacionalidad', icon: '⚠️' };
+                }
+                
+                return { confidence: 0.3, message: 'Formato inválido', icon: '❌' };
+            }
+
+            // Corrección automática inteligente
+            autoCorrectData(data) {
+                const corrected = { ...data };
+                
+                // Corregir formato de fechas
+                if (data.birthDate) {
+                    corrected.birthDate = this.standardizeDateFormat(data.birthDate);
+                }
+                if (data.expiration) {
+                    corrected.expiration = this.standardizeDateFormat(data.expiration);
+                }
+                
+                // Corregir nombres
+                if (data.name) {
+                    corrected.name = this.standardizeName(data.name);
+                }
+                if (data.surname) {
+                    corrected.surname = this.standardizeName(data.surname);
+                }
+                
+                // Corregir nacionalidad
+                if (data.nationality) {
+                    corrected.nationality = this.standardizeNationality(data.nationality);
+                }
+                
+                return corrected;
+            }
+
+            standardizeDateFormat(dateStr) {
+                const match = dateStr.match(/(\d{1,2})\s*[\/\-\.]\s*(\d{1,2})\s*[\/\-\.]\s*(\d{4})/);
+                if (match) {
+                    const [, day, month, year] = match;
+                    return `${day.padStart(2, '0')}/${month.padStart(2, '0')}/${year}`;
+                }
+                return dateStr;
+            }
+
+            standardizeName(name) {
+                return name.replace(/\s+/g, ' ')
+                          .split(' ')
+                          .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+                          .join(' ')
+                          .trim();
+            }
+
+            standardizeNationality(nationality) {
+                const mapping = {
+                    'ARG': 'ARGENTINA',
+                    'ESP': 'ESPAÑA',
+                    'COL': 'COLOMBIA',
+                    'VEN': 'VENEZUELA',
+                    'PER': 'PERÚ',
+                    'ECU': 'ECUADOR',
+                    'URU': 'URUGUAY',
+                    'CHI': 'CHILE',
+                    'BOL': 'BOLIVIA',
+                    'PAR': 'PARAGUAY'
+                };
+                
+                const upper = nationality.toUpperCase();
+                return mapping[upper] || this.standardizeName(nationality);
+            }
+
+            // Generar sugerencias inteligentes
+            generateSuggestions(data, validations) {
+                const suggestions = [];
+                
+                Object.entries(validations).forEach(([field, validation]) => {
+                    if (validation.confidence < this.confidenceThresholds.medium) {
+                        suggestions.push({
+                            field,
+                            message: `${field}: ${validation.message}`,
+                            type: validation.confidence < this.confidenceThresholds.low ? 'error' : 'warning'
+                        });
+                    }
+                });
+                
+                // Sugerencias específicas
+                if (!data.number || validations.number?.confidence < 0.5) {
+                    suggestions.push({
+                        field: 'general',
+                        message: 'Intenta capturar el documento con mejor iluminación',
+                        type: 'info'
+                    });
+                }
+                
+                if (Object.keys(validations).length < 3) {
+                    suggestions.push({
+                        field: 'general',
+                        message: 'Asegúrate de que todo el documento esté visible',
+                        type: 'info'
+                    });
+                }
+                
+                return suggestions;
+            }
+        }
+
+        class DocumentScanner {
+            constructor() {
+                this.video = document.getElementById('video');
+                this.canvas = document.getElementById('canvas');
+                this.ctx = this.canvas.getContext('2d');
+                this.stream = null;
+                this.ai = new DocumentAI(); // Instancia de IA
+                
+                this.initializeEventListeners();
+            }
+
+            initializeEventListeners() {
+                document.getElementById('startCamera').addEventListener('click', () => this.startCamera());
+                document.getElementById('capturePhoto').addEventListener('click', () => this.capturePhoto());
+                document.getElementById('retake').addEventListener('click', () => this.retake());
+                document.getElementById('uploadFile').addEventListener('click', () => this.triggerFileUpload());
+                document.getElementById('fileInput').addEventListener('change', (e) => this.handleFileUpload(e));
+            }
+
+            async startCamera() {
+                try {
+                    this.stream = await navigator.mediaDevices.getUserMedia({
+                        video: { 
+                            facingMode: 'environment',
+                            width: { ideal: 1920 },
+                            height: { ideal: 1080 },
+                            aspectRatio: { ideal: 16/9 }
+                        }
+                    });
+                    
+                    this.video.srcObject = this.stream;
+                    this.video.style.display = 'block';
+                    document.getElementById('frameOverlay').style.display = 'block';
+                    
+                    document.querySelector('.upload-options').style.display = 'none';
+                    document.getElementById('capturePhoto').style.display = 'inline-block';
+                    
+                    this.showStatus('Cámara lista. Coloca el documento HORIZONTALMENTE dentro del marco y captura la foto.', 'success');
+                } catch (error) {
+                    this.showStatus('Error al acceder a la cámara: ' + error.message, 'error');
+                }
+            }
+
+            capturePhoto() {
+                const videoWidth = this.video.videoWidth;
+                const videoHeight = this.video.videoHeight;
+                
+                this.canvas.width = videoWidth;
+                this.canvas.height = videoHeight;
+                
+                this.ctx.drawImage(this.video, 0, 0, videoWidth, videoHeight);
+                
+                this.video.style.display = 'none';
+                document.getElementById('frameOverlay').style.display = 'none';
+                this.canvas.style.display = 'block';
+                
+                document.getElementById('capturePhoto').style.display = 'none';
+                document.getElementById('retake').style.display = 'inline-block';
+                
+                this.stopCamera();
+                this.processImage();
+            }
+
+            retake() {
+                this.canvas.style.display = 'none';
+                document.getElementById('frameOverlay').style.display = 'none';
+                document.getElementById('retake').style.display = 'none';
+                document.getElementById('capturePhoto').style.display = 'none';
+                document.querySelector('.upload-options').style.display = 'flex';
+                document.getElementById('formSection').style.display = 'none';
+                
+                // Limpiar input de archivo
+                document.getElementById('fileInput').value = '';
+                
+                this.hideProgress();
+                this.showStatus('', '');
+            }
+
+            stopCamera() {
+                if (this.stream) {
+                    this.stream.getTracks().forEach(track => track.stop());
+                    this.stream = null;
+                }
+            }
+
+            triggerFileUpload() {
+                document.getElementById('fileInput').click();
+            }
+
+            handleFileUpload(event) {
+                const file = event.target.files[0];
+                if (!file) return;
+
+                // Verificar que es una imagen
+                if (!file.type.startsWith('image/')) {
+                    this.showStatus('Por favor, selecciona un archivo de imagen válido.', 'error');
+                    return;
+                }
+
+                this.showStatus('Cargando imagen...', 'processing');
+
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    this.loadImageToCanvas(e.target.result);
+                };
+                reader.readAsDataURL(file);
+            }
+
+            loadImageToCanvas(imageSrc) {
+                const img = new Image();
+                img.onload = () => {
+                    // Calcular dimensiones manteniendo proporción
+                    const maxWidth = 800;
+                    const maxHeight = 600;
+                    let { width, height } = img;
+
+                    if (width > maxWidth) {
+                        height = (height * maxWidth) / width;
+                        width = maxWidth;
+                    }
+                    if (height > maxHeight) {
+                        width = (width * maxHeight) / height;
+                        height = maxHeight;
+                    }
+
+                    // Configurar canvas
+                    this.canvas.width = width;
+                    this.canvas.height = height;
+
+                    // Dibujar imagen en canvas
+                    this.ctx.drawImage(img, 0, 0, width, height);
+
+                    // Mostrar canvas y ocultar video
+                    this.video.style.display = 'none';
+                    document.getElementById('frameOverlay').style.display = 'none';
+                    this.canvas.style.display = 'block';
+
+                    // Mostrar botón de repetir
+                    document.querySelector('.upload-options').style.display = 'none';
+                    document.getElementById('retake').style.display = 'inline-block';
+
+                    // Procesar imagen
+                    this.processImage();
+                };
+                img.src = imageSrc;
+            }
+
+            showStatus(message, type) {
+                const status = document.getElementById('status');
+                status.textContent = message;
+                status.className = `status ${type}`;
+                status.style.display = message ? 'block' : 'none';
+            }
+
+            showProgress() {
+                document.getElementById('progressBar').style.display = 'block';
+            }
+
+            hideProgress() {
+                document.getElementById('progressBar').style.display = 'none';
+                document.getElementById('progressFill').style.width = '0%';
+            }
+
+            updateProgress(percentage) {
+                document.getElementById('progressFill').style.width = percentage + '%';
+            }
+
+            async processImage() {
+                this.showStatus('🤖 IA procesando imagen...', 'processing');
+                this.showProgress();
+
+                try {
+                    const canvas = this.canvas;
+                    
+                    // Paso 1: Mejora inteligente de imagen
+                    this.updateProgress(10);
+                    this.showStatus('🔧 IA mejorando calidad de imagen...', 'processing');
+                    await this.ai.enhanceImage(canvas);
+                    
+                    // Paso 2: OCR con configuración optimizada
+                    this.updateProgress(20);
+                    this.showStatus('👁️ IA analizando texto...', 'processing');
+                    
+                    const worker = await Tesseract.createWorker('spa', 1, {
+                        logger: (m) => {
+                            if (m.status === 'recognizing text') {
+                                this.updateProgress(20 + (m.progress * 50));
+                            }
+                        }
+                    });
+
+                    // Configuración optimizada para documentos
+                    await worker.setParameters({
+                        tessedit_char_whitelist: 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789ÁÉÍÓÚÑáéíóúñ /.-:',
+                        tessedit_pageseg_mode: '6'
+                    });
+
+                    const { data: { text } } = await worker.recognize(canvas);
+                    await worker.terminate();
+
+                    this.updateProgress(75);
+                    
+                    // Paso 3: Análisis inteligente del documento
+                    this.showStatus('🧠 IA analizando documento...', 'processing');
+                    const documentData = this.analyzeDocument(text);
+                    
+                    this.updateProgress(85);
+                    
+                    // Paso 4: Corrección automática con IA
+                    this.showStatus('✨ IA corrigiendo datos...', 'processing');
+                    const correctedData = this.ai.autoCorrectData(documentData);
+                    
+                    this.updateProgress(90);
+                    
+                    // Paso 5: Validación inteligente
+                    this.showStatus('🎯 IA validando información...', 'processing');
+                    const validations = this.ai.validateDocumentData(correctedData);
+                    
+                    this.updateProgress(95);
+                    
+                    // Paso 6: Generar sugerencias
+                    const suggestions = this.ai.generateSuggestions(correctedData, validations);
+                    
+                    this.updateProgress(100);
+                    this.hideProgress();
+                    
+                    if (correctedData.type !== 'unknown') {
+                        this.showStatus(`✅ Documento ${correctedData.type.toUpperCase()} reconocido por IA`, 'success');
+                        this.populateForm(correctedData, validations, suggestions);
+                    } else {
+                        this.showStatus('❌ IA no pudo identificar el documento. Intenta con mejor iluminación.', 'error');
+                    }
+                    
+                } catch (error) {
+                    this.hideProgress();
+                    this.showStatus('💥 Error en procesamiento IA: ' + error.message, 'error');
+                }
+            }
+
+            analyzeDocument(text) {
+                const cleanText = text.replace(/\s+/g, ' ').toUpperCase();
+                console.log('Texto extraído:', cleanText); // Para debug
+                
+                // Patrones mejorados para diferentes documentos
+                const patterns = {
+                    dni: {
+                        identifier: /DNI|DOCUMENTO NACIONAL|IDENTIDAD/i,
+                        number: /(\d{8}[A-Z])/g,
+                        name: /(?:NOMBRE|NAME)[:\s]*([A-ZÁÉÍÓÚÑ\s]+?)(?:\s+APELLIDOS?|\s+SURNAME|\s+\d|\s*$)/i,
+                        surname: /(?:APELLIDOS?|SURNAME)[:\s]*([A-ZÁÉÍÓÚÑ\s]+?)(?:\s+FECHA|\s+BIRTH|\s+\d|\s*$)/i,
+                        birthDate: /(?:NACIMIENTO|BIRTH|FECHA)[:\s]*(\d{1,2}[-/\.]\d{1,2}[-/\.]\d{4})/i,
+                        expiration: /(?:VALIDEZ|VALID|HASTA)[:\s]*(\d{1,2}[-/\.]\d{1,2}[-/\.]\d{4})/i
+                    },
+                    nie: {
+                        identifier: /NIE|PERMISO.*RESIDENCIA|TARJETA.*EXTRANJERO|EXTRANJERÍA|TIE/i,
+                        number: /NIE[:\s]*([XYZ]\d{7}[A-Z])/i,
+                        // Patrones específicos para el formato de TIE español
+                        name: /([A-ZÁÉÍÓÚÑ\-]+)\s+([A-ZÁÉÍÓÚÑ\-\s]+?)\s+(?:ARG|ESP|COL|VEN|PER|ECU|URU|CHI|BOL|PAR|[A-Z]{3})/i,
+                        birthDate: /(\d{2}\s+\d{2}\s+\d{4})/g,
+                        expiration: /(?:RESIDENCIA|TRABAJO).*?(\d{2}\s+\d{2}\s+\d{4})/i,
+                        nationality: /(ARG|ESP|COL|VEN|PER|ECU|URU|CHI|BOL|PAR|[A-Z]{3})/i,
+                        supportNumber: /E(\d{8,9})/i
+                    },
+                    cif: {
+                        identifier: /CIF|CÓDIGO DE IDENTIFICACIÓN FISCAL/i,
+                        number: /([ABCDEFGHJNPQRSUVW]\d{7}[0-9A-J])/g,
+                        name: /(?:RAZÓN SOCIAL|DENOMINACIÓN)[:\s]*([A-ZÁÉÍÓÚÑ\s]+?)(?:\s+CIF|\s+\d|\s*$)/i,
+                        expiration: /(?:VALIDEZ|VALID|HASTA)[:\s]*(\d{1,2}[-/\.]\d{1,2}[-/\.]\d{4})/i
+                    },
+                    passport: {
+                        identifier: /PASAPORTE|PASSPORT|ESPAÑA|SPAIN/i,
+                        number: /([A-Z]{3}\d{6})/g,
+                        name: /(?:NOMBRE|NAME|GIVEN NAME)[:\s]*([A-ZÁÉÍÓÚÑ\s]+?)(?:\s+APELLIDOS?|\s+SURNAME|\s+\d|\s*$)/i,
+                        surname: /(?:APELLIDOS?|SURNAME)[:\s]*([A-ZÁÉÍÓÚÑ\s]+?)(?:\s+FECHA|\s+BIRTH|\s+\d|\s*$)/i,
+                        birthDate: /(?:NACIMIENTO|BIRTH|FECHA)[:\s]*(\d{1,2}[-/\.]\d{1,2}[-/\.]\d{4})/i,
+                        expiration: /(?:CADUCIDAD|EXPIRY|VÁLIDO HASTA)[:\s]*(\d{1,2}[-/\.]\d{1,2}[-/\.]\d{4})/i,
+                        nationality: /(?:NACIONALIDAD|NATIONALITY)[:\s]*([A-ZÁÉÍÓÚÑ\s]+?)(?:\s+FECHA|\s+\d|\s*$)/i
+                    }
+                };
+
+                // Determinar tipo de documento
+                let documentType = 'unknown';
+                for (const [type, pattern] of Object.entries(patterns)) {
+                    if (pattern.identifier.test(cleanText)) {
+                        documentType = type;
+                        break;
+                    }
+                }
+
+                if (documentType === 'unknown') {
+                    // Intentar detectar por formato de número
+                    if (/\d{8}[A-Z]/.test(cleanText)) {
+                        documentType = 'dni';
+                    } else if (/[XYZ]\d{7}[A-Z]/.test(cleanText)) {
+                        documentType = 'nie';
+                    } else if (/[ABCDEFGHJNPQRSUVW]\d{7}[0-9A-J]/.test(cleanText)) {
+                        documentType = 'cif';
+                    } else if (/[A-Z]{3}\d{6}/.test(cleanText)) {
+                        documentType = 'passport';
+                    }
+                }
+
+                // Extraer datos según el tipo
+                const result = { type: documentType };
+                
+                if (documentType !== 'unknown' && patterns[documentType]) {
+                    const pattern = patterns[documentType];
+                    
+                    // Extraer número (específico para NIE)
+                    if (documentType === 'nie') {
+                        // Buscar NIE en el formato específico
+                        const nieMatch = cleanText.match(/NIE[:\s]*([XYZ]\d{7}[A-Z])/i) || 
+                                        cleanText.match(/([XYZ]\d{7}[A-Z])/g);
+                        if (nieMatch) {
+                            result.number = nieMatch[1] || nieMatch[0];
+                        }
+                    } else {
+                        const numberMatch = cleanText.match(pattern.number);
+                        if (numberMatch) {
+                            result.number = numberMatch[0];
+                        }
+                    }
+                    
+                    // Para NIE, usar extracción específica
+                    if (documentType === 'nie') {
+                        this.extractTIESpecificData(cleanText, result);
+                    } else {
+                        // Extraer otros campos con limpieza adicional
+                        const fields = ['name', 'surname', 'birthDate', 'expiration', 'nationality'];
+                        for (const field of fields) {
+                            if (pattern[field]) {
+                                const match = cleanText.match(pattern[field]);
+                                if (match && match[1]) {
+                                    let value = match[1].trim();
+                                    // Limpiar valores extraños que a veces captura el OCR
+                                    value = value.replace(/[^\w\s\-\/\.]/g, ' ').replace(/\s+/g, ' ').trim();
+                                    if (value.length > 1) { // Solo si tiene contenido útil
+                                        result[field] = value;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                console.log('Datos extraídos:', result); // Para debug
+                return result;
+            }
+
+            extractTIESpecificData(text, result) {
+                // Extraer nombre completo del formato TIE: "APELLIDOS Nombre1 Nombre2"
+                const namePattern = /([A-ZÁÉÍÓÚÑ\-]+)\s+([A-ZÁÉÍÓÚÑ\-\s]+?)\s+(?:ARG|ESP|COL|VEN|PER|ECU|URU|CHI|BOL|PAR|[A-Z]{3})/i;
+                const nameMatch = text.match(namePattern);
+                if (nameMatch) {
+                    result.surname = nameMatch[1].trim(); // Primer apellido
+                    result.name = nameMatch[2].trim(); // Nombres
+                }
+
+                // Extraer todas las fechas en formato DD MM YYYY
+                const dateMatches = [...text.matchAll(/(\d{2})\s+(\d{2})\s+(\d{4})/g)];
+                if (dateMatches.length > 0) {
+                    // Primera fecha suele ser nacimiento
+                    const birthMatch = dateMatches[0];
+                    result.birthDate = `${birthMatch[1]}/${birthMatch[2]}/${birthMatch[3]}`;
+                    
+                    // Segunda fecha suele ser validez/caducidad
+                    if (dateMatches.length > 1) {
+                        const expMatch = dateMatches[1];
+                        result.expiration = `${expMatch[1]}/${expMatch[2]}/${expMatch[3]}`;
+                    }
+                }
+
+                // Extraer nacionalidad (3 letras)
+                const nationalityMatch = text.match(/(ARG|ESP|COL|VEN|PER|ECU|URU|CHI|BOL|PAR|USA|FRA|ITA|DEU|GBR|[A-Z]{3})/);
+                if (nationalityMatch) {
+                    const countryNames = {
+                        'ARG': 'Argentina',
+                        'ESP': 'España', 
+                        'COL': 'Colombia',
+                        'VEN': 'Venezuela',
+                        'PER': 'Perú',
+                        'ECU': 'Ecuador',
+                        'URU': 'Uruguay',
+                        'CHI': 'Chile',
+                        'BOL': 'Bolivia',
+                        'PAR': 'Paraguay',
+                        'USA': 'Estados Unidos',
+                        'FRA': 'Francia',
+                        'ITA': 'Italia',
+                        'DEU': 'Alemania',
+                        'GBR': 'Reino Unido'
+                    };
+                    result.nationality = countryNames[nationalityMatch[1]] || nationalityMatch[1];
+                }
+
+                // Extraer número de soporte
+                const supportMatch = text.match(/E(\d{8,9})/);
+                if (supportMatch) {
+                    result.supportNumber = 'E' + supportMatch[1];
+                }
+
+                // Si no encontramos nombre/apellidos con el patrón anterior, intentar otros
+                if (!result.name || !result.surname) {
+                    // Buscar patrón de apellidos seguidos de nombres
+                    const altNamePattern = /([A-ZÁÉÍÓÚÑ\-]+)\s+([A-ZÁÉÍÓÚÑ\s]+?)(?:\s+\d|\s+ARG|\s+ESP|$)/i;
+                    const altMatch = text.match(altNamePattern);
+                    if (altMatch) {
+                        if (!result.surname) result.surname = altMatch[1].trim();
+                        if (!result.name) result.name = altMatch[2].trim();
+                    }
+                }
+            }
+
+            populateForm(data, validations = {}, suggestions = []) {
+                const typeNames = {
+                    dni: 'DNI (Documento Nacional de Identidad)',
+                    nie: 'NIE (Número de Identidad de Extranjero)',
+                    cif: 'CIF (Código de Identificación Fiscal)',
+                    passport: 'Pasaporte'
+                };
+
+                // Actualizar tipo de documento con estilo mejorado
+                const docTypeElement = document.getElementById('documentType');
+                docTypeElement.className = 'document-type';
+                docTypeElement.innerHTML = `
+                    <div style="background: #e3f2fd; padding: 10px; border-radius: 8px; margin-bottom: 20px; text-align: center; font-weight: bold; color: #1976d2;">
+                        ${typeNames[data.type] || 'Documento no identificado'}
+                    </div>
+                `;
+                
+                // Llenar campos del formulario
+                const fields = {
+                    documentNumber: data.number || '',
+                    name: data.name || '',
+                    surname: data.surname || '',
+                    birthDate: data.birthDate || '',
+                    expirationDate: data.expiration || '',
+                    nationality: data.nationality || ''
+                };
+
+                for (const [fieldId, value] of Object.entries(fields)) {
+                    const element = document.getElementById(fieldId);
+                    if (element) {
+                        element.value = value;
+                        
+                        // Añadir indicador de confianza
+                        this.addConfidenceIndicator(fieldId, validations);
+                    }
+                }
+
+                // Mostrar sugerencias de IA
+                this.displayAISuggestions(suggestions);
+
+                document.getElementById('formSection').style.display = 'block';
+            }
+
+            addConfidenceIndicator(fieldId, validations) {
+                const validationContainer = document.getElementById(fieldId.replace(/([A-Z])/g, '$1').toLowerCase() + 'Validation');
+                if (!validationContainer) return;
+
+                const fieldKey = fieldId.replace('Date', '').replace('document', '').toLowerCase();
+                const validation = validations[fieldKey] || validations[fieldId];
+                
+                if (validation) {
+                    const confidence = validation.confidence;
+                    let confidenceClass, confidenceText;
+                    
+                    if (confidence >= this.ai.confidenceThresholds.high) {
+                        confidenceClass = 'confidence-high';
+                        confidenceText = 'Alta';
+                    } else if (confidence >= this.ai.confidenceThresholds.medium) {
+                        confidenceClass = 'confidence-medium';
+                        confidenceText = 'Media';
+                    } else {
+                        confidenceClass = 'confidence-low';
+                        confidenceText = 'Baja';
+                    }
+
+                    validationContainer.innerHTML = `
+                        <span class="validation-icon">${validation.icon}</span>
+                        <div class="confidence-meter">
+                            <div class="confidence-fill ${confidenceClass}" style="width: ${confidence * 100}%"></div>
+                        </div>
+                        <span class="validation-message">Confianza: ${confidenceText} - ${validation.message}</span>
+                    `;
+                }
+            }
+
+            displayAISuggestions(suggestions) {
+                const suggestionsContainer = document.getElementById('aiSuggestions');
+                const suggestionsList = document.getElementById('suggestionsList');
+                
+                if (suggestions.length > 0) {
+                    suggestionsContainer.style.display = 'block';
+                    suggestionsList.innerHTML = suggestions.map(suggestion => {
+                        const icon = suggestion.type === 'error' ? '❌' : 
+                                   suggestion.type === 'warning' ? '⚠️' : 'ℹ️';
+                        return `
+                            <div class="suggestion-item">
+                                <span>${icon}</span>
+                                <span>${suggestion.message}</span>
+                            </div>
+                        `;
+                    }).join('');
+                } else {
+                    suggestionsContainer.style.display = 'none';
+                }
+            }
+        }
+
+        // Inicializar la aplicación
+        const scanner = new DocumentScanner();
+
+        // Verificar soporte de cámara
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+            document.querySelector('.camera-section').innerHTML = 
+                '<div class="status error">Tu navegador no soporta acceso a la cámara</div>';
+        }
+    </script>
+</body>
+</html>

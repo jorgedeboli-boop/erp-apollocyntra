@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OCR Documento — Google Vision</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: sans-serif; background: #f4f4f4; color: #222; padding: 16px; }
+h1 { font-size: 18px; font-weight: 500; margin-bottom: 16px; color: #333; }
+.card { background: #fff; border-radius: 10px; border: 1px solid #ddd; padding: 16px; margin-bottom: 14px; }
+.card label { font-size: 12px; color: #888; display: block; margin-bottom: 4px; }
+input[type=text] {
+    width: 100%; border: 1px solid #ccc; border-radius: 6px;
+    padding: 10px; font-size: 14px; color: #222;
+}
+label.btn-foto {
+    display: block; text-align: center; background: #1a73e8; color: #fff;
+    padding: 14px; border-radius: 8px; font-size: 16px; cursor: pointer; margin-bottom: 12px;
+}
+label.btn-foto:active { background: #1558b0; }
+input[type=file] { display: none; }
+#preview { width: 100%; border-radius: 8px; display: none; margin-bottom: 12px; }
+#estado { font-size: 13px; color: #555; margin-bottom: 10px; min-height: 18px; }
+.spinner { display: none; text-align: center; padding: 10px; color: #1a73e8; font-size: 13px; }
+.resultado { display: none; }
+.campo { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #f0f0f0; font-size: 14px; }
+.campo:last-child { border-bottom: none; }
+.campo .lbl { color: #888; font-size: 12px; }
+.campo .val { font-weight: 500; color: #222; text-align: right; }
+.tipo-badge { display: inline-block; padding: 3px 10px; border-radius: 12px; font-size: 12px; font-weight: 500; margin-bottom: 10px; }
+.tipo-DNI { background: #e8f0fe; color: #1a73e8; }
+.tipo-NIE { background: #fce8e6; color: #d93025; }
+.tipo-PAS { background: #e6f4ea; color: #1e8e3e; }
+.tipo-? { background: #f1f3f4; color: #888; }
+.mrz-raw { font-family: monospace; font-size: 11px; word-break: break-all; color: #555; background: #f8f8f8; padding: 8px; border-radius: 6px; margin-top: 10px; }
+.error { color: #d93025; font-size: 13px; padding: 8px; background: #fce8e6; border-radius: 6px; }
+.raw-block { font-family: monospace; font-size: 10px; word-break: break-all; background: #f8f8f8; padding: 8px; border-radius: 6px; color: #666; max-height: 120px; overflow-y: auto; }
+</style>
+</head>
+<body>
+
+<h1>OCR Documento de Identidad</h1>
+
+<div class="card">
+    <label>API Key de Google Vision</label>
+    <input type="text" id="apikey" placeholder="AIza..." autocomplete="off">
+</div>
+
+<div class="card">
+    <label class="btn-foto" for="camara">📷 Hacer foto / seleccionar imagen</label>
+    <input type="file" id="camara" accept="image/*" capture="environment">
+    <img id="preview" alt="Vista previa">
+    <div class="spinner" id="spinner">⏳ Enviando a Google Vision...</div>
+    <div id="estado"></div>
+</div>
+
+<div class="card resultado" id="resultado">
+    <div id="tipo-badge"></div>
+    <div id="campos"></div>
+    <details style="margin-top:10px;">
+        <summary style="font-size:12px;color:#888;cursor:pointer;">Ver MRZ raw</summary>
+        <div class="mrz-raw" id="mrz-raw" style="margin-top:6px;"></div>
+    </details>
+    <details style="margin-top:6px;">
+        <summary style="font-size:12px;color:#888;cursor:pointer;">Ver texto completo OCR</summary>
+        <div class="raw-block" id="texto-raw" style="margin-top:6px;"></div>
+    </details>
+</div>
+
+<script>
+var estado   = document.getElementById('estado');
+var preview  = document.getElementById('preview');
+var spinner  = document.getElementById('spinner');
+var resultado = document.getElementById('resultado');
+
+document.getElementById('camara').addEventListener('change', function(e) {
+    var file = e.target.files[0];
+    if (!file) return;
+
+    var apikey = document.getElementById('apikey').value.trim();
+    if (!apikey) {
+        estado.innerHTML = '<span class="error">Introduce tu API Key de Google Vision.</span>';
+        return;
+    }
+
+    var reader = new FileReader();
+    reader.onload = function(ev) {
+        var base64 = ev.target.result.split(',')[1];
+        preview.src = ev.target.result;
+        preview.style.display = 'block';
+        resultado.style.display = 'none';
+        estado.textContent = '';
+        spinner.style.display = 'block';
+        llamarVision(base64, apikey);
+    };
+    reader.readAsDataURL(file);
+});
+
+function llamarVision(base64, apikey) {
+    var url = 'https://vision.googleapis.com/v1/images:annotate?key=' + apikey;
+    var body = {
+        requests: [{
+            image: { content: base64 },
+            features: [
+                { type: 'DOCUMENT_TEXT_DETECTION' }
+            ]
+        }]
+    };
+
+    fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+        spinner.style.display = 'none';
+        if (data.error) {
+            estado.innerHTML = '<span class="error">Error API: ' + data.error.message + '</span>';
+            return;
+        }
+        var ann = data.responses && data.responses[0];
+        if (!ann || !ann.fullTextAnnotation) {
+            estado.innerHTML = '<span class="error">No se detectó texto en la imagen.</span>';
+            return;
+        }
+        var texto = ann.fullTextAnnotation.text || '';
+        document.getElementById('texto-raw').textContent = texto;
+        estado.textContent = 'Extrayendo MRZ...';
+        var mrz = extraerMRZ(texto);
+        if (mrz) {
+            parsearMRZ(mrz);
+            estado.textContent = 'Listo.';
+        } else {
+            estado.innerHTML = '<span class="error">No se detectó zona MRZ. Asegúrate de fotografiar el reverso del DNI/NIE o la página de datos del pasaporte.</span>';
+        }
+    })
+    .catch(function(err) {
+        spinner.style.display = 'none';
+        estado.innerHTML = '<span class="error">Error de red: ' + err.message + '</span>';
+    });
+}
+
+function normalizarLinea(l) {
+    return l.replace(/\s/g, '').replace(/[^A-Z0-9<]/gi, function(c) {
+        var mapa = {'O':'0','o':'0','i':'1','l':'1','I':'1','Q':'0','D':'0','B':'8','G':'6','S':'5'};
+        return mapa[c] !== undefined ? mapa[c] : '<';
+    }).toUpperCase();
+}
+
+function extraerMRZ(texto) {
+    var lineas = texto.split('\n').map(normalizarLinea).filter(function(l) { return l.length >= 28; });
+
+    var td3 = lineas.filter(function(l) { return l.length >= 44; });
+    if (td3.length >= 2) {
+        return { tipo: 'TD3', lineas: [td3[0].substring(0,44), td3[1].substring(0,44)] };
+    }
+
+    var td1 = lineas.filter(function(l) { return l.length >= 30; });
+    if (td1.length >= 2) {
+        return {
+            tipo: 'TD1',
+            lineas: [
+                td1[0].substring(0,30),
+                td1[1].substring(0,30),
+                td1[2] ? td1[2].substring(0,30) : ''
+            ]
+        };
+    }
+
+    return null;
+}
+
+function limpiarNombre(s) {
+    return s.replace(/</g,' ').trim().replace(/\s+/g,' ');
+}
+
+function parsearFecha(s) {
+    if (!s || s.length < 6) return s;
+    var a = s.substring(0,2), m = s.substring(2,4), d = s.substring(4,6);
+    var anio = parseInt(a) > 30 ? '19'+a : '20'+a;
+    return d+'/'+m+'/'+anio;
+}
+
+function tipoDocumento(l1) {
+    var cod = l1.substring(0,2).replace(/</g,'');
+    if (cod === 'P') return 'PAS';
+    if (cod === 'ID' || cod === 'I') {
+        var pais = l1.substring(2,5).replace(/</g,'');
+        return 'DNI';
+    }
+    if (l1.substring(5,14).match(/^[XYZ]/)) return 'NIE';
+    return 'DNI';
+}
+
+function parsearMRZ(mrz) {
+    var campos = {};
+    var tipo = '?';
+    var l = mrz.lineas;
+
+    try {
+        if (mrz.tipo === 'TD3') {
+            tipo = l[0][0] === 'P' ? 'PAS' : 'DNI';
+            var nombres = l[0].substring(5).split('<<');
+            campos['Apellidos'] = limpiarNombre(nombres[0] || '');
+            campos['Nombre'] = limpiarNombre(nombres[1] || '');
+            campos['Nº Documento'] = l[1].substring(0,9).replace(/</g,'');
+            campos['Nacionalidad'] = l[1].substring(10,13).replace(/</g,'');
+            campos['Fecha nacimiento'] = parsearFecha(l[1].substring(13,19));
+            campos['Sexo'] = l[1][20]==='M' ? 'Masculino' : l[1][20]==='F' ? 'Femenino' : l[1][20];
+            campos['Caducidad'] = parsearFecha(l[1].substring(21,27));
+        } else {
+            tipo = tipoDocumento(l[0]);
+            campos['Nº Documento'] = l[0].substring(5,14).replace(/</g,'');
+            campos['Fecha nacimiento'] = parsearFecha(l[1].substring(0,6));
+            campos['Sexo'] = l[1][7]==='M' ? 'Masculino' : l[1][7]==='F' ? 'Femenino' : l[1][7];
+            campos['Caducidad'] = parsearFecha(l[1].substring(8,14));
+            campos['Nacionalidad'] = l[1].substring(15,18).replace(/</g,'');
+            if (l[2]) {
+                var nombres2 = l[2].split('<<');
+                campos['Apellidos'] = limpiarNombre(nombres2[0] || '');
+                campos['Nombre'] = limpiarNombre(nombres2[1] || '');
+            }
+        }
+    } catch(e) {}
+
+    var badge = document.getElementById('tipo-badge');
+    badge.innerHTML = '<span class="tipo-badge tipo-'+tipo+'">'+tipo+'</span>';
+
+    var html = '';
+    var orden = ['Nombre','Apellidos','Nº Documento','Fecha nacimiento','Caducidad','Sexo','Nacionalidad'];
+    orden.forEach(function(k) {
+        if (campos[k] !== undefined && campos[k] !== '') {
+            html += '<div class="campo"><span class="lbl">'+k+'</span><span class="val">'+campos[k]+'</span></div>';
+        }
+    });
+    document.getElementById('campos').innerHTML = html;
+    document.getElementById('mrz-raw').textContent = l.join('\n');
+    resultado.style.display = 'block';
+}
+</script>
+</body>
+</html>

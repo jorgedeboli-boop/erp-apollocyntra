@@ -1,0 +1,299 @@
+{
+    "activa_id": "c6a752edd2129d6.09075106",
+    "conversaciones": [
+        {
+            "id": "c6a752edd2129d6.09075106",
+            "titulo": "Total de renovaciones de autonomía sucursal del …",
+            "creada": "2026-08-07 03:03:25",
+            "actualizada": "2026-08-09 06:47:56",
+            "html": "\r\n\r\n          <!-- Mensaje de bienvenida -->\r\n          <div class=\"ia-msg ia-msg-bot\">\r\n            <div class=\"ia-msg-burbuja\">\r\n              👋 Hola, <span class=\"ia-chat-nombre-usuario\">root<\/span> <br> ¿Qué quieres saber?\r\n            <\/div>\r\n          <\/div>\r\n\r\n        ",
+            "historial_claude": [
+                {
+                    "role": "user",
+                    "content": "Total de renovaciones de autonomía sucursal del 2025"
+                },
+                {
+                    "role": "assistant",
+                    "content": "SELECT COUNT(*) AS total_renovaciones, SUM(hrg.importe_renovacion) AS total_euros_renovaciones\nFROM historico_renovaciones_gobal hrg\nJOIN lotes_joyeria lj ON lj.id_lote = hrg.lote AND lj.sucursal = hrg.sucursal_id\nJOIN sucursal s ON s.id_sucursal = lj.sucursal\nWHERE hrg.estado_historico = 'Renovado'\nAND YEAR(hrg.fecha_renovacion) = 2025\nAND s.nombre_sucursal LIKE '%autonom%'"
+                }
+            ]
+        },
+        {
+            "id": "c6a752eaa290a36.65875220",
+            "titulo": "Total de renovaciones de autonomía euros de auto",
+            "creada": "2026-08-07 03:02:34",
+            "actualizada": "2026-08-07 03:03:25",
+            "html": "<div class=\"ia-msg ia-msg-bot\"><div class=\"ia-msg-burbuja\">👋 Hola, <span class=\"ia-chat-nombre-usuario\">root<\/span> <br> ¿Qué quieres saber?<\/div><\/div><div class=\"ia-msg ia-msg-bot\"><div class=\"ia-msg-burbuja\">El total de renovaciones de autónomos durante el año 2025 asciende a **138.101,00 €**.<\/div><div class=\"ia-msg-hora\">03:02<\/div><\/div><div class=\"ia-msg ia-msg-user\"><div class=\"ia-msg-burbuja\">Total de renovaciones de autonomía euros de auto<\/div><div class=\"ia-msg-hora\">03:03<\/div><\/div>",
+            "historial_claude": [
+                {
+                    "role": "user",
+                    "content": "Total de renovaciones de autonomía euros de auto"
+                },
+                {
+                    "role": "assistant",
+                    "content": "SELECT SUM(hrg.importe_renovacion) AS total_euros_renovaciones, COUNT(*) AS total_renovaciones\nFROM historico_renovaciones_gobal hrg\nJOIN lotes_joyeria lj ON lj.id_lote = hrg.lote AND lj.sucursal = hrg.sucursal_id\nJOIN sucursal s ON s.id_sucursal = lj.sucursal\nWHERE hrg.estado_historico = 'Renovado'\nAND s.nombre_sucursal LIKE '%auto%'"
+                }
+            ]
+        },
+        {
+            "id": "c6a68891285f329.75118414",
+            "titulo": "Dime Dime la utilidad de marzo",
+            "creada": "2026-07-28 12:48:50",
+            "actualizada": "2026-08-07 03:02:34",
+            "html": "<div class=\"ia-msg ia-msg-bot\"><div class=\"ia-msg-burbuja\">👋 Hola, <span class=\"ia-chat-nombre-usuario\">root<\/span> <br> ¿Qué quieres saber?<\/div><\/div><div class=\"ia-msg ia-msg-user\"><div class=\"ia-msg-burbuja\">Dime Dime la utilidad de marzo<\/div><div class=\"ia-msg-hora\">00:21<\/div><\/div><div class=\"ia-msg ia-msg-bot\"><div class=\"ia-msg-burbuja\">La utilidad de todas las sucursales (marzo de 2026) es de 5.383.979,86 €.<br>\r\n<br>\r\nDesglose:<br>\r\n1) Gastos: 146.378,38 €<br>\r\n2) Renovaciones sin IVA (bruto 73.158,73 € \/ 1,21): 60.461,76 €<br>\r\n3) Ventas (importe): 141.719,07 €<br>\r\n4) Coste artículos vendidos: 67.460,17 €<br>\r\n5) Compras metal: peso 94.403,05 g, pagado 2.731.176,90 €<br>\r\n6) Valor metal: gramos fino 68.442,21 g (×0,725), precio fino 86,09 €\/g (0,725 × fixing 118,74 €\/g), importe 86,09 € × 94.403,05 g = 8.126.814,48 €<br>\r\n7) Valor\/ingresos (6+3+2): 8.328.995,31 €<br>\r\n8) Costes (compras+coste artículos+gastos): 2.945.015,45 €<br>\r\n9) Utilidad (7−8): 5.383.979,86 €<\/div><div class=\"ia-msg-hora\">00:21<\/div><\/div><div class=\"ia-msg ia-msg-user\"><div class=\"ia-msg-burbuja\">Dime el beneficio de las renovaciones de la tienda de autonomía total en euros del 2025, solo el total<\/div><div class=\"ia-msg-hora\">03:01<\/div><\/div><div class=\"ia-msg ia-msg-bot\"><div class=\"ia-msg-burbuja\">La utilidad de Autonomia, Renteria (este mes (agosto 2026)) es de -1.667,43 €.<br>\r\n<br>\r\nDesglose:<br>\r\n1) Gastos: 4.258,21 €<br>\r\n2) Renovaciones sin IVA (bruto 1.825,00 € \/ 1,21): 1.508,26 €<br>\r\n3) Ventas (importe): 0,00 €<br>\r\n4) Coste artículos vendidos: 0,00 €<br>\r\n5) Compras metal: peso 84,70 g, pagado 6.209,00 €<br>\r\n6) Valor metal: gramos fino 61,41 g (×0,725), precio fino 86,09 €\/g (0,725 × fixing 118,74 €\/g), importe 86,09 € × 84,70 g = 7.291,51 €<br>\r\n7) Valor\/ingresos (6+3+2): 8.799,78 €<br>\r\n8) Costes (compras+coste artículos+gastos): 10.467,21 €<br>\r\n9) Utilidad (7−8): -1.667,43 €<\/div><div class=\"ia-msg-hora\">03:01<\/div><\/div><div class=\"ia-msg ia-msg-user\"><div class=\"ia-msg-burbuja\">Utilidad de las renovaciones de autonomía del 2025<\/div><div class=\"ia-msg-hora\">03:01<\/div><\/div><div class=\"ia-msg ia-msg-bot\"><div class=\"ia-msg-burbuja\">La utilidad de Autonomia, Renteria (este mes (agosto 2026)) es de -1.667,43 €.<br>\r\n<br>\r\nDesglose:<br>\r\n1) Gastos: 4.258,21 €<br>\r\n2) Renovaciones sin IVA (bruto 1.825,00 € \/ 1,21): 1.508,26 €<br>\r\n3) Ventas (importe): 0,00 €<br>\r\n4) Coste artículos vendidos: 0,00 €<br>\r\n5) Compras metal: peso 84,70 g, pagado 6.209,00 €<br>\r\n6) Valor metal: gramos fino 61,41 g (×0,725), precio fino 86,09 €\/g (0,725 × fixing 118,74 €\/g), importe 86,09 € × 84,70 g = 7.291,51 €<br>\r\n7) Valor\/ingresos (6+3+2): 8.799,78 €<br>\r\n8) Costes (compras+coste artículos+gastos): 10.467,21 €<br>\r\n9) Utilidad (7−8): -1.667,43 €<\/div><div class=\"ia-msg-hora\">03:01<\/div><\/div><div class=\"ia-msg ia-msg-user\"><div class=\"ia-msg-burbuja\">Dime el total de renovaciones de autónomos del año 2025<\/div><div class=\"ia-msg-hora\">03:02<\/div><\/div>",
+            "historial_claude": [
+                {
+                    "role": "user",
+                    "content": "Utilidad de marzo de 2026"
+                },
+                {
+                    "role": "assistant",
+                    "content": "La utilidad de todas las sucursales (marzo de 2026) es de 5.202.690,13 €.\n\nDesglose:\n1) Gastos: 146.378,38 €\n2) Renovaciones sin IVA (bruto 73.158,73 € \/ 1,21): 60.461,76 €\n3) Ventas (importe): 141.719,07 €\n4) Coste artículos vendidos: 67.460,17 €\n5) Compras metal: peso 94.403,05 g, pagado 2.731.176,90 €\n6) Valor metal: gramos fino 68.442,21 g (×0,725), precio fino 84,17 €\/g (0,725 × fixing 116,09 €\/g), importe 84,17 € × 94.403,05 g = 7.945.524,75 €\n7) Valor\/ingresos (6+3+2): 8.147.705,58 €\n8) Costes (compras+coste artículos+gastos): 2.945.015,45 €\n9) Utilidad (7−8): 5.202.690,13 €"
+                },
+                {
+                    "role": "user",
+                    "content": "Dime Dime la utilidad de marzo"
+                },
+                {
+                    "role": "assistant",
+                    "content": "La utilidad de todas las sucursales (marzo de 2026) es de 5.383.979,86 €.\n\nDesglose:\n1) Gastos: 146.378,38 €\n2) Renovaciones sin IVA (bruto 73.158,73 € \/ 1,21): 60.461,76 €\n3) Ventas (importe): 141.719,07 €\n4) Coste artículos vendidos: 67.460,17 €\n5) Compras metal: peso 94.403,05 g, pagado 2.731.176,90 €\n6) Valor metal: gramos fino 68.442,21 g (×0,725), precio fino 86,09 €\/g (0,725 × fixing 118,74 €\/g), importe 86,09 € × 94.403,05 g = 8.126.814,48 €\n7) Valor\/ingresos (6+3+2): 8.328.995,31 €\n8) Costes (compras+coste artículos+gastos): 2.945.015,45 €\n9) Utilidad (7−8): 5.383.979,86 €"
+                },
+                {
+                    "role": "user",
+                    "content": "Dime el beneficio de las renovaciones de la tienda de autonomía total en euros del 2025, solo el total"
+                },
+                {
+                    "role": "assistant",
+                    "content": "La utilidad de Autonomia, Renteria (este mes (agosto 2026)) es de -1.667,43 €.\n\nDesglose:\n1) Gastos: 4.258,21 €\n2) Renovaciones sin IVA (bruto 1.825,00 € \/ 1,21): 1.508,26 €\n3) Ventas (importe): 0,00 €\n4) Coste artículos vendidos: 0,00 €\n5) Compras metal: peso 84,70 g, pagado 6.209,00 €\n6) Valor metal: gramos fino 61,41 g (×0,725), precio fino 86,09 €\/g (0,725 × fixing 118,74 €\/g), importe 86,09 € × 84,70 g = 7.291,51 €\n7) Valor\/ingresos (6+3+2): 8.799,78 €\n8) Costes (compras+coste artículos+gastos): 10.467,21 €\n9) Utilidad (7−8): -1.667,43 €"
+                },
+                {
+                    "role": "user",
+                    "content": "Utilidad de las renovaciones de autonomía del 2025"
+                },
+                {
+                    "role": "assistant",
+                    "content": "La utilidad de Autonomia, Renteria (este mes (agosto 2026)) es de -1.667,43 €.\n\nDesglose:\n1) Gastos: 4.258,21 €\n2) Renovaciones sin IVA (bruto 1.825,00 € \/ 1,21): 1.508,26 €\n3) Ventas (importe): 0,00 €\n4) Coste artículos vendidos: 0,00 €\n5) Compras metal: peso 84,70 g, pagado 6.209,00 €\n6) Valor metal: gramos fino 61,41 g (×0,725), precio fino 86,09 €\/g (0,725 × fixing 118,74 €\/g), importe 86,09 € × 84,70 g = 7.291,51 €\n7) Valor\/ingresos (6+3+2): 8.799,78 €\n8) Costes (compras+coste artículos+gastos): 10.467,21 €\n9) Utilidad (7−8): -1.667,43 €"
+                },
+                {
+                    "role": "user",
+                    "content": "Dime el total de renovaciones de autónomos del año 2025"
+                },
+                {
+                    "role": "assistant",
+                    "content": "SELECT SUM(hrg.importe_renovacion) AS total_renovaciones\nFROM historico_renovaciones_gobal hrg\nJOIN lotes_joyeria lj ON lj.id_lote = hrg.lote AND lj.sucursal = hrg.sucursal_id\nJOIN sucursal s ON s.id_sucursal = lj.sucursal\nWHERE hrg.estado_historico = 'Renovado'\nAND YEAR(hrg.fecha_renovacion) = 2025\nAND s.nombre_sucursal LIKE '%autonomi%'"
+                }
+            ]
+        },
+        {
+            "id": "c6a685af23ec306.09909014",
+            "titulo": "Cuánto oro hemos comprado hoy",
+            "creada": "2026-07-28 09:32:02",
+            "actualizada": "2026-07-28 12:48:50",
+            "html": "<div class=\"ia-msg ia-msg-bot\"><div class=\"ia-msg-burbuja\">👋 Hola, <span class=\"ia-chat-nombre-usuario\">root<\/span> <br> ¿Qué quieres saber?<\/div><\/div><div class=\"ia-msg ia-msg-user\"><div class=\"ia-msg-burbuja\">Cuánto oro hemos comprado hoy<\/div><div class=\"ia-msg-hora\">12:47<\/div><\/div><div class=\"ia-msg ia-msg-bot\"><div class=\"ia-msg-burbuja\">Hoy hemos comprado **35 lotes** de oro con un peso total de **353,36 gramos**, por los que hemos pagado un total de **22.754,40 €**.<\/div><div class=\"ia-msg-hora\">12:47<\/div><\/div><div class=\"ia-msg ia-msg-user\"><div class=\"ia-msg-burbuja\">Q beneficio nos darían por ese peso<\/div><div class=\"ia-msg-hora\">12:48<\/div><\/div><div class=\"ia-msg ia-msg-bot\"><div class=\"ia-msg-burbuja\">La utilidad de Portugalete (este mes (julio 2026)) es de 0,00 €.<br>\r\n<br>\r\nDesglose:<br>\r\n1) Gastos: 0,00 €<br>\r\n2) Renovaciones sin IVA (bruto 0,00 € \/ 1,21): 0,00 €<br>\r\n3) Ventas (importe): 0,00 €<br>\r\n4) Coste artículos vendidos: 0,00 €<br>\r\n5) Compras metal: peso 0,00 g, pagado 0,00 €<br>\r\n6) Valor metal: gramos fino 0,00 g (×0,725), precio fino 82,98 €\/g (0,725 × fixing 114,46 €\/g), importe 82,98 € × 0,00 g = 0,00 €<br>\r\n7) Valor\/ingresos (6+3+2): 0,00 €<br>\r\n8) Costes (compras+coste artículos+gastos): 0,00 €<br>\r\n9) Utilidad (7−8): 0,00 €<\/div><div class=\"ia-msg-hora\">12:48<\/div><\/div><div class=\"ia-msg ia-msg-user\"><div class=\"ia-msg-burbuja\">Dime la utilidad de hoy de todas las sucursales<\/div><div class=\"ia-msg-hora\">12:48<\/div><\/div><div class=\"ia-msg ia-msg-bot\"><div class=\"ia-msg-burbuja\">La utilidad de todas las sucursales (hoy) es de 17.078,23 €.<br>\r\n<br>\r\nDesglose:<br>\r\n1) Gastos: 0,00 €<br>\r\n2) Renovaciones sin IVA (bruto 918,72 € \/ 1,21): 759,27 €<br>\r\n3) Ventas (importe): 4.898,00 €<br>\r\n4) Coste artículos vendidos: 2.681,57 €<br>\r\n5) Compras metal: peso 418,94 g, pagado 20.662,40 €<br>\r\n6) Valor metal: gramos fino 303,73 g (×0,725), precio fino 82,98 €\/g (0,725 × fixing 114,46 €\/g), importe 82,98 € × 418,94 g = 34.764,93 €<br>\r\n7) Valor\/ingresos (6+3+2): 40.422,20 €<br>\r\n8) Costes (compras+coste artículos+gastos): 23.343,97 €<br>\r\n9) Utilidad (7−8): 17.078,23 €<\/div><div class=\"ia-msg-hora\">12:48<\/div><\/div>",
+            "historial_claude": [
+                {
+                    "role": "user",
+                    "content": "En este listado quita la columna identificador y pon la sucursal"
+                },
+                {
+                    "role": "assistant",
+                    "content": "SELECT\n  lj.id_lote,\n  s.nombre_sucursal,\n  c.nombre,\n  c.apellido,\n  lj.tipo_de_lote,\n  lj.peso,\n  lj.precio_compra,\n  lj.precio_recompra,\n  lj.fecha_compra,\n  lj.fecha_vencimiento,\n  lj.estado_lote,\n  lj.compra_opcion\nFROM lotes_joyeria lj\nJOIN sucursal s ON s.id_sucursal = lj.sucursal\nJOIN clientes c ON c.id_cliente = lj.cliente\nWHERE c.delete_state = 'false'"
+                },
+                {
+                    "role": "user",
+                    "content": "Y pon un link en el número de lote para poder ir a la ficha"
+                },
+                {
+                    "role": "assistant",
+                    "content": "SELECT\n  lj.id_lote,\n  lj.identificador,\n  s.nombre_sucursal,\n  c.nombre,\n  c.apellido,\n  lj.tipo_de_lote,\n  lj.peso,\n  lj.precio_compra,\n  lj.precio_recompra,\n  lj.fecha_compra,\n  lj.fecha_vencimiento,\n  lj.estado_lote,\n  lj.compra_opcion\nFROM lotes_joyeria lj\nJOIN sucursal s ON s.id_sucursal = lj.sucursal\nJOIN clientes c ON c.id_cliente = lj.cliente\nWHERE c.delete_state = 'false'"
+                },
+                {
+                    "role": "user",
+                    "content": "lote.php?id=identificador"
+                },
+                {
+                    "role": "assistant",
+                    "content": "SELECT\n  lj.id_lote,\n  lj.identificador,\n  s.nombre_sucursal,\n  c.nombre,\n  c.apellido,\n  lj.tipo_de_lote,\n  lj.peso,\n  lj.precio_compra,\n  lj.precio_recompra,\n  lj.fecha_compra,\n  lj.fecha_vencimiento,\n  lj.estado_lote,\n  lj.compra_opcion\nFROM lotes_joyeria lj\nJOIN sucursal s ON s.id_sucursal = lj.sucursal\nJOIN clientes c ON c.id_cliente = lj.cliente\nWHERE c.delete_state = 'false'"
+                },
+                {
+                    "role": "user",
+                    "content": "Y dónde está el link"
+                },
+                {
+                    "role": "assistant",
+                    "content": "SELECT\n  CONCAT('<a href=\"lote.php?id=', lj.identificador, '\">', lj.id_lote, '<\/a>') AS id_lote,\n  s.nombre_sucursal,\n  c.nombre,\n  c.apellido,\n  lj.tipo_de_lote,\n  lj.peso,\n  lj.precio_compra,\n  lj.precio_recompra,\n  lj.fecha_compra,\n  lj.fecha_vencimiento,\n  lj.estado_lote,\n  lj.compra_opcion\nFROM lotes_joyeria lj\nJOIN sucursal s ON s.id_sucursal = lj.sucursal\nJOIN clientes c ON c.id_cliente = lj.cliente\nWHERE c.delete_state = 'false'"
+                },
+                {
+                    "role": "user",
+                    "content": "Dame el listado de los lotes de este mes q no coinciden los pesos del lote con los artículos con el link al lote"
+                },
+                {
+                    "role": "assistant",
+                    "content": "SELECT\n  CONCAT('<a href=\"lote.php?id=', lj.identificador, '\">', lj.id_lote, '<\/a>') AS id_lote,\n  s.nombre_sucursal,\n  c.nombre,\n  c.apellido,\n  lj.tipo_de_lote,\n  lj.peso AS peso_lote,\n  COALESCE(SUM(al.peso_articulo), 0) AS peso_articulos,\n  lj.peso - COALESCE(SUM(al.peso_articulo), 0) AS diferencia_peso,\n  lj.fecha_compra,\n  lj.estado_lote,\n  lj.compra_opcion\nFROM lotes_joyeria lj\nJOIN sucursal s ON s.id_sucursal = lj.sucursal\nJOIN clientes c ON c.id_cliente = lj.cliente\nLEFT JOIN articulos_lotes al ON al.id_lote_articulos = lj.id_lote AND al.sucursal_articulo = lj.sucursal\nWHERE c.delete_state = 'false'\nAND MONTH(lj.fecha_compra) = MONTH(NOW())\nAND YEAR(lj.fecha_compra) = YEAR(NOW())\nGROUP BY lj.identificador, lj.id_lote, s.nombre_sucursal, c.nombre, c.apellido, lj.tipo_de_lote, lj.peso, lj.fecha_compra, lj.estado_lote, lj.compra_opcion\nHAVING ABS(lj.peso - COALESCE(SUM(al.peso_articulo), 0)) > 0.01"
+                },
+                {
+                    "role": "user",
+                    "content": "Lotes de Ayala comprados esta semana"
+                },
+                {
+                    "role": "assistant",
+                    "content": "SELECT\n  CONCAT('<a href=\"lote.php?id=', lj.identificador, '\">', lj.id_lote, '<\/a>') AS id_lote,\n  lj.identificador,\n  s.nombre_sucursal,\n  c.nombre,\n  c.apellido,\n  lj.tipo_de_lote,\n  lj.peso,\n  lj.precio_compra,\n  lj.precio_recompra,\n  lj.fecha_compra,\n  lj.fecha_vencimiento,\n  lj.estado_lote,\n  lj.compra_opcion\nFROM lotes_joyeria lj\nJOIN sucursal s ON s.id_sucursal = lj.sucursal\nJOIN clientes c ON c.id_cliente = lj.cliente\nWHERE c.delete_state = 'false'\nAND s.nombre_sucursal LIKE '%Ayala%'\nAND lj.fecha_compra >= DATE(DATE_SUB(NOW(), INTERVAL WEEKDAY(NOW()) DAY))\nAND lj.fecha_compra < DATE(DATE_ADD(DATE_SUB(NOW(), INTERVAL WEEKDAY(NOW()) DAY), INTERVAL 7 DAY))"
+                },
+                {
+                    "role": "user",
+                    "content": "Ok gracias"
+                },
+                {
+                    "role": "assistant",
+                    "content": "De nada, Root Root. Aquí estoy para lo que necesites. Dios te bendiga"
+                },
+                {
+                    "role": "user",
+                    "content": "Cuánto oro hemos comprado hoy"
+                },
+                {
+                    "role": "assistant",
+                    "content": "SELECT\n  COUNT(*) AS total_lotes,\n  SUM(lj.peso) AS total_gramos,\n  SUM(lj.precio_compra) AS total_pagado\nFROM lotes_joyeria lj\nWHERE lj.tipo_de_lote = 'oro'\nAND lj.fecha_compra = CURDATE()\nAND lj.estado_lote != 'anulado'"
+                },
+                {
+                    "role": "user",
+                    "content": "Q beneficio nos darían por ese peso"
+                },
+                {
+                    "role": "assistant",
+                    "content": "La utilidad de Portugalete (este mes (julio 2026)) es de 0,00 €.\n\nDesglose:\n1) Gastos: 0,00 €\n2) Renovaciones sin IVA (bruto 0,00 € \/ 1,21): 0,00 €\n3) Ventas (importe): 0,00 €\n4) Coste artículos vendidos: 0,00 €\n5) Compras metal: peso 0,00 g, pagado 0,00 €\n6) Valor metal: gramos fino 0,00 g (×0,725), precio fino 82,98 €\/g (0,725 × fixing 114,46 €\/g), importe 82,98 € × 0,00 g = 0,00 €\n7) Valor\/ingresos (6+3+2): 0,00 €\n8) Costes (compras+coste artículos+gastos): 0,00 €\n9) Utilidad (7−8): 0,00 €"
+                },
+                {
+                    "role": "user",
+                    "content": "Dime la utilidad de hoy de todas las sucursales"
+                },
+                {
+                    "role": "assistant",
+                    "content": "La utilidad de todas las sucursales (hoy) es de 17.078,23 €.\n\nDesglose:\n1) Gastos: 0,00 €\n2) Renovaciones sin IVA (bruto 918,72 € \/ 1,21): 759,27 €\n3) Ventas (importe): 4.898,00 €\n4) Coste artículos vendidos: 2.681,57 €\n5) Compras metal: peso 418,94 g, pagado 20.662,40 €\n6) Valor metal: gramos fino 303,73 g (×0,725), precio fino 82,98 €\/g (0,725 × fixing 114,46 €\/g), importe 82,98 € × 418,94 g = 34.764,93 €\n7) Valor\/ingresos (6+3+2): 40.422,20 €\n8) Costes (compras+coste artículos+gastos): 23.343,97 €\n9) Utilidad (7−8): 17.078,23 €"
+                }
+            ]
+        },
+        {
+            "id": "c6a685a49a7e100.95060118",
+            "titulo": "Dime los lotes de este mes q el peso no coincida…",
+            "creada": "2026-07-28 09:29:13",
+            "actualizada": "2026-07-28 09:32:02",
+            "html": "<div class=\"ia-msg ia-msg-bot\"><div class=\"ia-msg-burbuja\">👋 Hola, <span class=\"ia-chat-nombre-usuario\">root<\/span> <br> ¿Qué quieres saber?<\/div><\/div><div class=\"ia-msg ia-msg-user\"><div class=\"ia-msg-burbuja\">Dime los lotes de este mes q el peso no coincida con el peso de sus artículos<\/div><div class=\"ia-msg-hora\">09:29<\/div><\/div>",
+            "historial_claude": [
+                {
+                    "role": "user",
+                    "content": "Dime los lotes de este mes q el peso no coincida con el peso de sus artículos"
+                },
+                {
+                    "role": "assistant",
+                    "content": "SELECT\n  lj.identificador,\n  lj.id_lote,\n  s.nombre_sucursal,\n  lj.tipo_de_lote,\n  lj.peso AS peso_lote,\n  COALESCE(SUM(al.peso_articulo), 0) AS peso_articulos,\n  lj.peso - COALESCE(SUM(al.peso_articulo), 0) AS diferencia,\n  lj.fecha_compra\nFROM lotes_joyeria lj\nJOIN sucursal s ON s.id_sucursal = lj.sucursal\nLEFT JOIN articulos_lotes al ON al.id_lote_articulos = lj.id_lote AND al.sucursal_articulo = lj.sucursal\nWHERE MONTH(lj.fecha_compra) = MONTH(NOW())\n  AND YEAR(lj.fecha_compra) = YEAR(NOW())\nGROUP BY\n  lj.identificador,\n  lj.id_lote,\n  s.nombre_sucursal,\n  lj.tipo_de_lote,\n  lj.peso,\n  lj.fecha_compra\nHAVING ABS(lj.peso - COALESCE(SUM(al.peso_articulo), 0)) > 0.01\nORDER BY diferencia DESC"
+                }
+            ]
+        },
+        {
+            "id": "c6a685aec287176.59580465",
+            "titulo": "Nueva conversación",
+            "creada": "2026-07-28 09:31:56",
+            "actualizada": "2026-07-28 09:31:59",
+            "html": "<div class=\"ia-msg ia-msg-bot\"><div class=\"ia-msg-burbuja\">👋 Hola, <span class=\"ia-chat-nombre-usuario\">root<\/span> <br> ¿Qué quieres saber?<\/div><\/div>",
+            "historial_claude": []
+        },
+        {
+            "id": "c6a6838dd93b207.24827246",
+            "titulo": "Dime la utilidad de marzo de todas las sucursale…",
+            "creada": "2026-07-28 07:06:37",
+            "actualizada": "2026-07-28 09:29:13",
+            "html": "<div class=\"ia-msg ia-msg-bot\"><div class=\"ia-msg-burbuja\">👋 Hola, <span class=\"ia-chat-nombre-usuario\">root<\/span> <br> ¿Qué quieres saber?<\/div><\/div><div class=\"ia-msg ia-msg-user\"><div class=\"ia-msg-burbuja\">Dime la utilidad de marzo de todas las sucursales<\/div><div class=\"ia-msg-hora\">09:26<\/div><\/div><div class=\"ia-msg ia-msg-bot\"><div class=\"ia-msg-burbuja\">La utilidad de todas las sucursales (marzo de 2026) es de 5.092.902,31 €.<br>\r\n<br>\r\nDesglose:<br>\r\n1) Gastos: 146.378,38 €<br>\r\n2) Renovaciones sin IVA (bruto 73.158,73 € \/ 1,21): 60.461,76 €<br>\r\n3) Ventas (importe): 143.601,57 €<br>\r\n4) Coste artículos vendidos: 67.460,17 €<br>\r\n5) Compras metal: peso 94.403,05 g, pagado 2.731.176,90 €<br>\r\n6) Valor metal: gramos fino 68.442,21 g (×0,725), precio fino 82,98 €\/g (0,725 × fixing 114,46 €\/g), importe 82,98 € × 94.403,05 g = 7.833.854,43 €<br>\r\n7) Valor\/ingresos (6+3+2): 8.037.917,76 €<br>\r\n8) Costes (compras+coste artículos+gastos): 2.945.015,45 €<br>\r\n9) Utilidad (7−8): 5.092.902,31 €<\/div><div class=\"ia-msg-hora\">09:26<\/div><\/div>",
+            "historial_claude": [
+                {
+                    "role": "user",
+                    "content": "Dime la utilidad de todas las sucursales en marzo del 2026"
+                },
+                {
+                    "role": "assistant",
+                    "content": "La utilidad de sucursaltest (marzo de 2026) es de 0,00 €.\n\nDesglose:\n1) Gastos: 0,00 €\n2) Renovaciones sin IVA (bruto 0,00 € \/ 1,21): 0,00 €\n3) Ventas (importe): 0,00 €\n4) Coste artículos vendidos: 0,00 €\n5) Compras metal: peso 0,00 g, pagado 0,00 €\n6) Valor metal: gramos fino 0,00 g (×0,725), precio fino 83,79 €\/g (0,725 × fixing 115,58 €\/g), importe 83,79 € × 0,00 g = 0,00 €\n7) Valor\/ingresos (6+3+2): 0,00 €\n8) Costes (compras+coste artículos+gastos): 0,00 €\n9) Utilidad (7−8): 0,00 €"
+                },
+                {
+                    "role": "user",
+                    "content": "Utilidad de todas de marzo de 2026"
+                },
+                {
+                    "role": "assistant",
+                    "content": "La utilidad de todas las sucursales (marzo de 2026) es de 5.169.420,71 €.\n\nDesglose:\n1) Gastos: 146.378,38 €\n2) Renovaciones sin IVA (bruto 73.158,73 € \/ 1,21): 60.461,76 €\n3) Ventas (importe): 143.601,57 €\n4) Coste artículos vendidos: 67.460,17 €\n5) Compras metal: peso 94.403,05 g, pagado 2.731.176,90 €\n6) Valor metal: gramos fino 68.442,21 g (×0,725), precio fino 83,79 €\/g (0,725 × fixing 115,58 €\/g), importe 83,79 € × 94.403,05 g = 7.910.372,83 €\n7) Valor\/ingresos (6+3+2): 8.114.436,16 €\n8) Costes (compras+coste artículos+gastos): 2.945.015,45 €\n9) Utilidad (7−8): 5.169.420,71 €"
+                },
+                {
+                    "role": "user",
+                    "content": "Gastos de todo de marzo de 2026"
+                },
+                {
+                    "role": "assistant",
+                    "content": "SELECT g.id_gasto, s.nombre_sucursal, g.descripcion_gasto, g.base_impobile, g.iva_total, g.total_gasto, g.estado_gasto, g.fecha_gasto, g.forma_pago_gasto\nFROM gastos g\nJOIN sucursal s ON s.id_sucursal = g.sucursal_gasto\nWHERE YEAR(g.fecha_gasto) = 2026\nAND MONTH(g.fecha_gasto) = 3\nAND g.estado_gasto != 'cancelado'\nORDER BY s.nombre_sucursal, g.fecha_gasto"
+                },
+                {
+                    "role": "user",
+                    "content": "Pero solo dime el total en euros"
+                },
+                {
+                    "role": "assistant",
+                    "content": "SELECT SUM(g.total_gasto) AS importe_total\nFROM gastos g\nWHERE YEAR(g.fecha_gasto) = 2026\nAND MONTH(g.fecha_gasto) = 3\nAND g.estado_gasto != 'cancelado'"
+                },
+                {
+                    "role": "user",
+                    "content": "Dime la utilidad de todo de marzo de 2026"
+                },
+                {
+                    "role": "assistant",
+                    "content": "La utilidad de Odonell-Madrid (marzo de 2026) es de 7.176,09 €.\n\nDesglose:\n1) Gastos: 3.292,43 €\n2) Renovaciones sin IVA (bruto 402,00 € \/ 1,21): 332,23 €\n3) Ventas (importe): 0,00 €\n4) Coste artículos vendidos: 0,00 €\n5) Compras metal: peso 502,50 g, pagado 31.970,00 €\n6) Valor metal: gramos fino 364,31 g (×0,725), precio fino 83,79 €\/g (0,725 × fixing 115,58 €\/g), importe 83,79 € × 502,50 g = 42.106,29 €\n7) Valor\/ingresos (6+3+2): 42.438,52 €\n8) Costes (compras+coste artículos+gastos): 35.262,43 €\n9) Utilidad (7−8): 7.176,09 €"
+                },
+                {
+                    "role": "user",
+                    "content": "La utilidad de todo de marzo de 2026"
+                },
+                {
+                    "role": "assistant",
+                    "content": "La utilidad de Odonell-Madrid (marzo de 2026) es de 7.176,09 €.\n\nDesglose:\n1) Gastos: 3.292,43 €\n2) Renovaciones sin IVA (bruto 402,00 € \/ 1,21): 332,23 €\n3) Ventas (importe): 0,00 €\n4) Coste artículos vendidos: 0,00 €\n5) Compras metal: peso 502,50 g, pagado 31.970,00 €\n6) Valor metal: gramos fino 364,31 g (×0,725), precio fino 83,79 €\/g (0,725 × fixing 115,58 €\/g), importe 83,79 € × 502,50 g = 42.106,29 €\n7) Valor\/ingresos (6+3+2): 42.438,52 €\n8) Costes (compras+coste artículos+gastos): 35.262,43 €\n9) Utilidad (7−8): 7.176,09 €"
+                },
+                {
+                    "role": "user",
+                    "content": "Buenos días"
+                },
+                {
+                    "role": "assistant",
+                    "content": "Buenos días. ¿En qué puedo ayudarte?"
+                },
+                {
+                    "role": "user",
+                    "content": "Utilidad de este mes de todas las sucursales"
+                },
+                {
+                    "role": "assistant",
+                    "content": "La utilidad de sucursaltest (este mes (julio 2026)) es de 0,00 €.\n\nDesglose:\n1) Gastos: 0,00 €\n2) Renovaciones sin IVA (bruto 0,00 € \/ 1,21): 0,00 €\n3) Ventas (importe): 0,00 €\n4) Coste artículos vendidos: 0,00 €\n5) Compras metal: peso 0,00 g, pagado 0,00 €\n6) Valor metal: gramos fino 0,00 g (×0,725), precio fino 83,79 €\/g (0,725 × fixing 115,58 €\/g), importe 83,79 € × 0,00 g = 0,00 €\n7) Valor\/ingresos (6+3+2): 0,00 €\n8) Costes (compras+coste artículos+gastos): 0,00 €\n9) Utilidad (7−8): 0,00 €"
+                },
+                {
+                    "role": "user",
+                    "content": "utilidad de marzo"
+                },
+                {
+                    "role": "assistant",
+                    "content": "La utilidad de todas las sucursales (marzo de 2026) es de 5.169.420,71 €.\n\nDesglose:\n1) Gastos: 146.378,38 €\n2) Renovaciones sin IVA (bruto 73.158,73 € \/ 1,21): 60.461,76 €\n3) Ventas (importe): 143.601,57 €\n4) Coste artículos vendidos: 67.460,17 €\n5) Compras metal: peso 94.403,05 g, pagado 2.731.176,90 €\n6) Valor metal: gramos fino 68.442,21 g (×0,725), precio fino 83,79 €\/g (0,725 × fixing 115,58 €\/g), importe 83,79 € × 94.403,05 g = 7.910.372,83 €\n7) Valor\/ingresos (6+3+2): 8.114.436,16 €\n8) Costes (compras+coste artículos+gastos): 2.945.015,45 €\n9) Utilidad (7−8): 5.169.420,71 €"
+                },
+                {
+                    "role": "user",
+                    "content": "Dime la utilidad de marzo de todas las sucursales"
+                },
+                {
+                    "role": "assistant",
+                    "content": "La utilidad de todas las sucursales (marzo de 2026) es de 5.092.902,31 €.\n\nDesglose:\n1) Gastos: 146.378,38 €\n2) Renovaciones sin IVA (bruto 73.158,73 € \/ 1,21): 60.461,76 €\n3) Ventas (importe): 143.601,57 €\n4) Coste artículos vendidos: 67.460,17 €\n5) Compras metal: peso 94.403,05 g, pagado 2.731.176,90 €\n6) Valor metal: gramos fino 68.442,21 g (×0,725), precio fino 82,98 €\/g (0,725 × fixing 114,46 €\/g), importe 82,98 € × 94.403,05 g = 7.833.854,43 €\n7) Valor\/ingresos (6+3+2): 8.037.917,76 €\n8) Costes (compras+coste artículos+gastos): 2.945.015,45 €\n9) Utilidad (7−8): 5.092.902,31 €"
+                }
+            ]
+        },
+        {
+            "id": "c6a6859eb919bd9.00488195",
+            "titulo": "Nueva conversación",
+            "creada": "2026-07-28 09:27:39",
+            "actualizada": "2026-07-28 09:27:39",
+            "html": "",
+            "historial_claude": []
+        }
+    ]
+}

@@ -1,0 +1,290 @@
+.select2-filter {
+    min-width: 200px;
+}
+
+/* Estilos específicos para Select2 con clase select2-primary */
+.select2-primary .select2-selection--single {
+    background: #007bff !important;
+    border-color: #007bff !important;
+    color: white !important;
+}
+
+.select2-primary .select2-selection--single .select2-selection__rendered {
+    color: white !important;
+}
+
+.select2-primary .select2-selection--single .select2-selection__placeholder {
+    color: rgba(255, 255, 255, 0.9) !important;
+    font-style: normal !important;
+}
+
+/* Estilos adicionales para asegurar que Select2 se vea como btn-primary */
+.select2-container--default.select2-primary .select2-selection--single {
+    background: #007bff !important;
+    border-color: #007bff !important;
+    color: white !important;
+    border-radius: 0.375rem !important;
+    height: 38px !important;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 123, 255, 0.075) !important;
+}
+
+.select2-container--default.select2-primary .select2-selection--single .select2-selection__rendered {
+    color: white !important;
+    line-height: 36px !important;
+    padding-left: 12px !important;
+    font-size: 0.9375rem !important;
+    font-weight: 500 !important;
+}
+
+.select2-container--default.select2-primary .select2-selection--single .select2-selection__arrow {
+    height: 36px !important;
+    right: 8px !important;
+}
+
+.select2-container--default.select2-primary .select2-selection--single .select2-selection__arrow b {
+    border-color: white transparent transparent transparent !important;
+}
+
+.select2-container--default .select2-selection--single {
+    border: 1px solid #007bff;
+    border-radius: 0.375rem;
+    height: 38px;
+    background: #007bff;
+    color: white;
+    transition: all 0.15s ease-in-out;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 123, 255, 0.075);
+}
+
+.select2-container--default .select2-selection--single .select2-selection__rendered {
+    line-height: 36px;
+    padding-left: 12px;
+    color: white;
+    font-size: 0.9375rem;
+    font-weight: 500;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__arrow {
+    height: 36px;
+    right: 8px;
+    color: white;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__arrow b {
+    border-color: white transparent transparent transparent;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__placeholder {
+    color: rgba(255, 255, 255, 0.9);
+    font-style: normal;
+}
+
+.select2-container--default .select2-results__option--highlighted[aria-selected] {
+    background-color: #007bff;
+    color: white;
+}
+
+.select2-dropdown {
+    border: 1px solid #007bff;
+    border-radius: 0.375rem;
+    box-shadow: 0 0.25rem 1.125rem rgba(0, 123, 255, 0.15);
+    z-index: 9999;
+}
+
+.select2-results__option {
+    padding: 8px 12px;
+    font-size: 0.9375rem;
+    transition: background-color 0.15s ease-in-out;
+}
+
+.select2-container--default .select2-results__option[aria-selected=true] {
+    background-color: #e6f3ff;
+    color: #007bff;
+}
+
+.select2-container--default .select2-selection--single:focus {
+    outline: none;
+}
+
+/* Hover effects para btn-primary - DESACTIVADOS */
+.select2-container--default .select2-selection--single:hover {
+    background: #007bff;
+    border-color: #007bff;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 123, 255, 0.075);
+    transform: none;
+}
+
+.select2-container--default.select2-container--focus .select2-selection--single {
+    background: #007bff;
+    border-color: #007bff;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 123, 255, 0.075);
+    transform: none;
+}
+
+/* Animaciones suaves */
+.select2-container--default .select2-selection--single,
+.select2-dropdown,
+.select2-results__option {
+    transition: all 0.15s ease-in-out;
+}
+
+/* Estilos para el botón de limpiar */
+.select2-container--default .select2-selection--single .select2-selection__clear {
+    color: rgba(255, 255, 255, 0.9);
+    font-weight: bold;
+    margin-right: 20px;
+    transition: color 0.15s ease-in-out;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__clear:hover {
+    color: #ffeb3b;
+}
+
+/* Mejoras en el dropdown */
+.select2-dropdown--below {
+    margin-top: 2px;
+}
+
+.select2-dropdown--above {
+    margin-bottom: 2px;
+}
+
+/* Estilos para opciones deshabilitadas */
+.select2-container--default .select2-results__option[aria-disabled=true] {
+    color: #a1acb8;
+    background-color: #f8f9fa;
+}
+
+/* Estilos para grupos de opciones */
+.select2-container--default .select2-results__group {
+    padding: 6px 12px;
+    font-weight: 600;
+    color: #007bff;
+    background-color: #e6f3ff;
+    border-bottom: 1px solid #e9ecef;
+}
+
+/* Estilos adicionales para btn-primary */
+.select2-container--default .select2-selection--single {
+    cursor: pointer;
+    user-select: none;
+}
+
+.select2-container--default .select2-selection--single:active {
+    transform: translateY(0);
+    box-shadow: 0 0.0625rem 0.125rem rgba(0, 123, 255, 0.075);
+}
+
+/* Estilos para el estado disabled */
+.select2-container--default.select2-container--disabled .select2-selection--single {
+    background: #e9ecef;
+    border-color: #dee2e6;
+    color: #6c757d;
+    cursor: not-allowed;
+    opacity: 0.65;
+}
+
+/* Eliminar TODOS los efectos hover y active de Select2 */
+.select2-container--default .select2-selection--single:hover,
+.select2-container--default.select2-primary .select2-selection--single:hover,
+.select2-container--default .select2-selection--single:active,
+.select2-container--default.select2-primary .select2-selection--single:active,
+.select2-container--default .select2-selection--single:focus,
+.select2-container--default.select2-primary .select2-selection--single:focus {
+    background: #007bff !important;
+    border-color: #007bff !important;
+    transform: none !important;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 123, 255, 0.075) !important;
+}
+
+.select2-container--default.select2-container--focus .select2-selection--single,
+.select2-container--default.select2-primary.select2-container--focus .select2-selection--single {
+    background: #007bff !important;
+    border-color: #007bff !important;
+    transform: none !important;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 123, 255, 0.075) !important;
+}
+
+/* Eliminar TODOS los efectos de presión y click */
+.select2-container--default .select2-selection--single:active,
+.select2-container--default.select2-primary .select2-selection--single:active,
+.select2-container--default .select2-selection--single:focus:active,
+.select2-container--default.select2-primary .select2-selection--single:focus:active,
+.select2-container--default .select2-selection--single:focus-within,
+.select2-container--default.select2-primary .select2-selection--single:focus-within {
+    background: #007bff !important;
+    border-color: #007bff !important;
+    transform: none !important;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 123, 255, 0.075) !important;
+    outline: none !important;
+}
+
+/* Eliminar efectos de transición que puedan causar cambios visuales */
+.select2-container--default .select2-selection--single,
+.select2-container--default.select2-primary .select2-selection--single {
+    transition: none !important;
+    animation: none !important;
+}
+
+/* Eliminar COMPLETAMENTE el movimiento del texto al hacer click */
+.select2-container--default .select2-selection--single:active,
+.select2-container--default.select2-primary .select2-selection--single:active,
+.select2-container--default .select2-selection--single:focus,
+.select2-container--default.select2-primary .select2-selection--single:focus,
+.select2-container--default .select2-selection--single:focus:active,
+.select2-container--default.select2-primary .select2-selection--single:focus:active,
+.select2-container--default .select2-selection--single:focus-within,
+.select2-container--default.select2-primary .select2-selection--single:focus-within,
+.select2-container--default .select2-selection--single:target,
+.select2-container--default.select2-primary .select2-selection--single:target {
+    transform: none !important;
+    translate: none !important;
+    translate3d: none !important;
+    translateX: none !important;
+    translateY: none !important;
+    translateZ: none !important;
+    position: static !important;
+    top: auto !important;
+    left: auto !important;
+    right: auto !important;
+    bottom: auto !important;
+}
+
+
+
+.select2-container--default.select2-container--disabled .select2-selection--single .select2-selection__rendered {
+    color: #6c757d;
+}
+
+.select2-container--default.select2-container--disabled .select2-selection--single .select2-selection__arrow {
+    opacity: 0.5;
+}
+
+/* Estilos para el estado loading */
+.select2-container--default.select2-container--loading .select2-selection--single {
+    background: #007bff;
+    position: relative;
+}
+
+.select2-container--default.select2-container--loading .select2-selection--single::after {
+    content: '';
+    position: absolute;
+    right: 30px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 16px;
+    height: 16px;
+    border: 2px solid transparent;
+    border-top: 2px solid white;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+.select2-container--default.select2-container--focus .select2-selection--single .select2-selection__rendered,
+.select2-container--default.select2-container--open .select2-selection--single .select2-selection__rendered {
+    line-height: 34px !important; /* Forzar line-height fijo */
+    padding-inline-end: 2rem !important; /* Padding fijo */
+    /*padding-inline-start: 1rem !important;  Padding fijo */
+}
+.select_label{
+    margin-top: -10px !important;
+}

@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="Content-Language" content="es">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0, viewport-fit=cover" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>TPV Quinta Gracia</title>
+    <meta name="description" content="Sistema TPV Quinta Gracia" />
+    <link rel="icon" type="image/x-icon" href="assets/img/icons/app/favicon.ico" />
+    
+    <!-- PWA Meta Tags -->
+    <meta name="application-name" content="TPV Quinta Gracia">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="TPV Quinta Gracia">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#007bff">
+    <meta name="msapplication-TileColor" content="#007bff">
+    <meta name="msapplication-tap-highlight" content="no">
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/manifest.json">
+    
+    <!-- iOS App Icons -->
+    <link rel="apple-touch-icon" sizes="180x180" href="assets/img/icons/app/ios/180.png">
+    <link rel="apple-touch-icon" sizes="167x167" href="assets/img/icons/app/ios/167.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="assets/img/icons/app/ios/152.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="assets/img/icons/app/ios/120.png">
+    
+    <!-- Android Icons -->
+    <link rel="icon" type="image/png" sizes="192x192" href="assets/img/icons/app/android/android-launchericon-192-192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="assets/img/icons/app/android/android-launchericon-512-512.png">
+    <link rel="stylesheet" href="assets/css/fonts.css">
+    <link rel="stylesheet" href="assets/vendor/fonts/iconify-icons.css" />
+    <link rel="stylesheet" href="assets/vendor/libs/node-waves/node-waves.css" />
+    <link rel="stylesheet" href="assets/vendor/css/core.css" />
+    <link rel="stylesheet" href="assets/css/demo.css" />
+    <link rel="stylesheet" href="assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css" />
+    <link rel="stylesheet" href="assets/vendor/libs/spinkit/spinkit.css" />
+    <link rel="stylesheet" href="assets/vendor/libs/@form-validation/form-validation.css" />
+    <link rel="stylesheet" href="assets/vendor/css/pages/page-auth.css" />
+    <script src="assets/vendor/js/helpers.js"></script>
+    <script src="parts/universal/theme-persistence.js"></script>
+    <script src="assets/js/config.js"></script>
+    <style>
+      .loader-container {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: #fff;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+        transition: opacity 0.3s ease-out;
+      }
+      
+      .loader-container.hidden {
+        opacity: 0;
+        pointer-events: none;
+      }
+      
+      .main-content {
+        opacity: 0;
+        transition: opacity 0.3s ease-in;
+      }
+      
+      .main-content.loaded {
+        opacity: 1;
+      }
+      .login-theme-switcher {
+        z-index: 10000;
+      }
+      [data-bs-theme="dark"] .loader-container {
+        background-color: var(--bs-body-bg);
+      }
+      @media (max-width: 520px) {
+        body{
+          background-color: #f7f7f9 !important;
+        }
+        #card-login-mobile {
+          background: none !important;
+          border: none !important;
+          box-shadow: none !important;
+          padding: 0px 11px !important;
+        }
+        .authentication-inner {
+          padding-block-start: 0px !important;
+          padding-block-end: 100px !important;
+        }
+        .authentication-wrapper.authentication-basic {
+          padding: 0px !important;
+        }
+        .authentication-wrapper.authentication-basic .authentication-inner {
+          max-inline-size: 100% !important;
+        }
+        .authentication-wrapper.authentication-basic .authentication-inner .card {
+          background: none !important;
+          border: none !important;
+          box-shadow: none !important;
+          padding: 0px 11px !important;
+        }
+        .authentication-wrapper.authentication-basic .authentication-inner .card .card-body {
+          padding: 0px 11px !important;
+        }
+        .app-brand {
+          display: block !important;
+          width: 195px !important;
+          margin: 0 auto 19px !important;
+        }
+      }
+      
+    </style>
+  </head>
+
+  <body>
+    <div class="loader-container" id="loaderContainer">
+      <div class="sk-circle-fade sk-primary">
+        <div class="sk-circle-fade-dot"></div>
+        <div class="sk-circle-fade-dot"></div>
+        <div class="sk-circle-fade-dot"></div>
+        <div class="sk-circle-fade-dot"></div>
+        <div class="sk-circle-fade-dot"></div>
+        <div class="sk-circle-fade-dot"></div>
+        <div class="sk-circle-fade-dot"></div>
+        <div class="sk-circle-fade-dot"></div>
+        <div class="sk-circle-fade-dot"></div>
+        <div class="sk-circle-fade-dot"></div>
+        <div class="sk-circle-fade-dot"></div>
+        <div class="sk-circle-fade-dot"></div>
+      </div>
+    </div>
+
+    <div class="main-content" id="mainContent">
+      <div class="position-relative">
+      <div class="login-theme-switcher position-absolute top-0 end-0 p-3">
+        <div class="dropdown">
+          <a
+            class="btn btn-icon btn-text-secondary rounded-pill dropdown-toggle hide-arrow"
+            id="nav-theme"
+            href="javascript:void(0);"
+            data-bs-toggle="dropdown"
+            aria-label="Cambiar tema">
+            <i class="icon-base ri ri-sun-line icon-24px theme-icon-active"></i>
+            <span class="d-none" id="nav-theme-text">Tema</span>
+          </a>
+          <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="nav-theme-text">
+            <li>
+              <button
+                type="button"
+                class="dropdown-item align-items-center active"
+                data-bs-theme-value="light"
+                aria-pressed="false">
+                <span><i class="icon-base ri ri-sun-line icon-24px me-3" data-icon="sun-line"></i>Claro</span>
+              </button>
+            </li>
+            <li>
+              <button
+                type="button"
+                class="dropdown-item align-items-center"
+                data-bs-theme-value="dark"
+                aria-pressed="true">
+                <span><i class="icon-base ri ri-moon-clear-line icon-24px me-3" data-icon="moon-clear-line"></i>Oscuro</span>
+              </button>
+            </li>
+            <li>
+              <button
+                type="button"
+                class="dropdown-item align-items-center"
+                data-bs-theme-value="system"
+                aria-pressed="false">
+                <span><i class="icon-base ri ri-computer-line icon-24px me-3" data-icon="computer-line"></i>Sistema</span>
+              </button>
+            </li>
+          </ul>
+        </div>
+      </div>
+      <div class="authentication-wrapper authentication-basic container-p-y p-4 p-sm-0">
+        <div class="authentication-inner py-6">
+          <div class="card p-md-2 p-1" id="card-login-mobile">
+            <div class="app-brand mt-5" style="display: block;width: 151px;margin: 0 auto;">
+              <a href="index.html" class="app-brand-link gap-2" style="display: block;">
+                <span class="app-brand-logo demo">
+                  <span class="text-primary">
+                     <svg fill="none" xmlns="http://www.w3.org/2000/svg" width="70" height="45" viewBox="0 0 70 45">
+            <defs>
+                <linearGradient id="SVGID_257" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" style="stop-color:#007bff;"></stop>
+                    <stop offset="50%" style="stop-color:#0097ff;"></stop>
+                    <stop offset="100%" style="stop-color:#00b0ff;"></stop>
+                </linearGradient>
+                <linearGradient id="SVGID_258" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" style="stop-color:#007bff;"></stop>
+                    <stop offset="50%" style="stop-color:#0097ff;"></stop>
+                    <stop offset="100%" style="stop-color:#00b0ff;"></stop>
+                </linearGradient>
+            </defs>
+            <g transform="translate(35, 23) scale(0.76)">
+                <g transform="translate(-18.9716, 0)">
+                    <g transform="translate(-0.144, -2.5923)">
+                        <path fill="url(#SVGID_257)" d="M 99.8203 73.4929 C 85.2031 73.4929 73.3213 85.3747 73.3213 100.0632 C 73.3213 114.6813 85.2031 126.4899 99.8203 126.4899 C 114.4375 126.4899 126.3906 114.6813 126.3906 100.0632 C 126.3906 85.3747 114.4375 73.4929 99.8203 73.4929 Z M 99.8203 116.9128 C 90.459 116.9128 82.8984 109.4245 82.8984 100.0632 C 82.8984 90.7028 90.459 83.07 99.8203 83.07 C 109.1807 83.07 116.8135 90.7028 116.8135 100.0632 C 116.8135 109.4245 109.1807 116.9128 99.8203 116.9128 Z" transform="translate(-99.856, -99.9914)"></path>
+                        <path fill="#0097ff" d="M 117.1016 126.9216 C 117.1016 124.2575 119.2617 122.1696 121.8535 122.1696 C 124.5186 122.1696 126.6787 124.2575 126.6787 126.9216 C 126.6787 129.5144 124.5185 131.6745 121.8535 131.6745 C 119.2617 131.6745 117.1016 129.5144 117.1016 126.9216 Z" transform="translate(21.8901, 24.3384) translate(-121.8901, -126.9221)"></path>
+                    </g>
+                </g>
+                <g transform="translate(21.996, -2.5923)">
+                    <path fill="url(#SVGID_258)" d="M 102.8447 73.4929 C 107.6689 73.4929 114.4375 74.4294 119.9102 78.8942 C 121.9258 80.5495 122.0703 83.4304 120.5576 85.5905 C 119.1182 87.6062 116.2373 87.3181 113.9336 86.0944 C 110.9092 84.5827 107.3809 83.07 102.8447 83.07 C 93.4834 83.07 85.9228 90.6306 85.9228 99.9919 C 85.9228 109.3523 93.4834 116.9128 102.8447 116.9128 C 106.5889 116.9128 110.9814 115.7614 114.1494 113.9607 L 114.1494 104.0241 C 114.1494 101.4314 116.2373 99.2712 118.9014 99.2712 C 121.5664 99.2712 123.6543 101.4314 123.6543 104.0241 L 123.6543 115.3288 C 123.6543 116.6247 123.6543 117.6335 123.1504 118.7136 C 122.7178 119.5769 121.998 120.2253 121.0615 120.8738 C 116.3096 124.2576 109.1094 126.49 102.8447 126.49 C 88.2275 126.49 76.3457 114.6091 76.3457 99.9919 C 76.3457 85.3024 88.2275 73.4929 102.8447 73.4929 Z" transform="translate(-100, -99.9914)"></path>
+                    <path fill="#0097ff" d="M 104.6445 99.2712 C 107.2363 99.2712 109.3965 101.4314 109.3965 104.0241 C 109.3965 106.6882 107.2363 108.8483 104.6445 108.8483 C 101.9805 108.8483 99.8203 106.6882 99.8203 104.0241 C 99.8203 101.4313 101.9805 99.2712 104.6445 99.2712 Z" transform="translate(4.6084, 4.0683) translate(-104.6084, -104.0598)"></path>
+                </g>
+            </g>
+        </svg>
+                  </span>
+                </span>
+                
+              </a>
+            </div>
+
+            <div class="card-body mt-1">
+              <p class="mb-5" style="font-size: 12px;">Por favor, inicia sesión en tu cuenta para continuar en TPV Quinta Gracia</p>
+
+              <form id="formAuthentication" class="mb-0" action="include/procesar_login.php" method="POST">
+                <div class="form-floating form-floating-outline mb-5 form-control-validation">
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="usuario"
+                    name="usuario"
+                    placeholder="Ingresa tu usuario"
+                    value=""
+                    autofocus 
+                    required />
+                  <label for="usuario">Usuario</label>
+                </div>
+                <div class="mb-5">
+                  <div class="form-password-toggle form-control-validation">
+                    <div class="input-group input-group-merge">
+                      <div class="form-floating form-floating-outline">
+                        <input
+                          type="password"
+                          id="password"
+                          class="form-control"
+                          name="password"
+                          placeholder="Contraseña"
+                          aria-describedby="password"
+                          required />
+                        <label for="password">Contraseña</label>
+                      </div>
+                      <span class="input-group-text cursor-pointer"
+                        ><i class="icon-base ri ri-eye-off-line icon-20px"></i
+                      ></span>
+                    </div>
+                  </div>
+                </div>
+                <div class="mb-3 d-flex justify-content-between mt-3">
+                  <div class="form-check mt-2">
+                    <input class="form-check-input" type="checkbox" id="remember-me" name="remember_me" value="1" />
+                    <label class="form-check-label" for="remember-me">Recordarme</label>
+                  </div>
+                  <a href="auth-forgot-password-basic.html" class="float-end mb-1 mt-2">
+                    <span>¿Olvidaste tu contraseña?</span>
+                  </a>
+                </div>
+                <div class="mb-0">
+                  <button class="btn btn-primary d-grid w-100" type="submit">Iniciar sesión</button>
+                </div>
+              </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    </div>
+    <script src="assets/vendor/libs/jquery/jquery.js"></script>
+    <script src="assets/vendor/libs/popper/popper.js"></script>
+    <script src="assets/vendor/js/bootstrap.js"></script>
+    <script src="assets/vendor/libs/node-waves/node-waves.js"></script>
+    <script src="assets/vendor/libs/@algolia/autocomplete-js.js"></script>
+    <script src="assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.js"></script>
+    <script src="assets/vendor/libs/hammer/hammer.js"></script>
+    <script src="assets/vendor/libs/i18n/i18n.js"></script>
+    <script src="assets/vendor/js/menu.js"></script>
+    <script src="assets/vendor/libs/moment/moment.js"></script>
+    <script src="assets/vendor/libs/datatables-bs5/datatables-bootstrap5.js"></script>
+    <script src="assets/vendor/libs/select2/select2.js"></script>
+    <script src="assets/vendor/libs/flatpickr/flatpickr.js"></script>
+    <script src="parts/universal/select2-espanol.js"></script>
+    <script src="assets/vendor/libs/apex-charts/apexcharts.js"></script>
+    <script src="assets/vendor/libs/@form-validation/popular.js"></script>
+    <script src="assets/vendor/libs/@form-validation/bootstrap5.js"></script>
+    <script src="assets/vendor/libs/@form-validation/auto-focus.js"></script>
+    <script src="assets/vendor/libs/apex-charts/apexcharts.js"></script>
+    <script src="assets/vendor/libs/cleave-zen/cleave-zen.js"></script>
+    <script src="assets/vendor/libs/sweetalert2/sweetalert2.js"></script>
+    <script src="assets/vendor/libs/tagify/tagify.js"></script>
+    <script src="assets/vendor/libs/bootstrap-select/bootstrap-select.js"></script>
+    <script src="assets/vendor/libs/typeahead-js/typeahead.js"></script>
+    <script src="assets/vendor/libs/bloodhound/bloodhound.js"></script>
+    <script src="assets/vendor/libs/@form-validation/popular.js"></script>
+    <script src="assets/vendor/libs/@form-validation/bootstrap5.js"></script>
+    <script src="assets/vendor/libs/@form-validation/auto-focus.js"></script>
+    <script src="assets/js/main.js"></script>
+    <script src="assets/js/pages-auth.js"></script>
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        const templateName = document.documentElement.getAttribute('data-template') || 'vertical-menu-template-no-customizer';
+        const themeKey = 'templateCustomizer-' + templateName + '--Theme';
+        const savedTheme = localStorage.getItem(themeKey);
+        const savedRememberUser = localStorage.getItem('tpv_remember_usuario');
+        const savedRememberMe = localStorage.getItem('tpv_remember_me');
+        localStorage.clear();
+        if (savedTheme) {
+          localStorage.setItem(themeKey, savedTheme);
+        }
+        if (savedRememberUser) {
+          localStorage.setItem('tpv_remember_usuario', savedRememberUser);
+        }
+        if (savedRememberMe) {
+          localStorage.setItem('tpv_remember_me', savedRememberMe);
+        }
+
+        const usuarioInput = document.getElementById('usuario');
+        const rememberCheckbox = document.getElementById('remember-me');
+        if (usuarioInput && !usuarioInput.value && savedRememberUser) {
+          usuarioInput.value = savedRememberUser;
+        }
+        if (rememberCheckbox && savedRememberMe === '1') {
+          rememberCheckbox.checked = true;
+        }
+
+        const loginForm = document.getElementById('formAuthentication');
+        if (loginForm) {
+          loginForm.addEventListener('submit', function () {
+            const usuario = usuarioInput ? usuarioInput.value.trim() : '';
+            const recordar = rememberCheckbox && rememberCheckbox.checked;
+            if (recordar && usuario) {
+              localStorage.setItem('tpv_remember_usuario', usuario);
+              localStorage.setItem('tpv_remember_me', '1');
+            } else {
+              localStorage.removeItem('tpv_remember_usuario');
+              localStorage.removeItem('tpv_remember_me');
+            }
+          });
+        }
+        const loaderContainer = document.getElementById('loaderContainer');
+        const mainContent = document.getElementById('mainContent');
+        
+        function hideLoader() {
+          loaderContainer.classList.add('hidden');
+          mainContent.classList.add('loaded');
+          
+          setTimeout(() => {
+            if (loaderContainer.parentNode) {
+              loaderContainer.parentNode.removeChild(loaderContainer);
+            }
+          }, 300);
+        }
+        
+        function checkDependencies() {
+          if (typeof $ !== 'undefined') {
+            if (typeof bootstrap !== 'undefined') {
+              if (typeof FormValidation !== 'undefined') {
+                hideLoader();
+                return;
+              }
+            }
+          }
+          
+          setTimeout(checkDependencies, 100);
+        }
+        
+        setTimeout(checkDependencies, 500);
+        
+        setTimeout(hideLoader, 5000);
+      });
+    </script>
+    <script src="assets/js/pwa-install.js"></script>
+  </body>
+</html>

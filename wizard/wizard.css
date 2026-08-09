@@ -1,0 +1,99 @@
+/* Capa tutorial formación (APP_ID 444) — overlay por encima del layout */
+
+.fw-root {
+  position: fixed;
+  inset: 0;
+  z-index: 99999999;
+  font-family: inherit;
+  pointer-events: none;
+}
+
+.fw-mask {
+  position: fixed;
+  box-sizing: border-box;
+  background: rgba(15, 18, 28, 0.78);
+  pointer-events: auto;
+  transition: top 0.15s ease, left 0.15s ease, width 0.15s ease, height 0.15s ease;
+}
+
+.fw-highlight {
+  position: relative;
+  z-index: 108002 !important;
+  pointer-events: auto;
+  box-shadow:
+    0 0 0 3px rgba(255, 193, 7, 0.95),
+    0 0 28px rgba(255, 193, 7, 0.45);
+  border-radius: 6px;
+  outline: none;
+}
+
+.fw-tooltip {
+  position: fixed;
+  z-index: 108003;
+  max-width: min(420px, calc(100vw - 32px));
+  left: 50%;
+  bottom: 28px;
+  transform: translateX(-50%);
+  background: #1e293b;
+  color: #f1f5f9;
+  padding: 18px 20px;
+  border-radius: 12px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
+  pointer-events: auto;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.fw-tooltip h2 {
+  font-size: 1.05rem;
+  font-weight: 600;
+  margin: 0 0 10px;
+  color: #fff;
+}
+
+.fw-tooltip p {
+  margin: 0 0 12px;
+  font-size: 0.92rem;
+  line-height: 1.45;
+  color: #e2e8f0;
+}
+
+.fw-tooltip p:last-child {
+  margin-bottom: 0;
+}
+
+.fw-actions {
+  margin-top: 14px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.fw-btn {
+  border: none;
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.fw-btn-primary {
+  background: #fbbf24;
+  color: #1a1a1a;
+}
+
+.fw-btn-primary:hover {
+  filter: brightness(1.05);
+}
+
+.fw-btn-quiet {
+  background: transparent;
+  color: #94a3b8;
+}
+
+@media (max-width: 576px) {
+  .fw-tooltip {
+    bottom: 16px;
+    max-width: calc(100vw - 24px);
+  }
+}

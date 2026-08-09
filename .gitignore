@@ -1,14 +1,50 @@
 # Mac
 .DS_Store
 
-# Configuraciones con datos sensibles
+# Configuraciones con datos sensibles (BD, contraseñas)
+include/config.php
+include/API_KEY_CLAUDE.txt
 *.env
-.env.*
-
-# Dependencias
-/node_modules/
-/vendor/
 
 # Logs y temporales
 *.log
 .cache/
+
+# Dependencias (se instalan, no se suben)
+/node_modules/
+/vendor/
+/libs/
+/assets/
+/fonts/
+/MPDF54/
+/scss/
+/tasks/
+/tablas_mysql/
+/TCPDF/
+/control_data/
+/test ios/
+
+# Archivos subidos por usuarios
+/photos/
+/invoices/
+testp.php
+test.php
+test-dni.php
+test_connection.php
+test_connection_OLD.php
+chat_db_api.php
+login.php
+login_backup.php
+especificaion_fiskaly.json
+/parts/universal/body_start.php
+/parts/importaciones/
+*.md
+*.ini
+
+# Logs
+*.log
+
+# Backups
+*.sql
+*.bak
+*.zip
