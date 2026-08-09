@@ -31,17 +31,6 @@ $usuario_data = verificar_usuario($usuario, $password);
 
 if ($usuario_data) {
 
-    if( $usuario_data['sucursal_section'] == 'true'){
-        if (controlarNewSistemaCaja($usuario_data['sucursal_usuario'])) {
-            // Verificar si la caja está cerrada
-            if (controlarCajaCerrada($usuario_data['sucursal_usuario'])) {
-                if (fechaCajaCerrada($usuario_data['sucursal_usuario'])) {
-                    header('Location: ../login.php?cajaCerrada=1');
-                    exit();
-                }
-            }
-        }
-    }
     // Credenciales correctas, iniciar sesión
     iniciar_sesion($usuario_data);
     
@@ -56,58 +45,7 @@ if ($usuario_data) {
         $_SESSION['remember_me'] = true;
     }
     
-    // Redirigir al dashboard (formación APP_ID 444: reanudar último paso del wizard si aplica)
-    if ($usuario_data['sucursal_section'] == 'true') {
-
-        $destino = '../dashboard_sucursal.php';
-        require_once __DIR__ . '/formacion_wizard.php';
-        if (formacion_wizard_activo()) {
-            require_once __DIR__ . '/formacion_wizard_login.php';
-            $wiz = formacion_wizard_url_tras_login((int) ($_SESSION['usuario_id'] ?? 0));
-            if ($wiz !== null && $wiz !== '') {
-                $destino = '../' . $wiz;
-            }
-        }
-        header('Location: ' . $destino);
-
-    }elseif ($usuario_data['central_section'] == 'true') {
-
-        $destino = '../dashboard.php';
-        header('Location: ' . $destino);
-
-    }elseif ($usuario_data['recepcion_lotes_section'] == 'true') {
-
-        $destino = '../dashboard_recepcion_lotes.php';
-        header('Location: ' . $destino);
-
-    }elseif ($usuario_data['auditoria_section'] == 'true') {
-
-        $destino = '../dashboard_auditorias.php';
-        header('Location: ' . $destino);
-        
-    }
-    /*
-    if ($usuario_data['sucursal_section'] == 'true') {
-        $destino = '../dashboard_sucursal.php';
-        require_once __DIR__ . '/formacion_wizard.php';
-        if (formacion_wizard_activo()) {
-            require_once __DIR__ . '/formacion_wizard_login.php';
-            $wiz = formacion_wizard_url_tras_login((int) ($_SESSION['usuario_id'] ?? 0));
-            if ($wiz !== null && $wiz !== '') {
-                $destino = '../' . $wiz;
-            }
-        }
-        header('Location: ' . $destino);
-    } else {
-        if($usuario_data['privilegio_usuario'] == 8){
-            header('Location: ../dashboard_auditorias.php');
-        }elseif($usuario_data['privilegio_usuario'] == 17){
-            header('Location: ../dashboard_recepcion_lotes.php');
-        }else{
-            header('Location: ../dashboard.php');
-        }
-    }
-    */
+    header('Location: ../dashboard.php');
     exit();
 } else {
     // Credenciales incorrectas

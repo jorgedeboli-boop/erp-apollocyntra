@@ -1,0 +1,10 @@
+[
+    {
+        "role": "user",
+        "content": "Total de renovaciones de autonomía sucursal del 2025"
+    },
+    {
+        "role": "assistant",
+        "content": "SELECT COUNT(*) AS total_renovaciones, SUM(hrg.importe_renovacion) AS total_euros_renovaciones\nFROM historico_renovaciones_gobal hrg\nJOIN lotes_joyeria lj ON lj.id_lote = hrg.lote AND lj.sucursal = hrg.sucursal_id\nJOIN sucursal s ON s.id_sucursal = lj.sucursal\nWHERE hrg.estado_historico = 'Renovado'\nAND YEAR(hrg.fecha_renovacion) = 2025\nAND s.nombre_sucursal LIKE '%autonom%'"
+    }
+]

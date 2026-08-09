@@ -1,0 +1,10 @@
+[
+    {
+        "role": "user",
+        "content": "ventas de este mes"
+    },
+    {
+        "role": "assistant",
+        "content": "SELECT v.id, v.fecha, v.precio, c.nombre, c.apellido, s.nombre_sucursal\nFROM ventas v\nLEFT JOIN clientes c ON v.cliente = c.id_cliente\nLEFT JOIN sucursal s ON v.id_sucursal = s.id_sucursal\nWHERE v.estado != 'anulada'\nAND MONTH(v.fecha) = MONTH(NOW())\nAND YEAR(v.fecha) = YEAR(NOW())\nORDER BY v.fecha DESC"
+    }
+]

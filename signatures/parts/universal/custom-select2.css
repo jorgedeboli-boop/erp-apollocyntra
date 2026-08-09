@@ -1,0 +1,206 @@
+    /* Estilos para Select2 CUSTOM */
+    /* Usa el selector [aria-labelledby] que Select2 genera automáticamente */
+    
+.select2-custom + .select2-container .select2-selection--single {
+    background-color: #007bff !important;
+    border-color: #007bff !important;
+}
+
+.select2-custom + .select2-container .select2-selection--single .select2-selection__rendered {
+    color: white !important;
+}
+
+.select2-custom + .select2-container .select2-selection--single .select2-selection__arrow b {
+    display: inline-block !important;
+    margin-left: -5px !important;
+    vertical-align: middle;
+    content: "";
+    border: 2px solid;
+    border-color: white;
+    block-size: 0.55em;
+    border-block-start: 0;
+    border-inline-start: 0;
+    inline-size: 0.55em;
+    margin-block-start: -0.2783em;
+    margin-inline: -5px 0;
+    transform: rotate(45deg);
+    position: absolute;
+    top: 50%;
+    right: 18px;
+    margin-top: -0.375em;
+}
+
+.select2-custom + .select2-container.select2-container--open .select2-selection--single .select2-selection__arrow b {
+    display: inline-block !important;
+    margin-left: -5px !important;
+    vertical-align: middle;
+    content: "";
+    border: 2px solid;
+    border-color: white;
+    block-size: 0.55em;
+    border-block-start: 0;
+    border-inline-start: 0;
+    inline-size: 0.55em;
+    margin-block-start: -0.2783em;
+
+    transform: rotate(225deg);
+    position: absolute;
+    top: 50%;
+    right: 18px;
+    margin-top: -0.375em;
+}
+
+.select2-custom + .select2-container--default .select2-selection--single .select2-selection__arrow::after {
+    display: none !important;
+    margin-left: 0em !important;
+    vertical-align: middle;
+    content: "";
+    border: 2px solid;
+    border-color: white;
+    block-size: 0.55em;
+    border-block-start: 0;
+    border-inline-start: 0;
+    inline-size: 0.55em;
+    margin-block-start: -0.2783em;
+    transform: rotate(45deg);
+    position: absolute;
+    top: 50%;
+    right: 18px;
+    margin-top: -0.375em;
+}
+
+
+
+
+   /* Estilos para Select2 DEFAULT */
+    .select2-container--default .select2-selection--single {
+        font-size: 0.9375rem !important;
+        font-weight: 400 !important;
+    }
+    .select2-container--default .select2-selection--single .select2-selection__arrow {
+        font-size: 0.990rem !important;
+        font-weight: 500 !important;
+    }
+   #filtro_fecha_hasta, #filtro_fecha_desde {
+        padding-block: calc(0.55rem - 1px);
+    }
+    .flatpickr-input {
+        border: 1px solid #e7e7ff;
+        font-weight: 500;
+        color: #686eff !important;
+        padding-block: calc(0.55rem - 1px);
+        background-color: #e7e7ff;
+        font-size: 14.5px;
+        text-align: center !important;
+    }
+    .flatpickr-input:focus, .flatpickr-input:active, .flatpickr-input:hover {
+        border: 1px solid #007BFF !important;
+        font-weight: 500 !important;
+        color: #007BFF !important;
+        padding-block: calc(0.55rem - 1px) !important;
+        background-color: #e7e7ff !important;
+        outline: none !important;
+        box-shadow: none !important;
+        font-size: 14.5px !important;
+        text-align: center !important;
+    }
+    .flatpickr-input::placeholder {
+        color: #686eff !important;
+        opacity: 1 !important; /* Para Firefox */
+    }
+
+    /* Ocultar la flecha por defecto */
+.select2-container--default .select2-selection--single .select2-selection__arrow b {
+    display: none;
+}
+/* Ocultar la flecha */
+.select2-container--default .select2-selection--single .select2-selection__arrow {
+    display: none;
+}
+
+/* O hacerla invisible */
+.select2-container--default .select2-selection--single .select2-selection__arrow {
+    visibility: hidden;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__arrow::after {
+    display: inline-block;
+    margin-left: 0.8em;
+    vertical-align: middle;
+    content: "";
+    border: 2px solid;
+    border-color: white;
+    block-size: 0.55em;
+    border-block-start: 0;
+    border-inline-start: 0;
+    inline-size: 0.55em;
+    margin-block-start: -0.2783em;
+    margin-inline: 0.8em 0;
+    transform: rotate(45deg);
+    position: absolute;
+    top: 50%;
+    right: 18px;
+    margin-top: -0.375em;
+}
+/*
+.select2-container--default .select2-selection--single .select2-selection__arrow b {
+	position: absolute;
+	border-width: 0.3125rem 0.25rem 0;
+	border-style: solid;
+	border-color: var(--bs-gray-400) transparent transparent;
+	block-size: 0;
+	inline-size: 0;
+	inset-block-start: 50%;
+	inset-inline-start: 50%;
+	margin-block-start: -0.125rem;
+	margin-inline-start: -0.25rem;
+}
+*/
+
+/* ========================================
+   Clase reutilizable: Select2 con altura de botón
+   ======================================== */
+/* Ajustar tamaño de selects Select2 para que coincidan con botones estándar (38px) */
+/* Uso: Agregar clase "select2-btn-height" al contenedor del select */
+.select2-btn-height .select2-container .select2-selection--single {
+  height: 38px !important;
+  min-height: 38px !important;
+  padding: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  border-width: 0px !important;
+}
+
+.select2-btn-height .select2-container .select2-selection--single .select2-selection__rendered {
+  line-height: normal !important;
+  padding-left: 0.95rem !important;
+  padding-right: 0.75rem !important;
+  display: flex !important;
+  align-items: center !important;
+}
+
+.select2-btn-height .select2-container .select2-selection--single .select2-selection__arrow {
+  height: 38px !important;
+  top: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+}
+
+/* Select2 custom al tamaño form-select-sm / btn-sm */
+.form-select-sm.select2-custom + .select2-container {
+  --bs-select-height: 31px !important;
+}
+
+.form-select-sm.select2-custom + .select2-container .select2-selection--single {
+  height: 31px !important;
+  min-height: 31px !important;
+}
+
+.form-select-sm.select2-custom + .select2-container .select2-selection--single .select2-selection__rendered {
+  font-size: 0.8125rem !important;
+  line-height: 29px !important;
+}
+
+.form-select-sm.select2-custom + .select2-container .select2-selection--single .select2-selection__arrow {
+  height: 29px !important;
+}

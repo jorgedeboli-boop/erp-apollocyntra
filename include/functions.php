@@ -436,22 +436,7 @@ function generarPdfFactura($id_factura, $tipo_factura, $origen_factura, $id_orig
  */
 function crearCarpetaFacturasSucursal($id_sucursal)
 {
-    $id_sucursal = (int) $id_sucursal;
-    if ($id_sucursal <= 0) {
-        return;
-    }
-
-    $root_proyecto = dirname(__DIR__);
-    $anio_actual = date('Y');
-    $base_sucursal = $root_proyecto . DIRECTORY_SEPARATOR . 'invoices' . DIRECTORY_SEPARATOR . 'sucursales'
-        . DIRECTORY_SEPARATOR . $id_sucursal . DIRECTORY_SEPARATOR . $anio_actual;
-    $subcarpetas = array('facturas', 'facturas_simplificadas', 'facturas_rectificativas', 'facturas_rectificativas_simplificadas');
-    foreach ($subcarpetas as $sub) {
-        $ruta = $base_sucursal . DIRECTORY_SEPARATOR . $sub;
-        if (!is_dir($ruta) && !mkdir($ruta, 0755, true)) {
-            throw new Exception('No se pudo crear la carpeta: ' . $ruta);
-        }
-    }
+    return;
 }
 
 /**
@@ -463,26 +448,8 @@ function crearCarpetaFacturasSucursal($id_sucursal)
  */
 function existenCarpetasFacturasSucursal($id_sucursal)
 {
-    $id_sucursal = (int) $id_sucursal;
-    if ($id_sucursal <= 0) {
-        return false;
-    }
-
-    $root_proyecto = dirname(__DIR__);
-    $anio_actual = date('Y');
-    $base_sucursal = $root_proyecto . DIRECTORY_SEPARATOR . 'invoices' . DIRECTORY_SEPARATOR . 'sucursales'
-        . DIRECTORY_SEPARATOR . $id_sucursal . DIRECTORY_SEPARATOR . $anio_actual;
-    $subcarpetas = array('facturas', 'facturas_simplificadas', 'facturas_rectificativas', 'facturas_rectificativas_simplificadas');
-    foreach ($subcarpetas as $sub) {
-        $ruta = $base_sucursal . DIRECTORY_SEPARATOR . $sub;
-        if (!is_dir($ruta)) {
-            return false;
-        }
-    }
-
-    return true;
+    return false;
 }
-
 
 /**
  * Construye el prefijo de factura según sucursal, si es simplificada y el tipo.
@@ -1971,22 +1938,18 @@ function verificar_usuario($usuario, $password) {
             u.email, 
             u.estado_usuario, 
             u.telefono_usuario, 
-            u.sucursal_usuario, 
             u.privilegio_usuario,
             u.observaciones_usuario,
             u.ultimo_acceso,
             u.usuario_root,
             u.acceso_ia,
             p.nombre_privilegio,
-            p.sucursal_section,
             p.central_section,
             p.recepcion_lotes_section,
             p.auditoria_section,
-            p.super_administrador,
-            s.nombre_sucursal
+            p.super_administrador
         FROM usuarios u
         LEFT JOIN privilegios_usuarios p ON u.privilegio_usuario = p.id_privilegios
-        LEFT JOIN sucursal s ON u.sucursal_usuario = s.id_sucursal
         WHERE u.usuario = ? AND u.estado_usuario = 'true'
     ");
     
@@ -2051,8 +2014,6 @@ function iniciar_sesion($usuario_data) {
     $_SESSION['usuario_email'] = $usuario_data['email'];
     $_SESSION['usuario_estado'] = $usuario_data['estado_usuario'];
     $_SESSION['usuario_telefono'] = $usuario_data['telefono_usuario'];
-    $_SESSION['usuario_sucursal'] = $usuario_data['sucursal_usuario'];
-    $_SESSION['usuario_sucursal_nombre'] = $usuario_data['nombre_sucursal'];    
     $_SESSION['usuario_privilegio_id'] = $usuario_data['privilegio_usuario'];
     $_SESSION['usuario_privilegio_nombre'] = $usuario_data['nombre_privilegio'];
     $_SESSION['usuario_super_administrador'] = $usuario_data['super_administrador'];
@@ -2073,8 +2034,7 @@ function iniciar_sesion($usuario_data) {
     $_SESSION['relItemAction'] = "false";
 
     // Variables de sesión para la sección activa del usuario
-    $_SESSION['sucursal_section'] = $usuario_data['sucursal_section'];
-    $_SESSION['central_section'] = $usuario_data['central_section'] ?? 'false';
+    $_SESSION['central_section'] = $usuario_data['central_section'] ?? 'true';
     $_SESSION['recepcion_lotes_section'] = $usuario_data['recepcion_lotes_section'] ?? 'false';
     $_SESSION['auditoria_section'] = $usuario_data['auditoria_section'] ?? 'false';
     $_SESSION['bloquear_arqueo'] = false;
@@ -2088,7 +2048,7 @@ function iniciar_sesion($usuario_data) {
     actualizar_ultimo_acceso($usuario_data['id_usuario']);
     
     // Registrar el inicio de sesión en usersConexions
-    registrar_inicio_sesion($usuario_data['id_usuario'], $usuario_data['sucursal_usuario'], $_SESSION['usuario']);
+    registrar_inicio_sesion($usuario_data['id_usuario'], $_SESSION['usuario']);
 }
 
 /**
@@ -2212,23 +2172,7 @@ function usuario_es_admin() {
     return usuario_tiene_privilegio(1); // ID 1 = Administrador
 }
 function desconectar_sucursal($sucursalId) {
-    $conexion = conectar_bd();
-    if (!$conexion) return false;
-    
-    $query = "UPDATE usersConexions
-              SET state_connection = 'false'
-              WHERE state_connection = 'true'
-              AND sucursalIdUserConexion = ?";
-    
-    $stmt = mysqli_prepare($conexion, $query);
-    mysqli_stmt_bind_param($stmt, 'i', $sucursalId);
-    $resultado = mysqli_stmt_execute($stmt);
-    $afectados = mysqli_stmt_affected_rows($stmt);
-    
-    mysqli_stmt_close($stmt);
-    mysqli_close($conexion);
-    
-    return $resultado ? $afectados : false;
+    return false;
 }
 /**
  * Función para cerrar sesión
@@ -2242,13 +2186,11 @@ function cerrar_sesion() {
     
     // Obtener datos del usuario antes de destruir la sesión
     $usuario_id = $_SESSION['usuario_id'] ?? null;
-    $usuario_sucursal = $_SESSION['usuario_sucursal'] ?? null;
     $usuario = $_SESSION['usuario'] ?? null;
     $token = $_SESSION['tokensessioncontrol'] ?? '';
     
-    // Registrar el cierre de sesión en usersConexions y desactivar el token
-    if ($usuario_id && $usuario_sucursal) {
-        registrar_cierre_sesion($usuario_id, $usuario_sucursal, $usuario, $token);
+    if ($usuario_id) {
+        registrar_cierre_sesion($usuario_id, $usuario, $token);
     }
     
     // Destruir todas las variables de sesión
@@ -2315,23 +2257,7 @@ function requerir_autenticacion() {
  */
 function redirigir_si_autenticado() {
     if (usuario_autenticado()) {
-        if ($_SESSION['sucursal_section'] == 'true') {
-            $destino = 'dashboard_sucursal.php';
-            require_once __DIR__ . '/formacion_wizard.php';
-            if (formacion_wizard_activo() && isset($_SESSION['usuario_id'])) {
-                require_once __DIR__ . '/formacion_wizard_login.php';
-                $wiz = formacion_wizard_url_tras_login((int) $_SESSION['usuario_id']);
-                if ($wiz !== null && $wiz !== '') {
-                    $destino = $wiz;
-                }
-            }
-            header('Location: ' . $destino);
-        } else {
-            header('Location: dashboard.php');
-        }
-        if($_SESSION['usuario_privilegio_id'] == 8){
-            header('Location: ../dashboard_auditorias.php');
-        }
+        header('Location: dashboard.php');
         exit();
     }
 }
@@ -2371,15 +2297,12 @@ function obtener_usuario_por_id($usuario_id) {
             u.email, 
             u.estado_usuario, 
             u.telefono_usuario, 
-            u.sucursal_usuario, 
             u.privilegio_usuario,
             u.observaciones_usuario,
             u.ultimo_acceso,
-            p.nombre_privilegio,
-            s.nombre_sucursal
+            p.nombre_privilegio
         FROM usuarios u
         LEFT JOIN privilegios_usuarios p ON u.privilegio_usuario = p.id_privilegios
-        LEFT JOIN sucursal s ON u.sucursal_usuario = s.id_sucursal
         WHERE u.id_usuario = ?
     ");
     
@@ -2479,7 +2402,7 @@ function obtener_user_agent() {
 /**
  * Función para registrar el inicio de sesión en usersConexions
  */
-function registrar_inicio_sesion($usuario_id, $usuario_sucursal, $usuario_parset) {
+function registrar_inicio_sesion($usuario_id, $usuario_parset) {
     $conexion = conectar_bd();
    
     
@@ -2490,6 +2413,7 @@ function registrar_inicio_sesion($usuario_id, $usuario_sucursal, $usuario_parset
     $userAgent = obtener_user_agent();
     $ipvVisitante = obtener_ip_visitante();
     $token = bin2hex(random_bytes(32));
+    $usuario_sucursal = '0';
 
     $query = "INSERT INTO usersConexions (
         state_connection, 
@@ -2538,7 +2462,7 @@ function registrar_inicio_sesion($usuario_id, $usuario_sucursal, $usuario_parset
 /**
  * Función para registrar el cierre de sesión en usersConexions
  */
-function registrar_cierre_sesion($usuario_id, $usuario_sucursal, $usuario_parset, $token = '') {
+function registrar_cierre_sesion($usuario_id, $usuario_parset, $token = '') {
     $conexion = conectar_bd();
     
     if (!$conexion) {
@@ -2547,6 +2471,7 @@ function registrar_cierre_sesion($usuario_id, $usuario_sucursal, $usuario_parset
     
     $userAgent = obtener_user_agent();
     $ipvVisitante = obtener_ip_visitante();
+    $usuario_sucursal = '0';
     
     // 1. Marcar como cerrada la conexión del login (desactiva el token)
     if ($token !== '') {
@@ -3035,20 +2960,7 @@ function tiempo_restante_sesion() {
  * Función para obtener todas las sucursales disponibles
  */
 function obtener_sucursales() {
-    $conexion = conectar_bd();
-    
-    $query = "SELECT id_sucursal, nombre_sucursal FROM sucursal ORDER BY nombre_sucursal";
-    $resultado = mysqli_query($conexion, $query);
-    
-    $sucursales = array();
-    if ($resultado) {
-        while ($row = mysqli_fetch_assoc($resultado)) {
-            $sucursales[] = $row;
-        }
-    }
-    
-    mysqli_close($conexion);
-    return $sucursales;
+    return array();
 }
 // FUNCION PARA ROOT
 
@@ -3644,9 +3556,9 @@ function obtenerIntemNameUrlBlankPageExtras($id_type_Item) {
  */
 function registrar_accion_usuario_not_access_id($texto_action_user, $relItemAction) {
     global $usuario_id;
-    global $usuario_sucursal;
     global $url_completa;
     $id_action_user = 29;
+    $usuario_sucursal = 0;
     $conexion = conectar_bd();
     
     if (!$conexion) {
@@ -4412,35 +4324,7 @@ function generarUUIDv4() {
 }
 
 function obtener_nombre_sucursal($id_sucursal) {
-    $conexion = conectar_bd();
-    
-    if (!$conexion) {
-        return false;
-    }
-    
-    $query = "SELECT nombre_sucursal FROM sucursal WHERE id_sucursal = ?";
-    $stmt = mysqli_prepare($conexion, $query);
-    
-    if (!$stmt) {
-        mysqli_close($conexion);
-        return false;
-    }
-    
-    mysqli_stmt_bind_param($stmt, 'i', $id_sucursal);
-    mysqli_stmt_execute($stmt);
-    $resultado = mysqli_stmt_get_result($stmt);
-    
-    if ($resultado && mysqli_num_rows($resultado) > 0) {
-        $row = mysqli_fetch_assoc($resultado);
-        $nombre = $row['nombre_sucursal'];
-        mysqli_stmt_close($stmt);
-        mysqli_close($conexion);
-        return $nombre;
-    }
-    
-    mysqli_stmt_close($stmt);
-    mysqli_close($conexion);
-    return false;
+    return '';
 }
 
 /**
@@ -4693,12 +4577,6 @@ function generarSelectArticulosLotes($id_articulo = 0, $sucursal_articulo = 0, $
     $params = [];
     $types = "";
     
-    if ($sucursal_articulo > 0) {
-        $query .= " WHERE sucursal_articulo = ?";
-        $params[] = $sucursal_articulo;
-        $types .= "i";
-    }
-    
     $query .= " ORDER BY descripcion_articulo ASC";
     
     $stmt = mysqli_prepare($conexion, $query);
@@ -4813,12 +4691,6 @@ function generarSelectUsuarios($id_usuario = 0, $sucursal_usuario = 0, $name = '
     $query = "SELECT id_usuario, usuario FROM usuarios";
     $params = [];
     $types = "";
-    
-    if ($sucursal_usuario > 0) {
-        $query .= " WHERE sucursal_usuario = ?";
-        $params[] = $sucursal_usuario;
-        $types .= "i";
-    }
     
     $query .= " ORDER BY usuario ASC";
     
@@ -4991,89 +4863,17 @@ function generarSelectNacionalidades($id = 0, $required = false) {
  * @param bool $required Si es requerido
  */
 function generarSelectSucursales($id_sucursal = 0, $name = 'id_sucursal', $id = 'id_sucursal', $required = false) {
-    $conexion = conectar_bd();
-    
-    if (!$conexion) {
-        echo "<select class='form-select select2' id='{$id}' name='{$name}'" . ($required ? ' required' : '') . ">";
-        echo "<option value=''>Error de conexión</option>";
-        echo "</select>";
-        return;
-    }
-    
-    $query = "SELECT id_sucursal, nombre_sucursal FROM sucursal ORDER BY nombre_sucursal ASC";
-    $resultado = mysqli_query($conexion, $query);
-    
-    if (!$resultado) {
-        echo "<select class='form-select select2' id='{$id}' name='{$name}'" . ($required ? ' required' : '') . ">";
-        echo "<option value=''>Error en consulta</option>";
-        echo "</select>";
-        mysqli_close($conexion);
-        return;
-    }
-    
     echo "<select class='form-select select2' id='{$id}' name='{$name}'" . ($required ? ' required' : '') . ">";
-    echo "<option value=''>Seleccionar...</option>";
-    
-    while ($row = mysqli_fetch_assoc($resultado)) {
-        $selected = ($row['id_sucursal'] == $id_sucursal) ? 'selected' : '';
-        echo "<option value='{$row['id_sucursal']}' {$selected}>" . htmlspecialchars($row['nombre_sucursal']) . "</option>";
-    }
-    
+    echo "<option value=''>—</option>";
     echo "</select>";
-    
-    mysqli_close($conexion);
 }
 
 function obtener_select_sucursales_habilitadas() {
-    $conexion = conectar_bd();
-    
-    if (!$conexion) {
-        echo "<option value=''>Error de conexión</option>";
-        return;
-    }
-    
-    $query = "SELECT id_sucursal, nombre_sucursal FROM sucursal WHERE estado_tienda = 'habilitada' ORDER BY nombre_sucursal ASC";
-    $resultado = mysqli_query($conexion, $query);
-    
-    if (!$resultado) {
-        echo "<option value=''>Error en consulta</option>";
-        mysqli_close($conexion);
-        return;
-    }
-    
-    while ($row = mysqli_fetch_assoc($resultado)) {
-        echo "<option value='{$row['id_sucursal']}'>" . htmlspecialchars($row['nombre_sucursal']) . "</option>";
-    }
-    
-    mysqli_close($conexion);
+    return;
 }
 
-/**
- * Opciones de sucursales habilitadas usando nombre_sucursal como value (filtros por nombre).
- */
 function obtener_opciones_sucursales_habilitadas_por_nombre() {
-    $conexion = conectar_bd();
-
-    if (!$conexion) {
-        echo "<option value=''>Error de conexión</option>";
-        return;
-    }
-
-    $query = "SELECT nombre_sucursal FROM sucursal WHERE estado_tienda = 'habilitada' ORDER BY nombre_sucursal ASC";
-    $resultado = mysqli_query($conexion, $query);
-
-    if (!$resultado) {
-        echo "<option value=''>Error en consulta</option>";
-        mysqli_close($conexion);
-        return;
-    }
-
-    while ($row = mysqli_fetch_assoc($resultado)) {
-        $nombre = htmlspecialchars($row['nombre_sucursal'], ENT_QUOTES, 'UTF-8');
-        echo "<option value=\"{$nombre}\">{$nombre}</option>";
-    }
-
-    mysqli_close($conexion);
+    return;
 }
 
 /**
@@ -7598,149 +7398,23 @@ function generaSello($idsucursal, $conexion){
 
 // AQUI CONSTRUIREMOS UNA FUNCION QUE CONTROLE SI LA CAJA ESTA CERRADA, DICHA FUNCION SE INVOCARA DESDE session.php y si es true se producira un logout.
 function controlarNewSistemaCaja($sucursal_id) {
-    $conexion = conectar_bd();
-    $query = "SELECT * FROM sucursal WHERE id_sucursal = ? AND new_sitema_caja = 'true'";
-    $stmt = mysqli_prepare($conexion, $query);
-    mysqli_stmt_bind_param($stmt, 'i', $sucursal_id);
-    mysqli_stmt_execute($stmt);
-    $result = mysqli_stmt_get_result($stmt);    
-    mysqli_close($conexion);
-    if ($result && mysqli_num_rows($result) > 0) {
-        return true;
-    } else {
-        return false;
-    }
+    return false;
 }
 
 function controlarCajaCerrada($sucursal_id) {
-    $conexion = conectar_bd();
-    $query = "SELECT * FROM sucursal WHERE id_sucursal = ? AND caja_cerrada = 'true' ";
-    $stmt = mysqli_prepare($conexion, $query);
-    mysqli_stmt_bind_param($stmt, 'i', $sucursal_id);
-    mysqli_stmt_execute($stmt);
-    $result = mysqli_stmt_get_result($stmt);    
-    mysqli_close($conexion);
-    if ($result && mysqli_num_rows($result) > 0) {
-        return true;
-    } else {
-        return false;
-    }
+    return false;
 }
 
-/**
- * Comprueba si la fecha del último cierre de caja (CAJA FINAL) coincide con hoy.
- *
- * @param int|string $suc Id de sucursal (sufijo de movimientos_de_caja_{suc})
- * @return bool true si la fecha_apunte del último cierre es el día de hoy, false en caso contrario o sin registro
- */
 function fechaCajaCerrada($suc) {
-    $suc = (int) $suc;
-    if ($suc < 1) {
-        return false;
-    }
-
-    $conexion = conectar_bd();
-    if (!$conexion) {
-        return false;
-    }
-
-    $tabla = 'movimientos_de_caja_' . $suc;
-    $query = "SELECT salida, fecha_apunte FROM {$tabla} WHERE cierre_caja = 'true' AND grupos = 'CAJA FINAL' ORDER BY id_movimientos DESC LIMIT 1";
-    $result = mysqli_query($conexion, $query);
-
-    if (!$result || mysqli_num_rows($result) === 0) {
-        mysqli_close($conexion);
-        return false;
-    }
-
-    $row = mysqli_fetch_assoc($result);
-    mysqli_free_result($result);
-    mysqli_close($conexion);
-
-    $fecha_apunte_ultimo_cierre = isset($row['fecha_apunte']) ? $row['fecha_apunte'] : null;
-    if ($fecha_apunte_ultimo_cierre === null || $fecha_apunte_ultimo_cierre === '' || $fecha_apunte_ultimo_cierre === '0000-00-00' || $fecha_apunte_ultimo_cierre === '0000-00-00 00:00:00') {
-        return false;
-    }
-
-    $fechaUltimo = substr($fecha_apunte_ultimo_cierre, 0, 10);
-    $hoy = date('Y-m-d');
-
-    return $fechaUltimo === $hoy;
+    return false;
 }
 
-/**
- * Fecha (Y-m-d) del CAJA INICIO activo sin CAJA FINAL posterior, o null si no hay sesión pendiente.
- *
- * @param int|string $sucursal_id
- * @return string|null
- */
 function obtener_fecha_apertura_caja_pendiente($sucursal_id) {
-    $sucursal_id = (int) $sucursal_id;
-    if ($sucursal_id < 1) {
-        return null;
-    }
-
-    $conexion = conectar_bd();
-    if (!$conexion) {
-        return null;
-    }
-
-    $tabla = 'movimientos_de_caja_' . $sucursal_id;
-    $check = mysqli_query($conexion, "SHOW TABLES LIKE '{$tabla}'");
-    if (!$check || mysqli_num_rows($check) === 0) {
-        mysqli_close($conexion);
-        return null;
-    }
-
-    $query = "SELECT a.fecha_apunte
-              FROM {$tabla} a
-              WHERE a.grupos = 'CAJA INICIO'
-              AND NOT EXISTS (
-                  SELECT 1
-                  FROM {$tabla} c
-                  WHERE c.cierre_caja = 'true'
-                  AND c.id_movimientos > a.id_movimientos
-              )
-              ORDER BY a.id_movimientos DESC
-              LIMIT 1";
-    $result = mysqli_query($conexion, $query);
-
-    if (!$result || mysqli_num_rows($result) === 0) {
-        mysqli_close($conexion);
-        return null;
-    }
-
-    $row = mysqli_fetch_assoc($result);
-    mysqli_free_result($result);
-    mysqli_close($conexion);
-
-    $fecha = isset($row['fecha_apunte']) ? substr((string) $row['fecha_apunte'], 0, 10) : null;
-    if ($fecha === null || $fecha === '' || $fecha === '0000-00-00') {
-        return null;
-    }
-
-    return $fecha;
+    return null;
 }
 
-/**
- * Indica si la sucursal debe realizar arqueo antes de continuar.
- * Solo aplica con caja abierta (caja_cerrada = false) y sesión de un día anterior sin cerrar.
- */
 function requiere_arqueo_caja_sucursal($sucursal_id) {
-    $sucursal_id = (int) $sucursal_id;
-    if ($sucursal_id < 1 || !controlarNewSistemaCaja($sucursal_id)) {
-        return false;
-    }
-    if (controlarCajaCerrada($sucursal_id)) {
-        return false;
-    }
-
-    $fechaAperturaPendiente = obtener_fecha_apertura_caja_pendiente($sucursal_id);
-    if ($fechaAperturaPendiente === null) {
-        return false;
-    }
-
-    return $fechaAperturaPendiente < date('Y-m-d');
+    return false;
 }
 
 /**
@@ -9373,11 +9047,9 @@ function asegurarClienteParaVenta($conexion, array $datos, $usuario_id, $sucursa
     }
 
     if (function_exists('registrar_accion_usuario')) {
-        global $usuario, $usuario_sucursal;
+        global $usuario;
         $nombre_usuario = isset($usuario) ? (string) $usuario : '';
-        $sucursal_accion = isset($usuario_sucursal) && (int) $usuario_sucursal > 0
-            ? (int) $usuario_sucursal
-            : $sucursal;
+        $sucursal_accion = 0;
         $texto_action_user = $nombre_usuario . " creó el cliente Nº '" . $nuevo_id . "' (desde venta)";
         $relItemAction = isset($_SESSION['relItemAction']) ? $_SESSION['relItemAction'] : 'false';
         registrar_accion_usuario($usuario_id, '34', $texto_action_user, $sucursal_accion, $relItemAction);

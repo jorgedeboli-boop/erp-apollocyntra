@@ -1,0 +1,82 @@
+/* 
+ * Archivo de colores personalizados
+ * Este archivo sobrescribe los colores del template
+ * Para cambiar colores, modifica las variables CSS aquí
+ */
+
+:root {
+  /* Color principal del template */
+  --bs-primary: #007BFF !important; /* Azul personalizado */
+  --bs-primary-rgb: 0, 123, 255 !important;
+  
+  /* Colores relacionados con el primario */
+  --bs-primary-text-emphasis: #0056B3 !important;
+  --bs-primary-bg-subtle: #E6F3FF !important;
+  --bs-primary-border-subtle: #B3D9FF !important;
+  
+  /* Enlaces */
+  --bs-link-color: #007BFF !important;
+  --bs-link-hover-color: #0056B3 !important;
+  
+  /* Para modo oscuro */
+  --bs-primary-text-emphasis-dark: #66B3FF !important;
+  --bs-primary-bg-subtle-dark: #1A3D66 !important;
+  --bs-primary-border-subtle-dark: #4D79B3 !important;
+}
+
+/* Aplicar colores personalizados a elementos específicos */
+.btn-primary {
+  background-color: var(--bs-primary) !important;
+  border-color: var(--bs-primary) !important;
+}
+
+.btn-primary:hover {
+  background-color: var(--bs-link-hover-color) !important;
+  border-color: var(--bs-link-hover-color) !important;
+}
+
+.btn-outline-primary {
+  color: var(--bs-primary) !important;
+  border-color: var(--bs-primary) !important;
+}
+
+.btn-outline-primary:hover {
+  background-color: var(--bs-primary) !important;
+  border-color: var(--bs-primary) !important;
+}
+
+/* Badges y elementos con color primario */
+.badge.bg-primary,
+.bg-primary {
+  background-color: var(--bs-primary) !important;
+}
+
+.text-primary {
+  color: var(--bs-primary) !important;
+}
+
+.border-primary {
+  border-color: var(--bs-primary) !important;
+}
+
+/* Formularios */
+.form-control:focus,
+.form-select:focus {
+  border-color: var(--bs-primary) !important;
+  box-shadow: 0 0 0 0.2rem rgba(255, 107, 53, 0.25) !important;
+}
+
+/* Checkboxes y radios */
+.form-check-input:checked {
+  background-color: var(--bs-primary) !important;
+  border-color: var(--bs-primary) !important;
+}
+
+/* SweetAlert2 personalizado */
+.swal2-confirm {
+  background-color: var(--bs-primary) !important;
+}
+
+.swal2-confirm:hover {
+  background-color: var(--bs-link-hover-color) !important;
+}

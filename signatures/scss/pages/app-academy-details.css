@@ -1,0 +1,8 @@
+/**
+ * Academy Course courseContent
+ */
+.stick-top {
+  position: sticky;
+  inset-block: calc(10px) 0; }
+  .stick-top.course-content-fixed {
+    inset-block-start: calc(70px + 10px); }
