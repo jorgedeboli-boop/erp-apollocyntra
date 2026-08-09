@@ -17,9 +17,16 @@ if (!defined('IA_CLAUDE_MODEL')) {
 }
 
 if (!defined('IA_API_KEY')) {
-    $ia_key_env = getenv('ANTHROPIC_API_KEY');
-    if ($ia_key_env === false || $ia_key_env === '') {
-        $ia_key_env = getenv('IA_API_KEY');
+    require_once __DIR__ . '/config.php';
+    $ia_key_env = '';
+    if (defined('ANTHROPIC_API_KEY') && ANTHROPIC_API_KEY !== '') {
+        $ia_key_env = ANTHROPIC_API_KEY;
+    }
+    if ($ia_key_env === '') {
+        $ia_key_env = getenv('ANTHROPIC_API_KEY');
+        if ($ia_key_env === false || $ia_key_env === '') {
+            $ia_key_env = getenv('IA_API_KEY');
+        }
     }
     if ($ia_key_env !== false && $ia_key_env !== '') {
         define('IA_API_KEY', $ia_key_env);

@@ -1,7 +1,14 @@
 <?php
-$gemini_key_env = getenv('GEMINI_API_KEY');
-define('GEMINI_API_KEY', ($gemini_key_env !== false && $gemini_key_env !== '') ? $gemini_key_env : '');
-define('GEMINI_MODEL', 'gemini-2.5-flash');
+if (!defined('GEMINI_API_KEY')) {
+    require_once __DIR__ . '/config.php';
+}
+if (!defined('GEMINI_API_KEY')) {
+    $gemini_key_env = getenv('GEMINI_API_KEY');
+    define('GEMINI_API_KEY', ($gemini_key_env !== false && $gemini_key_env !== '') ? $gemini_key_env : '');
+}
+if (!defined('GEMINI_MODEL')) {
+    define('GEMINI_MODEL', 'gemini-2.5-flash');
+}
 
 $GLOBALS['gemini_ultimo_error'] = '';
 
