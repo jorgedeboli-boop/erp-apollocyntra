@@ -6,6 +6,7 @@
 
 # Configuraciones con datos sensibles (BD, contraseñas)
 include/config.php
+include/diagnostico_login.php
 include/API_KEY_CLAUDE.txt
 *.env
 

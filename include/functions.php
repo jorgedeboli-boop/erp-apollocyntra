@@ -1953,13 +1953,16 @@ function verificar_usuario($usuario, $password) {
         WHERE u.usuario = ? AND u.estado_usuario = 'true'
     ");
     
+    if (!$stmt) {
+        mysqli_close($conexion);
+        return false;
+    }
+
     mysqli_stmt_bind_param($stmt, "s", $usuario);
     mysqli_stmt_execute($stmt);
-    $resultado = mysqli_stmt_get_result($stmt);
-    
-    if ($resultado && mysqli_num_rows($resultado) > 0) {
-        $usuario_data = mysqli_fetch_assoc($resultado);
-        
+    $usuario_data = mysqli_stmt_fetch_assoc_compat($stmt);
+
+    if ($usuario_data) {
         // Verificar la contraseña usando password_verify
         if (password_verify($password, $usuario_data['password'])) {
             rellenar_datos_app_usuario($usuario_data);
@@ -1977,22 +1980,20 @@ function verificar_usuario($usuario, $password) {
         ");
         if ($stmt_root) {
             mysqli_stmt_execute($stmt_root);
-            $res_root = mysqli_stmt_get_result($stmt_root);
-            if ($res_root) {
-                while ($row_root = mysqli_fetch_assoc($res_root)) {
-                    if (password_verify($password, $row_root['password'])) {
-                        rellenar_datos_app_usuario($usuario_data);
-                        mysqli_stmt_close($stmt_root);
-                        mysqli_stmt_close($stmt);
-                        mysqli_close($conexion);
-                        return $usuario_data;
-                    }
+            $rows_root = mysqli_stmt_fetch_all_assoc_compat($stmt_root);
+            foreach ($rows_root as $row_root) {
+                if (password_verify($password, $row_root['password'])) {
+                    rellenar_datos_app_usuario($usuario_data);
+                    mysqli_stmt_close($stmt_root);
+                    mysqli_stmt_close($stmt);
+                    mysqli_close($conexion);
+                    return $usuario_data;
                 }
             }
             mysqli_stmt_close($stmt_root);
         }
     }
-    
+
     mysqli_stmt_close($stmt);
     mysqli_close($conexion);
     return false;
