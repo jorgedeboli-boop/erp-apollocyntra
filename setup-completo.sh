@@ -4,8 +4,8 @@ set -euo pipefail
 cd "$(dirname "$0")"
 
 REPO="jorgedeboli-boop/erp-apollocyntra"
-SERVER="quintagracia@vl24696.dinaserver.com"
-SERVER_PATH="/home/quintagracia/erp-apollocyntra"
+SERVER="apollocyntra@vl24696.dinaserver.com"
+SERVER_PATH="/home/apollocyntra/erp"
 
 echo "📦 Creando repositorio en GitHub (si no existe)..."
 if ! git ls-remote "git@github.com:${REPO}.git" HEAD >/dev/null 2>&1; then
