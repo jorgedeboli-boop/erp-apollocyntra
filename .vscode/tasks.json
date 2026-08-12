@@ -6,12 +6,19 @@
       "type": "shell",
       "command": "bash",
       "args": [
-        "/Users/jorgedeboli/Developer/erp.apollocyntra/deploy.sh"
+        "${workspaceFolder}/deploy.sh"
       ],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
       "presentation": {
         "reveal": "always",
-        "panel": "new"
-      }
+        "panel": "new",
+        "focus": true,
+        "clear": true
+      },
+      "problemMatcher": []
     }
   ]
 }

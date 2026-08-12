@@ -3,7 +3,29 @@ set -euo pipefail
 
 cd "$(dirname "$0")"
 
-mensaje=$(osascript -e 'tell application "System Events" to display dialog "Describe los cambios:" default answer ""' -e 'text returned of result')
+echo "🚀 Deploy: commit + push + FTP"
+echo ""
+
+prompt_commit_message() {
+  if [[ -n "${1:-}" ]]; then
+    printf '%s' "$1"
+    return
+  fi
+
+  if [[ -r /dev/tty ]]; then
+    printf 'Describe los cambios: ' >/dev/tty
+    IFS= read -r reply </dev/tty || true
+    printf '%s' "$reply"
+    return
+  fi
+
+  osascript \
+    -e 'tell application "System Events" to activate' \
+    -e 'display dialog "Describe los cambios:" default answer ""' \
+    -e 'text returned of result' 2>/dev/null || true
+}
+
+mensaje="$(prompt_commit_message "${1:-}")"
 
 if [ -z "$mensaje" ]; then
   echo "❌ Mensaje vacío, cancelado."
@@ -14,6 +36,10 @@ git add -A
 
 if git diff --cached --quiet; then
   echo "❌ No hay cambios para commitear."
+  if ! git diff --quiet; then
+    echo "ℹ️  Hay cambios locales en archivos ignorados por .gitignore (p. ej. login.php, include/config.php)."
+    git status --short
+  fi
   exit 1
 fi
 
@@ -42,7 +68,16 @@ PY
 
 LOCAL_DIR="$(pwd)"
 
-/opt/homebrew/bin/lftp -c "
+LFTP="$(command -v lftp || true)"
+if [[ -z "$LFTP" && -x /opt/homebrew/bin/lftp ]]; then
+  LFTP="/opt/homebrew/bin/lftp"
+fi
+if [[ -z "$LFTP" ]]; then
+  echo "❌ lftp no está instalado. Instálalo con: brew install lftp"
+  exit 1
+fi
+
+"$LFTP" -c "
 set ftp:ssl-allow no
 set cmd:fail-exit yes
 open -u ${FTP_USER},${FTP_PASS} ${FTP_HOST}

@@ -1,4 +1,6 @@
 <?php
+
+// Función para generar un select de tipo de identificación
 function generarSelectTipoIdentificacion($tipo_seleccionado = '', $name = 'tipo_identificacion', $id = 'tipo_identificacion', $required = false, $formato = 'mayusculas', $id_cliente = 0) {
     $conexion = conectar_bd();
     
