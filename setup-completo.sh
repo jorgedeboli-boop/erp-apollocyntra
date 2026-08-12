@@ -6,6 +6,7 @@ cd "$(dirname "$0")"
 REPO="jorgedeboli-boop/erp-apollocyntra"
 SERVER="apollocyntra@vl24696.dinaserver.com"
 SERVER_PATH="/home/apollocyntra/erp"
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 
 echo "📦 Creando repositorio en GitHub (si no existe)..."
 if ! git ls-remote "git@github.com:${REPO}.git" HEAD >/dev/null 2>&1; then
@@ -19,9 +20,8 @@ fi
 echo "⬆️  Subiendo código a GitHub..."
 git push -u origin main
 
-echo "🖥️  Configurando servidor..."
-ssh "$SERVER" "test -d ${SERVER_PATH}/.git" 2>/dev/null || \
-  ssh "$SERVER" "git clone git@github.com:${REPO}.git ${SERVER_PATH}"
+echo "🖥️  Configurando repositorio git en el servidor..."
+ssh "$SERVER" "bash -s" < "${SCRIPT_DIR}/servidor-git.sh"
 
 echo "✅ Repositorio y servidor listos."
 echo "   Usa ./deploy.sh para commitear y actualizar el servidor."

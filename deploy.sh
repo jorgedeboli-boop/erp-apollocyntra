@@ -50,7 +50,10 @@ printf "%s\n" "$mensaje" > "$commit_msg_file"
 git commit -F "$commit_msg_file"
 git push
 
+SERVER="apollocyntra@vl24696.dinaserver.com"
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+
 echo "🚀 Actualizando servidor..."
-ssh apollocyntra@vl24696.dinaserver.com "cd /home/apollocyntra/erp && git fetch origin && git reset --hard origin/main"
+ssh "$SERVER" "bash -s" < "${SCRIPT_DIR}/servidor-git.sh"
 
 echo "✅ ¡Todo actualizado!"
