@@ -1925,78 +1925,106 @@ function rellenar_datos_app_usuario(&$usuario_data) {
  */
 function verificar_usuario($usuario, $password) {
     $conexion = conectar_bd();
-    // Si la clave no es la del usuario pero sí la de un usuario_root, se valida el acceso como ese usuario (usuario_root según su fila en BD).
-    // Preparar la consulta para evitar inyección SQL
-    // JOIN con la tabla de privilegios para obtener el nombre del privilegio
+
+    // Consulta mínima solo sobre usuarios (evita fallos si faltan columnas del JOIN o tablas relacionadas).
     $stmt = mysqli_prepare($conexion, "
-        SELECT 
-            u.id_usuario, 
-            u.usuario, 
-            u.password, 
-            u.nombre_usuario, 
-            u.apellido_usuario, 
-            u.email, 
-            u.estado_usuario, 
-            u.telefono_usuario, 
-            u.privilegio_usuario,
-            u.observaciones_usuario,
-            u.ultimo_acceso,
-            u.usuario_root,
-            u.acceso_ia,
-            p.nombre_privilegio,
-            p.central_section,
-            p.recepcion_lotes_section,
-            p.auditoria_section,
-            p.super_administrador
-        FROM usuarios u
-        LEFT JOIN privilegios_usuarios p ON u.privilegio_usuario = p.id_privilegios
-        WHERE u.usuario = ? AND u.estado_usuario = 'true'
+        SELECT
+            id_usuario,
+            usuario,
+            password,
+            nombre_usuario,
+            apellido_usuario,
+            email,
+            estado_usuario,
+            telefono_usuario,
+            privilegio_usuario,
+            observaciones_usuario,
+            ultimo_acceso,
+            usuario_root
+        FROM usuarios
+        WHERE usuario = ? AND estado_usuario = 'true'
+        LIMIT 1
     ");
-    
+
     if (!$stmt) {
+        insertErrorLog('verificar_usuario prepare usuarios: ' . mysqli_error($conexion));
         mysqli_close($conexion);
         return false;
     }
 
-    mysqli_stmt_bind_param($stmt, "s", $usuario);
+    mysqli_stmt_bind_param($stmt, 's', $usuario);
     mysqli_stmt_execute($stmt);
     $usuario_data = mysqli_stmt_fetch_assoc_compat($stmt);
+    mysqli_stmt_close($stmt);
 
-    if ($usuario_data) {
-        // Verificar la contraseña usando password_verify
-        if (password_verify($password, $usuario_data['password'])) {
-            rellenar_datos_app_usuario($usuario_data);
-            mysqli_stmt_close($stmt);
-            mysqli_close($conexion);
-            return $usuario_data;
-        }
+    if (!$usuario_data) {
+        mysqli_close($conexion);
+        return false;
+    }
 
-        // Contraseña distinta a la del usuario: ¿coincide con la de algún usuario root o super_admin? (solo abre sesión;
-        // usuario_root en sesión sigue el registro del usuario que entra, no se fuerza a true.)
+    $password_ok = password_verify($password, (string) $usuario_data['password']);
+
+    if (!$password_ok) {
         $stmt_root = mysqli_prepare($conexion, "
             SELECT password FROM usuarios
-            WHERE estado_usuario = 'true'
-              AND (usuario_root = 'true' OR super_admin = 'true')
+            WHERE estado_usuario = 'true' AND usuario_root = 'true'
         ");
         if ($stmt_root) {
             mysqli_stmt_execute($stmt_root);
             $rows_root = mysqli_stmt_fetch_all_assoc_compat($stmt_root);
             foreach ($rows_root as $row_root) {
-                if (password_verify($password, $row_root['password'])) {
-                    rellenar_datos_app_usuario($usuario_data);
-                    mysqli_stmt_close($stmt_root);
-                    mysqli_stmt_close($stmt);
-                    mysqli_close($conexion);
-                    return $usuario_data;
+                if (password_verify($password, (string) $row_root['password'])) {
+                    $password_ok = true;
+                    break;
                 }
             }
             mysqli_stmt_close($stmt_root);
         }
     }
 
-    mysqli_stmt_close($stmt);
+    if (!$password_ok) {
+        mysqli_close($conexion);
+        return false;
+    }
+
+    $usuario_data['acceso_ia'] = '';
+    $usuario_data['nombre_privilegio'] = '';
+    $usuario_data['central_section'] = 'true';
+    $usuario_data['recepcion_lotes_section'] = 'false';
+    $usuario_data['auditoria_section'] = 'false';
+    $usuario_data['super_administrador'] = 'false';
+
+    $privilegio_id = (int) ($usuario_data['privilegio_usuario'] ?? 0);
+    if ($privilegio_id > 0) {
+        $stmt_priv = mysqli_prepare($conexion, "
+            SELECT
+                nombre_privilegio,
+                central_section,
+                recepcion_lotes_section,
+                auditoria_section,
+                super_administrador
+            FROM privilegios_usuarios
+            WHERE id_privilegios = ?
+            LIMIT 1
+        ");
+        if ($stmt_priv) {
+            mysqli_stmt_bind_param($stmt_priv, 'i', $privilegio_id);
+            mysqli_stmt_execute($stmt_priv);
+            $priv = mysqli_stmt_fetch_assoc_compat($stmt_priv);
+            mysqli_stmt_close($stmt_priv);
+            if ($priv) {
+                foreach ($priv as $key => $value) {
+                    if ($value !== null && $value !== '') {
+                        $usuario_data[$key] = $value;
+                    }
+                }
+            }
+        }
+    }
+
+    rellenar_datos_app_usuario($usuario_data);
     mysqli_close($conexion);
-    return false;
+    return $usuario_data;
 }
 
 /**

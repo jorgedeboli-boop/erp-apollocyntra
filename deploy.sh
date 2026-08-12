@@ -40,11 +40,13 @@ print(cfg["host"], cfg["username"], cfg["password"], cfg.get("remotePath", ""))
 PY
 )"
 
+LOCAL_DIR="$(pwd)"
+
 /opt/homebrew/bin/lftp -c "
 set ftp:ssl-allow no
 set cmd:fail-exit yes
 open -u ${FTP_USER},${FTP_PASS} ${FTP_HOST}
-lcd $(pwd)
+lcd '${LOCAL_DIR}'
 cd ${FTP_PATH:-/}
 mirror -R \
   --parallel=4 \
