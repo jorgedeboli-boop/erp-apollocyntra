@@ -7,6 +7,11 @@ REPO="git@github.com:jorgedeboli-boop/erp-apollocyntra.git"
 BRANCH="main"
 
 cd "$SERVER_PATH"
+REAL_PATH="$(pwd -P)"
+
+# La carpeta erp suele ser enlace a .ftp-users/erp (propietario distinto).
+git config --global --add safe.directory "$SERVER_PATH"
+git config --global --add safe.directory "$REAL_PATH"
 
 is_valid_git() {
   [[ -d .git && -d .git/objects && -d .git/refs ]]
