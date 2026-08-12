@@ -6,7 +6,7 @@
       "type": "shell",
       "command": "bash",
       "args": [
-        "${workspaceFolder}/deploy.sh"
+        "/Users/jorgedeboli/Developer/erp.apollocyntra/deploy.sh"
       ],
       "presentation": {
         "reveal": "always",
