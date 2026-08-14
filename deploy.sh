@@ -3,6 +3,9 @@ set -euo pipefail
 
 cd "$(dirname "$0")"
 
+SERVER="apollocyntra@vl24696.dinaserver.com"
+SERVER_PATH="/home/apollocyntra/erp"
+
 echo "🚀 Deploy: commit + push + servidor"
 echo ""
 
@@ -15,28 +18,14 @@ if git diff --cached --quiet; then
   fi
   echo "ℹ️  No hay cambios para commitear. Actualizando solo el servidor..."
 else
-  prompt_commit_message() {
-    if [[ -n "${1:-}" ]]; then
-      printf '%s' "$1"
-      return
-    fi
+  if [[ -r /dev/tty ]]; then
+    printf 'Describe los cambios: ' >/dev/tty
+    IFS= read -r mensaje </dev/tty || true
+  else
+    mensaje=$(osascript -e 'tell application "System Events" to display dialog "Describe los cambios:" default answer ""' -e 'text returned of result' 2>/dev/null || true)
+  fi
 
-    if [[ -r /dev/tty ]]; then
-      printf 'Describe los cambios: ' >/dev/tty
-      IFS= read -r reply </dev/tty || true
-      printf '%s' "$reply"
-      return
-    fi
-
-    osascript \
-      -e 'tell application "System Events" to activate' \
-      -e 'display dialog "Describe los cambios:" default answer ""' \
-      -e 'text returned of result' 2>/dev/null || true
-  }
-
-  mensaje="$(prompt_commit_message "${1:-}")"
-
-  if [ -z "$mensaje" ]; then
+  if [ -z "${mensaje:-}" ]; then
     echo "❌ Mensaje vacío, cancelado."
     exit 1
   fi
@@ -49,10 +38,7 @@ else
   git push
 fi
 
-SERVER="apollocyntra@vl24696.dinaserver.com"
-SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-
 echo "🚀 Actualizando servidor..."
-ssh "$SERVER" "bash -s" < "${SCRIPT_DIR}/servidor-git.sh"
+ssh "$SERVER" "cd ${SERVER_PATH} && git fetch origin && git reset --hard origin/main"
 
 echo "✅ ¡Todo actualizado!"
