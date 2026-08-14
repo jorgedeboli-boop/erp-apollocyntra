@@ -108,6 +108,7 @@ class SessionChecker {
             }
 
             if (response.status === 401 || response.status === 403) {
+                console.log('handleSessionExpired disparada 1');
                 this.handleSessionExpired();
                 return;
             }
@@ -124,6 +125,7 @@ class SessionChecker {
             }
 
             if (data.session_expired) {
+                console.log('handleSessionExpired disparada 2');
                 this.handleSessionExpired();
             } else if (
                 !this.warningShown &&
@@ -168,6 +170,7 @@ class SessionChecker {
                 if (result.isConfirmed) {
                     this.extendSession();
                 } else {
+                    console.log('handleSessionExpired disparada 3');
                     this.handleSessionExpired();
                 }
             });
@@ -176,6 +179,7 @@ class SessionChecker {
             if (extend) {
                 this.extendSession();
             } else {
+                console.log('handleSessionExpired disparada 4');
                 this.handleSessionExpired();
             }
         }
@@ -228,7 +232,7 @@ class SessionChecker {
         // Mostrar mensaje de sesión expirada
         if (typeof Swal !== 'undefined') {
             Swal.fire({
-                title: 'Sesión expirada test 224488',
+                title: 'Sesión expirada test',
                 text: 'Tu sesión ha expirado. Serás redirigido al login.',
                 icon: 'error',
                 showConfirmButton: false,
