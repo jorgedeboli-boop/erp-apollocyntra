@@ -1,9 +1,9 @@
 /**
- * Service Worker para TPV Quinta Gracia
+ * Service Worker para ERP Apollo Cyntra
  * Precache selectivo de recursos estáticos del login/app shell.
  */
 
-const CACHE_NAME = 'tpv-quinta-gracia-v2';
+const CACHE_NAME = 'erp-apollo-cyntra-v1';
 
 const PRECACHE_URLS = [
   // iOS App Icons
