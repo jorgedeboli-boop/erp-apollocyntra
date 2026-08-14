@@ -16,6 +16,39 @@ is_valid_git() {
   [[ -d .git && -d .git/objects && -d .git/refs ]]
 }
 
+point_branch_to() {
+  local head="$1"
+  git update-ref "refs/heads/$BRANCH" "$head"
+  git symbolic-ref HEAD "refs/heads/$BRANCH" 2>/dev/null || true
+}
+
+prepare_path() {
+  local path="$1" dir
+  dir="$(dirname "$path")"
+  while [[ "$dir" != "." && "$dir" != "/" ]]; do
+    chmod g+w "$dir" 2>/dev/null || true
+    dir="$(dirname "$dir")"
+  done
+  [[ -e "$path" ]] && chmod g+w "$path" 2>/dev/null || true
+}
+
+checkout_one_file() {
+  local file="$1"
+  prepare_path "$file"
+  if git checkout "$NEW_HEAD" -- "$file" 2>/dev/null; then
+    return 0
+  fi
+  local dir tmp
+  dir="$(dirname "$file")"
+  mkdir -p "$dir"
+  tmp="$(mktemp "${dir}/.deploy.XXXXXX")"
+  if git show "$NEW_HEAD:$file" > "$tmp" 2>/dev/null && mv -f "$tmp" "$file" 2>/dev/null; then
+    return 0
+  fi
+  rm -f "$tmp"
+  return 1
+}
+
 if ! is_valid_git; then
   echo "⚠️  Repositorio git inválido o incompleto. Reparando..."
   if [[ -d .git ]]; then
@@ -63,15 +96,14 @@ apply_changed_files_only() {
   fi
 
   if [[ ${#files[@]} -eq 0 ]]; then
-    git branch -f "$BRANCH" "$NEW_HEAD"
-    git symbolic-ref HEAD "refs/heads/$BRANCH" 2>/dev/null || git checkout -B "$BRANCH" "$NEW_HEAD"
+    point_branch_to "$NEW_HEAD"
     return 0
   fi
 
   echo "⚠️  Actualizando ${#files[@]} archivo(s) (modo permisos limitados)..."
 
   for file in "${files[@]}"; do
-    if git checkout "$NEW_HEAD" -- "$file" 2>/dev/null; then
+    if checkout_one_file "$file"; then
       updated=$((updated + 1))
     else
       echo "   ⚠️  Sin permiso: $file"
@@ -79,19 +111,24 @@ apply_changed_files_only() {
     fi
   done
 
-  git branch -f "$BRANCH" "$NEW_HEAD"
-  git symbolic-ref HEAD "refs/heads/$BRANCH" 2>/dev/null || true
-
   echo "   ✅ Actualizados: $updated | ⚠️  Omitidos: $failed"
+
   if [[ $failed -gt 0 ]]; then
-    echo "   (Omitidos: PDFs/firmas generados por la web con otro propietario.)"
+    echo ""
+    echo "❌ Permisos insuficientes en el servidor."
+    echo "   Pide a DinaServer o ejecuta (si tienes sudo):"
+    echo "   sudo chown -R apollocyntra:apollocyntragrp $REAL_PATH"
+    echo "   sudo chmod -R g+rwX $REAL_PATH"
+    return 1
   fi
+
+  point_branch_to "$NEW_HEAD"
 }
 
 if [[ -z "$OLD_HEAD" || "$OLD_HEAD" == "$NEW_HEAD" ]]; then
   if ! apply_full_reset 2>/dev/null; then
-    git branch -f "$BRANCH" "$NEW_HEAD"
-    git checkout -B "$BRANCH" "$NEW_HEAD" 2>/dev/null || apply_changed_files_only
+    point_branch_to "$NEW_HEAD" 2>/dev/null || true
+    apply_changed_files_only
   fi
 elif apply_full_reset 2>/dev/null; then
   :
