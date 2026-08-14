@@ -1,7 +1,7 @@
 <?php
 /**
  * Archivo para verificar el estado de la sesión
- * Compatible con PHP 7.0
+ * Compatible con PHP 7.0 
  */
 
 require_once 'functions.php';
