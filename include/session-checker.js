@@ -218,8 +218,6 @@ class SessionChecker {
     }
     
     handleSessionExpired() {
-        console.log('handleSessionExpired disparada 5');
-        return false;
         if (this.isUnloading) {
             return;
         }

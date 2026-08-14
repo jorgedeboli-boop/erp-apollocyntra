@@ -4,7 +4,7 @@ set -euo pipefail
 cd "$(dirname "$0")"
 
 REPO="jorgedeboli-boop/erp-apollocyntra"
-SERVER="apollocyntra@vl24696.dinaserver.com"
+SERVER="erp-deploy"
 SERVER_PATH="/home/apollocyntra/erp"
 
 echo "📦 Creando repositorio en GitHub (si no existe)..."
