@@ -228,7 +228,7 @@ class SessionChecker {
         // Mostrar mensaje de sesión expirada
         if (typeof Swal !== 'undefined') {
             Swal.fire({
-                title: 'Sesión expirada test 2222',
+                title: 'Sesión expirada test 22225',
                 text: 'Tu sesión ha expirado. Serás redirigido al login.',
                 icon: 'error',
                 showConfirmButton: false,
