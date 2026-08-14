@@ -25,10 +25,25 @@ if ! is_valid_git; then
     echo "   Copia de seguridad: $SERVER_PATH/$backup"
   fi
   git init
-  git remote add origin "$REPO" 2>/dev/null || git remote set-url origin "$REPO"
 fi
 
-git fetch origin
+# Siempre asegurar remoto origin (el .git viejo a veces no lo tenía).
+if git remote get-url origin &>/dev/null; then
+  git remote set-url origin "$REPO"
+else
+  git remote add origin "$REPO"
+fi
+
+echo "📡 Remoto origin: $(git remote get-url origin)"
+
+if ! git fetch origin; then
+  echo ""
+  echo "❌ No se pudo conectar con GitHub desde el servidor."
+  echo "   Comprueba en el servidor: ssh -T git@github.com"
+  echo "   El usuario apollocyntra necesita una clave SSH en GitHub (deploy key)."
+  exit 1
+fi
+
 git checkout -B "$BRANCH" "origin/$BRANCH" 2>/dev/null || git reset --hard "origin/$BRANCH"
 
 echo "✅ Servidor actualizado en $BRANCH ($(git rev-parse --short HEAD))"
