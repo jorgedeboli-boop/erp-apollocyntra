@@ -165,6 +165,7 @@
             console.error('CameraQR: falta la librería QRCode');
             return;
         }
+        id_sucursal = tipo_qr === 'cliente' ? 0 : id_sucursal;
         var token = generarToken();
         var modalId = defaultModalId(tipo_qr, opts);
         var qrId = defaultQrContainerId(tipo_qr, opts);

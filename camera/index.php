@@ -14,7 +14,7 @@ $type = $_GET['type'] ?? null;
 $id = $_GET['id'] ?? null;
 $token = $_GET['token'] ?? null;
 $id_token =  $_GET['id_token'] ?? null;
-$id_sucursal = $_GET['id_sucursal'] ?? null;
+$id_sucursal = isset($_GET['id_sucursal']) ? (int) $_GET['id_sucursal'] : 0;
 
 // Inicializar array de tokens usados en sesión
 if (!isset($_SESSION['tokens_usados'])) {
@@ -25,9 +25,9 @@ if (!isset($_SESSION['tokens_usados'])) {
 $error = null;
 $success = false;
 
-// Validar que los parámetros existan
-if (!$type || !$id || !$token || !$id_token || !$id_sucursal) {
-    //dime que parametro falta de a uno por uno
+// Validar que los parámetros existan.
+// type=cliente no usa sucursal; id_sucursal=0 es válido (en PHP "0" es falsy).
+if (!$type || !$id || !$token || !$id_token || ($type !== 'cliente' && $id_sucursal <= 0)) {
     if (!$type) {
         $error = 'Faltan parámetros requeridos (type)';
     } elseif (!$id) {
@@ -36,7 +36,7 @@ if (!$type || !$id || !$token || !$id_token || !$id_sucursal) {
         $error = 'Faltan parámetros requeridos (token)';
     } elseif (!$id_token) {
         $error = 'Faltan parámetros requeridos (id_token)';
-    } elseif (!$id_sucursal) {
+    } elseif ($type !== 'cliente' && $id_sucursal <= 0) {
         $error = 'Faltan parámetros requeridos (id_sucursal)';
     }
 
@@ -336,7 +336,7 @@ mysqli_close($conexion);
             const type = urlParams.get('type');
             const id = urlParams.get('id');
             const id_sucursal = urlParams.get('id_sucursal');
-            if (!type || !id || !id_sucursal) {
+            if (!type || !id || (type !== 'cliente' && (id_sucursal === null || id_sucursal === ''))) {
                 Swal.fire({
                     title: 'Error',
                     text: 'Faltan parámetros necesarios',

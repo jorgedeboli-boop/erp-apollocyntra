@@ -192,7 +192,8 @@ function abrirModalFotoMovilCliente() {
     if (window.CameraDocPanel && typeof window.CameraDocPanel.open === 'function') {
         window.CameraDocPanel.open({
             tipo: 'cliente',
-            id: ctx.idCliente
+            id: ctx.idCliente,
+            idSucursal: 0
         }).catch(function (err) {
             console.error('CameraDocPanel', err);
             Swal.fire({

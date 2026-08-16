@@ -21,23 +21,20 @@ try {
         throw new Exception('No se pudieron leer los datos JSON');
     }
 
-    if (!isset($data['tipo_qr']) || !isset($data['id_item']) || !isset($data['token']) || !isset($data['id_sucursal'])) {
+    if (!isset($data['tipo_qr']) || !isset($data['id_item']) || !isset($data['token'])) {
         if (!isset($data['tipo_qr'])) {
             throw new Exception('Falta el parámetro tipo_qr');
         }
         if (!isset($data['id_item'])) {
             throw new Exception('Falta el parámetro id_item');
         }
-        if (!isset($data['token'])) {
-            throw new Exception('Falta el parámetro token');
-        }
-        throw new Exception('Falta el parámetro id_sucursal');
+        throw new Exception('Falta el parámetro token');
     }
 
     $tipo_qr = trim($data['tipo_qr']);
     $id_item = (int) $data['id_item'];
     $token = trim($data['token']);
-    $id_sucursal = (int) $data['id_sucursal'];
+    $id_sucursal = isset($data['id_sucursal']) ? (int) $data['id_sucursal'] : 0;
 
     $tipos_validos = array('cliente', 'lote', 'gasto', 'gasto_prueba', 'renovacion', 'adelanto', 'articulo', 'venta', 'articulo_venta', 'adelanto_venta', 'plazo_venta', 'autorizar_gasto', 'ia_chat', 'documento_ocr', 'factura_ocr', 'traspaso');
     if (!in_array($tipo_qr, $tipos_validos, true)) {
@@ -50,7 +47,10 @@ try {
     if ($token === '') {
         throw new Exception('Token no puede estar vacío');
     }
-    if ($id_sucursal <= 0) {
+    // En este ERP las fotos de cliente no van por sucursal.
+    if ($tipo_qr === 'cliente') {
+        $id_sucursal = 0;
+    } elseif ($id_sucursal <= 0) {
         throw new Exception('ID de sucursal no válido');
     }
 
