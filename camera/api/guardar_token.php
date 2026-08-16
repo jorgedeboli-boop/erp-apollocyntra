@@ -1,12 +1,45 @@
 <?php
 require_once __DIR__ . '/../../include/session.php';
 require_once __DIR__ . '/../../include/functions.php';
-require_once __DIR__ . '/../lib/camera_qr_multifoto.php';
 
 ob_start();
 ob_clean();
 
 header('Content-Type: application/json');
+
+if (function_exists('mysqli_report')) {
+    mysqli_report(MYSQLI_REPORT_OFF);
+}
+
+/**
+ * type_item es ENUM sin 'articulo'. Se amplía para poder guardar el token del QR.
+ */
+function camera_guardar_token_ensure_type_item($conexion)
+{
+    $r = mysqli_query($conexion, "SHOW COLUMNS FROM tokens_actions LIKE 'type_item'");
+    if (!$r) {
+        return;
+    }
+    $col = mysqli_fetch_assoc($r);
+    mysqli_free_result($r);
+    if (!$col) {
+        return;
+    }
+    $type = strtolower((string) ($col['Type'] ?? ''));
+    if (strpos($type, "'articulo'") !== false || strpos($type, 'varchar') === 0) {
+        return;
+    }
+    if (strpos($type, 'enum(') !== 0) {
+        return;
+    }
+    if (mysqli_query($conexion, 'ALTER TABLE tokens_actions MODIFY type_item VARCHAR(32) NOT NULL')) {
+        return;
+    }
+    $enum = "ENUM('cliente','lote','renovacion','adelanto','autorizar_gasto','articulo','gasto','gasto_prueba','venta','articulo_venta','adelanto_venta','plazo_venta','ia_chat','documento_ocr','factura_ocr','traspaso') NOT NULL";
+    if (!mysqli_query($conexion, 'ALTER TABLE tokens_actions MODIFY type_item ' . $enum)) {
+        throw new Exception('No se pudo ampliar type_item para artículos: ' . mysqli_error($conexion));
+    }
+}
 
 try {
     if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -52,7 +85,7 @@ try {
     if (!$conexion) {
         throw new Exception('Sin conexión a la base de datos');
     }
-    camera_token_ensure_type_item_column($conexion);
+    camera_guardar_token_ensure_type_item($conexion);
 
     $rel_id_empresa = 0;
     if ($tipo_qr === 'cliente') {
@@ -116,7 +149,7 @@ try {
         'id_token' => $id_token_insertado,
         'token' => $token,
     ));
-} catch (Exception $e) {
+} catch (Throwable $e) {
     http_response_code(500);
     echo json_encode(array(
         'success' => false,

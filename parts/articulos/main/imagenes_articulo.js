@@ -372,15 +372,9 @@
     if (tipo_verificacion !== 'articulo') {
       return;
     }
-    var idSucPoll = parseInt(String(ids.idSucursal != null ? ids.idSucursal : 0), 10);
-    if (isNaN(idSucPoll) || idSucPoll < 0) {
-      idSucPoll = 0;
-    }
     fetch(
-      'parts/lotes/main/get_cantidad_fotos.php?tipo=articulo&id_item=' +
-        ids.idArticulo +
-        '&id_sucursal=' +
-        idSucPoll,
+      'parts/articulos/main/get_cantidad_fotos.php?tipo=articulo&id_item=' +
+        ids.idArticulo,
       { credentials: 'same-origin' }
     )
       .then(function (response) {
