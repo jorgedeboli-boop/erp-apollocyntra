@@ -1,44 +1,6 @@
 <!-- JAVASCRIPT CUSTOM editar_articulo - editar  -->
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-  // Event listener para inscripciones (manejar el estilo visual)
-  document.querySelectorAll('input[name="inscripciones"]').forEach(radio => {
-    radio.addEventListener('change', function() {
-      // Quitar clase 'checked' de todos los radio buttons de inscripciones
-      document.querySelectorAll('input[name="inscripciones"]').forEach(r => {
-        const parentOption = r.closest('.custom-option-basic');
-        if (parentOption) {
-          parentOption.classList.remove('checked');
-        }
-      });
-      
-      // Agregar clase 'checked' al seleccionado
-      const parentOption = this.closest('.custom-option-basic');
-      if (parentOption) {
-        parentOption.classList.add('checked');
-      }
-    });
-  });
-  
-  // Event listener para piedras (manejar el estilo visual)
-  document.querySelectorAll('input[name="piedras"]').forEach(radio => {
-    radio.addEventListener('change', function() {
-      // Quitar clase 'checked' de todos los radio buttons de piedras
-      document.querySelectorAll('input[name="piedras"]').forEach(r => {
-        const parentOption = r.closest('.custom-option-basic');
-        if (parentOption) {
-          parentOption.classList.remove('checked');
-        }
-      });
-      
-      // Agregar clase 'checked' al seleccionado
-      const parentOption = this.closest('.custom-option-basic');
-      if (parentOption) {
-        parentOption.classList.add('checked');
-      }
-    });
-  });
-  
   // Event listener para tipo de IVA (manejar el estilo visual)
   document.querySelectorAll('input[name="system_codigo_regimen"]').forEach(radio => {
     radio.addEventListener('change', function() {

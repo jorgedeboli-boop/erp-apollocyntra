@@ -49,12 +49,10 @@ try {
             $precio_coste = number_format($precio_coste, 2, '.', '');
         }
         
-        $inscripciones = isset($_POST['inscripciones']) ? trim($_POST['inscripciones']) : 'no';
-        $piedras = isset($_POST['piedras']) ? trim($_POST['piedras']) : 'no';
         $observaciones = isset($_POST['observaciones']) ? trim($_POST['observaciones']) : '';
         
         // Verificar que el artículo existe y obtener datos necesarios
-        $query_check = "SELECT id, id_sucursal_destino, id_sucursal_origen, estado, precio, peso, tipo, id_lote_origen, ley FROM articulos_venta WHERE id = ? LIMIT 1";
+        $query_check = "SELECT id, id_sucursal_destino, id_sucursal_origen, estado, precio, peso, tipo, id_lote_origen, ley, inscripciones, piedras FROM articulos_venta WHERE id = ? LIMIT 1";
         $stmt_check = mysqli_prepare($conexion, $query_check);
         mysqli_stmt_bind_param($stmt_check, 'i', $id_articulo);
         mysqli_stmt_execute($stmt_check);
@@ -73,6 +71,8 @@ try {
         $tipo_articulo = (string) ($articulo_actual['tipo'] ?? '');
         $id_lote_origen = (int) ($articulo_actual['id_lote_origen'] ?? 0);
         $ley = (string) ($articulo_actual['ley'] ?? '');
+        $inscripciones = (string) ($articulo_actual['inscripciones'] ?? 'no');
+        $piedras = (string) ($articulo_actual['piedras'] ?? 'no');
         $precio_gramo = ($peso > 0) ? number_format($precio_venta / $peso, 2, '.', '') : 0;
         $precio_anterior = (float)$articulo_actual['precio'];
         mysqli_stmt_close($stmt_check);

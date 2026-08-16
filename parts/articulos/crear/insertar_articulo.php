@@ -58,8 +58,8 @@ try {
         }
         $precio_gramo = 0;
         $ley = '';
-        $inscripciones = isset($_POST['inscripciones']) ? trim($_POST['inscripciones']) : 'no';
-        $piedras = isset($_POST['piedras']) ? trim($_POST['piedras']) : 'no';
+        $inscripciones = 'no';
+        $piedras = 'no';
         $observaciones = isset($_POST['observaciones']) ? trim($_POST['observaciones']) : '';
         
         

@@ -152,18 +152,6 @@
               <ul class="list-unstyled my-3 py-1">
               <li class="d-flex align-items-center mb-4"><span class="fw-medium"><?php echo htmlspecialchars($articulo['descripcion']); ?></span>
                 </li>
-                <?php if (!empty($articulo['inscripciones']) && $articulo['inscripciones'] != 'no'): ?>
-                <li class="d-flex align-items-center mb-4">
-                  <i class="icon-base ri ri-edit-line icon-24px"></i><span class="fw-medium mx-2">Inscripciones:</span> 
-                  <span><?php echo htmlspecialchars($articulo['inscripciones']); ?></span>
-                </li>
-                <?php endif; ?>
-                <?php if (!empty($articulo['piedras']) && $articulo['piedras'] != 'no'): ?>
-                <li class="d-flex align-items-center mb-2">
-                  <i class="icon-base ri ri-diamond-line icon-24px"></i><span class="fw-medium mx-2">Piedras:</span> 
-                  <span><?php echo htmlspecialchars($articulo['piedras']); ?></span>
-                </li>
-                <?php endif; ?>
               </ul>
               <small class="card-text text-uppercase text-body-secondary small">Detalles del Artículo</small>
               <ul class="list-unstyled my-3 py-1">
@@ -213,26 +201,6 @@
                 </li>
                 <?php endif; ?>
               </ul>
-              <?php if ((!empty($articulo['piedras_descripcion']) || !empty($articulo['kilate_piedras'])) && $articulo['piedras'] === 'si'): ?>
-              <small class="card-text text-uppercase text-body-secondary small">Detalles de Piedras</small>
-              <ul class="list-unstyled my-3 py-1">
-                <?php if (!empty($articulo['piedras_descripcion'])): ?>
-                <li class="d-flex align-items-start mb-4">
-                  <i class="icon-base ri ri-file-text-line icon-24px flex-shrink-0"></i>
-                  <div class="mx-2">
-                    <span class="fw-medium d-block mb-1">Descripción Piedras</span>
-                    <span class="text-body-secondary"><?php echo nl2br(htmlspecialchars($articulo['piedras_descripcion'])); ?></span>
-                  </div>
-                </li>
-                <?php endif; ?>
-                <?php if (!empty($articulo['kilate_piedras'])): ?>
-                <li class="d-flex align-items-center mb-4">
-                  <i class="icon-base ri ri-vip-diamond-line icon-24px"></i><span class="fw-medium mx-2">Kilates Piedras:</span>
-                  <span><?php echo htmlspecialchars($articulo['kilate_piedras']); ?></span>
-                </li>
-                <?php endif; ?>
-              </ul>
-              <?php endif; ?>
             </div>
           </div>
           <!--/ Información del Artículo -->

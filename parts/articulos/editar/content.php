@@ -75,60 +75,6 @@
                 </div>
               </div>
               
-              <!-- Inscripciones -->
-              <div class="col-12 mb-4">
-                <label class="form-label mb-3">Inscripciones</label>
-                <div class="row">
-                  <div class="col-md-6 mb-3">
-                    <div class="form-check custom-option custom-option-basic <?php echo ($articulo['inscripciones'] === 'si') ? 'checked' : ''; ?>">
-                      <label class="form-check-label custom-option-content" for="inscripciones_si">
-                        <input class="form-check-input" type="radio" name="inscripciones" value="si" id="inscripciones_si" <?php echo ($articulo['inscripciones'] === 'si') ? 'checked' : ''; ?>>
-                        <span class="custom-option-header">
-                          <span class="h6 mb-0">Si</span>
-                        </span>
-                      </label>
-                    </div>
-                  </div>
-                  <div class="col-md-6 mb-3">
-                    <div class="form-check custom-option custom-option-basic <?php echo ($articulo['inscripciones'] !== 'si') ? 'checked' : ''; ?>">
-                      <label class="form-check-label custom-option-content" for="inscripciones_no">
-                        <input class="form-check-input" type="radio" name="inscripciones" value="no" id="inscripciones_no" <?php echo ($articulo['inscripciones'] !== 'si') ? 'checked' : ''; ?>>
-                        <span class="custom-option-header">
-                          <span class="h6 mb-0">No</span>
-                        </span>
-                      </label>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              
-              <!-- Piedras -->
-              <div class="col-12 mb-4">
-                <label class="form-label mb-3">Piedras</label>
-                <div class="row">
-                  <div class="col-md-6 mb-3">
-                    <div class="form-check custom-option custom-option-basic <?php echo ($articulo['piedras'] === 'si') ? 'checked' : ''; ?>">
-                      <label class="form-check-label custom-option-content" for="piedras_si">
-                        <input class="form-check-input" type="radio" name="piedras" value="si" id="piedras_si" <?php echo ($articulo['piedras'] === 'si') ? 'checked' : ''; ?>>
-                        <span class="custom-option-header">
-                          <span class="h6 mb-0">Si</span>
-                        </span>
-                      </label>
-                    </div>
-                  </div>
-                  <div class="col-md-6 mb-3">
-                    <div class="form-check custom-option custom-option-basic <?php echo ($articulo['piedras'] !== 'si') ? 'checked' : ''; ?>">
-                      <label class="form-check-label custom-option-content" for="piedras_no">
-                        <input class="form-check-input" type="radio" name="piedras" value="no" id="piedras_no" <?php echo ($articulo['piedras'] !== 'si') ? 'checked' : ''; ?>>
-                        <span class="custom-option-header">
-                          <span class="h6 mb-0">No</span>
-                        </span>
-                      </label>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              
               <!-- Tipo de IVA -->
               <div class="col-12 mb-4">
                 <label class="form-label mb-3">Tipo de IVA *</label>
