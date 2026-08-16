@@ -34,46 +34,114 @@ function camera_catalog_imagenes_cliente(int $id_cliente): array
 
     $imagenes = [];
     $photos_dir = __DIR__ . '/../../photos/';
-    $result_tablas = mysqli_query($conexion, "SHOW TABLES LIKE 'fotos_app_%'");
-    if ($result_tablas) {
-        while ($row_tabla = mysqli_fetch_row($result_tablas)) {
-            if (!preg_match('/^fotos_app_\d+$/', $row_tabla[0])) {
+    $query = '
+        SELECT id_foto, nombre_foto
+        FROM fotos_app
+        WHERE id_cliente = ?
+        ORDER BY id_foto DESC
+    ';
+    $stmt = mysqli_prepare($conexion, $query);
+    if (!$stmt) {
+        mysqli_close($conexion);
+        throw new RuntimeException(mysqli_error($conexion));
+    }
+    mysqli_stmt_bind_param($stmt, 'i', $id_cliente);
+    mysqli_stmt_execute($stmt);
+    $result = mysqli_stmt_get_result($stmt);
+    if ($result) {
+        while ($row = mysqli_fetch_assoc($result)) {
+            $nombre = (string) ($row['nombre_foto'] ?? '');
+            if ($nombre === '') {
                 continue;
             }
-            $query = '
-                SELECT id_foto, nombre_foto
-                FROM ' . $row_tabla[0] . '
-                WHERE id_cliente = ?
-                ORDER BY id_foto DESC
-            ';
-            $stmt = mysqli_prepare($conexion, $query);
-            if (!$stmt) {
-                continue;
+            $ruta_archivo = $photos_dir . $nombre;
+            if (file_exists($ruta_archivo)) {
+                $imagenes[] = [
+                    'id_foto' => (int) $row['id_foto'],
+                    'nombre_foto' => $nombre,
+                    'foto' => $nombre,
+                    'descripcion' => '',
+                    'fecha_subida' => '',
+                ];
             }
-            mysqli_stmt_bind_param($stmt, 'i', $id_cliente);
-            mysqli_stmt_execute($stmt);
-            $result = mysqli_stmt_get_result($stmt);
-            if ($result) {
-                while ($row = mysqli_fetch_assoc($result)) {
-                    $ruta_archivo = $photos_dir . $row['nombre_foto'];
-                    if (file_exists($ruta_archivo)) {
-                        $imagenes[] = [
-                            'id_foto' => (int) $row['id_foto'],
-                            'nombre_foto' => $row['nombre_foto'],
-                            'foto' => $row['nombre_foto'],
-                            'descripcion' => '',
-                            'fecha_subida' => '',
-                        ];
-                    }
-                }
-            }
-            mysqli_stmt_close($stmt);
         }
     }
+    mysqli_stmt_close($stmt);
 
     mysqli_close($conexion);
 
     return $imagenes;
+}
+
+/**
+ * Inserta una foto de cliente en `fotos_app`.
+ *
+ * @return int id_foto
+ */
+function camera_insertar_foto_cliente(mysqli $conexion, $id_cliente, $nombre_foto)
+{
+    $id_cliente = (int) $id_cliente;
+    $nombre_foto = (string) $nombre_foto;
+    if ($id_cliente <= 0 || $nombre_foto === '') {
+        throw new InvalidArgumentException('Datos de foto de cliente no válidos');
+    }
+
+    $empresa_id_rel = 0;
+    $stmt_cli = mysqli_prepare($conexion, 'SELECT rel_id_empresa FROM clientes WHERE id_cliente = ? LIMIT 1');
+    if ($stmt_cli) {
+        mysqli_stmt_bind_param($stmt_cli, 'i', $id_cliente);
+        mysqli_stmt_execute($stmt_cli);
+        $res_cli = mysqli_stmt_get_result($stmt_cli);
+        $row_cli = $res_cli ? mysqli_fetch_assoc($res_cli) : null;
+        mysqli_stmt_close($stmt_cli);
+        $empresa_id_rel = (int) ($row_cli['rel_id_empresa'] ?? 0);
+    }
+    if ($empresa_id_rel <= 0 && defined('APP_ID')) {
+        $empresa_id_rel = (int) APP_ID;
+    }
+
+    $id_lote = 0;
+    $id_lote_cuarentena = 0;
+    $id_gasto = 0;
+    $id_empresa = 0;
+    $id_traspaso = 0;
+
+    $query = 'INSERT INTO fotos_app (
+            nombre_foto,
+            id_cliente,
+            id_lote,
+            id_lote_cuarentena,
+            rel_id_empresa,
+            id_gasto,
+            id_empresa,
+            id_traspaso,
+            fecha_factura
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, CURDATE())';
+    $stmt = mysqli_prepare($conexion, $query);
+    if (!$stmt) {
+        throw new RuntimeException('Error al preparar inserción de foto: ' . mysqli_error($conexion));
+    }
+    mysqli_stmt_bind_param(
+        $stmt,
+        'siiiiiii',
+        $nombre_foto,
+        $id_cliente,
+        $id_lote,
+        $id_lote_cuarentena,
+        $empresa_id_rel,
+        $id_gasto,
+        $id_empresa,
+        $id_traspaso
+    );
+    if (!mysqli_stmt_execute($stmt)) {
+        $error = mysqli_stmt_error($stmt);
+        mysqli_stmt_close($stmt);
+        throw new RuntimeException('Error al guardar la foto: ' . $error);
+    }
+    $id_foto = (int) mysqli_insert_id($conexion);
+    mysqli_stmt_close($stmt);
+
+    return $id_foto;
 }
 
 /**

@@ -1,6 +1,7 @@
 <?php
 require_once '../../../include/session.php';
 require_once '../../../include/functions.php';
+require_once __DIR__ . '/../../../camera/lib/imagenes_catalogo.php';
 
 if (!extension_loaded('gd')) {
     header('Content-Type: application/json');
@@ -45,22 +46,7 @@ try {
         throw new Exception("Cliente no encontrado");
     }
     mysqli_stmt_close($stmt_cliente);
-
-    $tabla_fotos = '';
-    $result_tablas = mysqli_query($conexion_temp, "SHOW TABLES LIKE 'fotos_app_%'");
-    if ($result_tablas) {
-        while ($row_tabla = mysqli_fetch_row($result_tablas)) {
-            if (preg_match('/^fotos_app_(\d+)$/', $row_tabla[0])) {
-                $tabla_fotos = $row_tabla[0];
-                break;
-            }
-        }
-    }
     mysqli_close($conexion_temp);
-    
-    if ($tabla_fotos === '') {
-        throw new Exception("No se encontró una tabla de fotos disponible");
-    }
     
     // Validar tipo de archivo
     $tipos_permitidos = array('image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'application/pdf');
@@ -126,23 +112,12 @@ try {
     // Conectar BD
     $conexion = conectar_bd();
     
-    // Insertar registro en la tabla fotos_app
-    $query = "
-        INSERT INTO " . $tabla_fotos . " (id_cliente, nombre_foto) 
-        VALUES (?, ?)
-    ";
-    
-    $stmt = mysqli_prepare($conexion, $query);
-    mysqli_stmt_bind_param($stmt, 'is', $id_cliente, $nombre_archivo);
-    
-    if (!mysqli_stmt_execute($stmt)) {
-        // Si falla la inserción, eliminar el archivo
+    try {
+        $id_foto = camera_insertar_foto_cliente($conexion, $id_cliente, $nombre_archivo);
+    } catch (Exception $e) {
         unlink($ruta_completa);
-        throw new Exception("Error al guardar en la base de datos: " . mysqli_stmt_error($stmt));
+        throw new Exception("Error al guardar en la base de datos: " . $e->getMessage());
     }
-    
-    $id_foto = mysqli_insert_id($conexion);
-    mysqli_stmt_close($stmt);
     
     // Registrar la acción en el log
     if (function_exists('registrar_accion_usuario')) {

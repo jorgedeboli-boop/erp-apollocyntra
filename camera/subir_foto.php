@@ -152,8 +152,8 @@ try {
             if ($id_cliente <= 0) {
                 throw new Exception('ID de cliente no válido');
             }
-            $query_sucursal = 'SELECT sucursal FROM clientes WHERE id_cliente = ?';
-            $stmt_s = mysqli_prepare($conexion, $query_sucursal);
+            $query_cli = 'SELECT id_cliente FROM clientes WHERE id_cliente = ? LIMIT 1';
+            $stmt_s = mysqli_prepare($conexion, $query_cli);
             mysqli_stmt_bind_param($stmt_s, 'i', $id_cliente);
             mysqli_stmt_execute($stmt_s);
             $rs = mysqli_stmt_get_result($stmt_s);
@@ -161,22 +161,13 @@ try {
                 mysqli_stmt_close($stmt_s);
                 throw new Exception('Cliente no encontrado');
             }
-            $row_c = mysqli_fetch_assoc($rs);
-            $id_sucursal = (int) $row_c['sucursal'];
             mysqli_stmt_close($stmt_s);
-            if ($id_sucursal <= 0) {
-                throw new Exception('Sucursal del cliente no válida');
-            }
-            $tabla_fotos = 'fotos_app_' . $id_sucursal;
-            $query = "INSERT INTO {$tabla_fotos} (id_cliente, nombre_foto) VALUES (?, ?)";
-            $stmt = mysqli_prepare($conexion, $query);
-            mysqli_stmt_bind_param($stmt, 'is', $id_cliente, $nombre_archivo);
-            if (!mysqli_stmt_execute($stmt)) {
+            try {
+                $respuesta['id_foto'] = camera_insertar_foto_cliente($conexion, $id_cliente, $nombre_archivo);
+            } catch (Exception $e) {
                 @unlink($ruta_completa);
-                throw new Exception('Error al guardar en la base de datos: ' . mysqli_stmt_error($stmt));
+                throw new Exception('Error al guardar en la base de datos: ' . $e->getMessage());
             }
-            $respuesta['id_foto'] = mysqli_insert_id($conexion);
-            mysqli_stmt_close($stmt);
             camera_marcar_token_usado($conexion, $id_token_qr);
             if (function_exists('registrar_accion_usuario')) {
                 $texto_action_user = 'Foto subida del cliente';

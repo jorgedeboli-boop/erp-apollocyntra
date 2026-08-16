@@ -32,51 +32,22 @@ try {
     // Conectar BD
     $conexion = conectar_bd();
     
-    // Buscar la foto en las tablas fotos_app_*
-    $result_tablas = mysqli_query($conexion, "SHOW TABLES LIKE 'fotos_app_%'");
-    
-    $foto_info = null;
-    $tabla_fotos = '';
-    
-    if ($result_tablas) {
-        while ($row_tabla = mysqli_fetch_row($result_tablas)) {
-            if (!preg_match('/^fotos_app_\d+$/', $row_tabla[0])) {
-                continue;
-            }
-            $tabla_fotos_temp = $row_tabla[0];
-            
-            // Buscar la foto por id_foto Y nombre_foto a la vez para evitar colisiones
-            // entre tablas (id_foto es AUTOINCREMENT y puede repetirse).
-            $query_info = "SELECT id_cliente, nombre_foto FROM " . $tabla_fotos_temp . " WHERE id_foto = ? AND nombre_foto = ?";
-            $stmt_info = mysqli_prepare($conexion, $query_info);
-            
-            if ($stmt_info) {
-                mysqli_stmt_bind_param($stmt_info, 'is', $id_foto, $nombre_foto);
-                mysqli_stmt_execute($stmt_info);
-                $result_info = mysqli_stmt_get_result($stmt_info);
-                
-                if ($result_info && mysqli_num_rows($result_info) > 0) {
-                    $foto_info = mysqli_fetch_assoc($result_info);
-                    $tabla_fotos = $tabla_fotos_temp;
-                    mysqli_stmt_close($stmt_info);
-                    break;
-                }
-                mysqli_stmt_close($stmt_info);
-            }
-        }
+    $query_info = 'SELECT id_cliente, nombre_foto FROM fotos_app WHERE id_foto = ? AND nombre_foto = ? LIMIT 1';
+    $stmt_info = mysqli_prepare($conexion, $query_info);
+    if (!$stmt_info) {
+        throw new Exception('Error al preparar la consulta: ' . mysqli_error($conexion));
     }
+    mysqli_stmt_bind_param($stmt_info, 'is', $id_foto, $nombre_foto);
+    mysqli_stmt_execute($stmt_info);
+    $result_info = mysqli_stmt_get_result($stmt_info);
+    $foto_info = ($result_info && mysqli_num_rows($result_info) > 0) ? mysqli_fetch_assoc($result_info) : null;
+    mysqli_stmt_close($stmt_info);
     
-    if (!$foto_info || $tabla_fotos === '') {
+    if (!$foto_info) {
         throw new Exception("Foto no encontrada en la base de datos");
     }
     
-    // Verificar que el nombre de la foto coincida
-    if ($foto_info['nombre_foto'] !== $nombre_foto) {
-        throw new Exception("El nombre de la foto no coincide");
-    }
-    
-    // Eliminar registro de la base de datos
-    $query_delete = "DELETE FROM " . $tabla_fotos . " WHERE id_foto = ? AND nombre_foto = ?";
+    $query_delete = 'DELETE FROM fotos_app WHERE id_foto = ? AND nombre_foto = ?';
     $stmt_delete = mysqli_prepare($conexion, $query_delete);
     mysqli_stmt_bind_param($stmt_delete, 'is', $id_foto, $nombre_foto);
     
