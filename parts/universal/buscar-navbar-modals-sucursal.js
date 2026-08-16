@@ -223,41 +223,7 @@
   }
 
   function init() {
-    wireNavbarTrigger('searchLoteNav', 'modalBuscarLote');
     wireNavbarTrigger('searchArticuloNav', 'modalBuscarArticulo');
-
-    initBusquedaNavbarModal({
-      modalId: 'modalBuscarLote',
-      inputId: 'searchLote',
-      btnBuscarId: 'btnBuscarLote',
-      resultsWrapId: 'searchLoteTablaWrap',
-      resultsBodyId: 'searchLoteTablaBody',
-      noEncontradoId: 'searchLoteNoEncontrado',
-      cardClass: 'search-lote-card',
-      apiUrl: 'parts/universal/buscar_lote_navbar_sucursal.php?busqueda=',
-      extraerItems: function (data) {
-        return data.lotes || [];
-      },
-      obtenerUrl: function (lote) {
-        return lote.identificador
-          ? 'lote_sucursal.php?id=' + encodeURIComponent(String(lote.identificador))
-          : '';
-      },
-      crearFilaHtml: function (lote) {
-        return (
-          '<div class="search-lote-fila">' +
-            '<div class="search-lote-celda search-lote-celda-lote">' +
-              '<span class="search-lote-numero">' + escapeHtml(String(lote.id_lote || '')) + '</span>' +
-            '</div>' +
-            '<div class="search-lote-celda search-lote-celda-dato search-lote-celda-sucursal">' + escapeHtml(String(lote.nombre_sucursal || '—')) + '</div>' +
-            '<div class="search-lote-celda search-lote-celda-dato search-lote-celda-tipo">' + escapeHtml(String(lote.tipo_lote || '—')) + '</div>' +
-            '<div class="search-lote-celda search-lote-celda-dato search-lote-celda-fecha-compra">' + escapeHtml(String(lote.fecha_compra || '—')) + '</div>' +
-            '<div class="search-lote-celda search-lote-celda-dato search-lote-celda-precio">' + escapeHtml(String(lote.precio_compra || '—')) + '</div>' +
-            '<div class="search-lote-celda search-lote-celda-dato search-lote-celda-peso">' + escapeHtml(String(lote.peso || '—')) + '</div>' +
-          '</div>'
-        );
-      },
-    });
 
     initBusquedaNavbarModal({
       modalId: 'modalBuscarArticulo',

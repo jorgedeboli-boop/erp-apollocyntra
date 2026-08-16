@@ -52,12 +52,4 @@ $hora_actual = date('H:i:s');
 // Función de traducciones disponible globalmente: t('Lang_Key')
 // Ejemplo: echo t('Lang_Rememberme'); // Retorna "Recordarme" según el idioma de la app
 $timestamp_actual = time();
-$datos_precio_oro_navbar = obtener_datos_precio_oro_navbar();
-$precio_oro_update = $datos_precio_oro_navbar['precio'];
-$precio_oro_vigencia_fmt = $datos_precio_oro_navbar['vigencia_fmt'];
-$precio_oro_base = $datos_precio_oro_navbar['precio_base'];
-$datos_precio_oro_proveedores_navbar = obtener_datos_precio_oro_proveedores_navbar();
-$proveedores_precio_oro_navbar = isset($datos_precio_oro_proveedores_navbar['proveedores'])
-    ? $datos_precio_oro_proveedores_navbar['proveedores']
-    : [];
 ?>
