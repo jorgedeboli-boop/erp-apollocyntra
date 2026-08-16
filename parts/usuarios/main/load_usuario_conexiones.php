@@ -44,10 +44,9 @@ try {
         1 => 'uc.dateConexion',
         2 => 'uc.state_connection',
         3 => 'uc.ipNumberUser',
-        4 => 's.nombre_sucursal',
-        5 => 'uc.userAgent',
-        6 => 'uc.locationLat',  
-        7 => 'uc.tokensessioncontrol'
+        4 => 'uc.userAgent',
+        5 => 'uc.locationLat',
+        6 => 'uc.tokensessioncontrol'
     ];
     
     // Validar columna de ordenamiento
@@ -64,10 +63,10 @@ try {
     $paramTypes = 'i'; // Tipo para id_usuario
     
     if (!empty($searchValue)) {
-        $whereConditions[] = "(uc.ipNumberUser LIKE ? OR s.nombre_sucursal LIKE ? OR uc.userAgent LIKE ? OR uc.tokensessioncontrol LIKE ?)";
+        $whereConditions[] = "(uc.ipNumberUser LIKE ? OR uc.userAgent LIKE ? OR uc.tokensessioncontrol LIKE ?)";
         $searchTerm = "%$searchValue%";
-        $searchParams = array_merge($searchParams, [$searchTerm, $searchTerm, $searchTerm, $searchTerm]);
-        $paramTypes .= 'ssss'; // 4 strings para LIKE
+        $searchParams = array_merge($searchParams, [$searchTerm, $searchTerm, $searchTerm]);
+        $paramTypes .= 'sss';
     }
     
     $whereClause = implode(' AND ', $whereConditions);
@@ -76,8 +75,6 @@ try {
     $queryCount = "
         SELECT COUNT(*) as total
         FROM usersConexions uc
-        LEFT JOIN usuarios u ON uc.userId = u.id_usuario
-        LEFT JOIN sucursal s ON u.sucursal_usuario = s.id_sucursal
         WHERE $whereClause
     ";
     
@@ -100,14 +97,11 @@ try {
             uc.dateConexion,
             uc.state_connection,
             uc.ipNumberUser,
-            s.nombre_sucursal,
             uc.userAgent,
             uc.locationLat,
             uc.locationLong,
             uc.tokensessioncontrol
         FROM usersConexions uc
-        LEFT JOIN usuarios u ON uc.userId = u.id_usuario
-        LEFT JOIN sucursal s ON u.sucursal_usuario = s.id_sucursal
         WHERE $whereClause
         ORDER BY $orderBy $orderDirection
         LIMIT ?, ?
@@ -139,7 +133,6 @@ try {
             date('d/m/Y H:i', strtotime($row['dateConexion'])),
             $row['state_connection'],
             $row['ipNumberUser'] ?: 'N/A',
-            $row['nombre_sucursal'] ?: 'Sin sucursal',
             $row['userAgent'] ?: 'N/A',
             $ubicacion,
             $row['tokensessioncontrol'] ?: 'N/A'

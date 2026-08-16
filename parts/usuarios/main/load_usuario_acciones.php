@@ -44,10 +44,9 @@ try {
         1 => 'ua.dateAction',
         2 => 'la.name_action',
         3 => 'ua.logTxt',
-        4 => 's.nombre_sucursal',
-        5 => 'ua.ipNumberUser',
-        6 => 'ua.urlAction',
-        7 => 'its.itemnameText'
+        4 => 'ua.ipNumberUser',
+        5 => 'ua.urlAction',
+        6 => 'its.itemnameText'
     ];
     
     // Validar columna de ordenamiento
@@ -64,10 +63,10 @@ try {
     $paramTypes = 'i'; // Tipo para id_usuario
     
     if (!empty($searchValue)) {
-        $whereConditions[] = "(ua.logTxt LIKE ? OR la.name_action LIKE ? OR s.nombre_sucursal LIKE ? OR ua.ipNumberUser LIKE ?)";
+        $whereConditions[] = "(ua.logTxt LIKE ? OR la.name_action LIKE ? OR ua.ipNumberUser LIKE ? OR ua.urlAction LIKE ?)";
         $searchTerm = "%$searchValue%";
         $searchParams = array_merge($searchParams, [$searchTerm, $searchTerm, $searchTerm, $searchTerm]);
-        $paramTypes .= 'ssss'; // 4 strings para LIKE
+        $paramTypes .= 'ssss';
     }
     
     $whereClause = implode(' AND ', $whereConditions);
@@ -77,7 +76,6 @@ try {
         SELECT COUNT(*) as total
         FROM usersActions ua
         LEFT JOIN listActions la ON ua.relidlistActions = la.id_action
-        LEFT JOIN sucursal s ON ua.sucursalIdUserAction = s.id_sucursal
         LEFT JOIN itemsSections its ON ua.relItemAction = its.id_type_Item
         WHERE $whereClause
     ";
@@ -101,13 +99,11 @@ try {
             ua.dateAction,
             la.name_action,
             ua.logTxt,
-            s.nombre_sucursal,
             ua.ipNumberUser,
             ua.urlAction,
             its.itemnameText
         FROM usersActions ua
         LEFT JOIN listActions la ON ua.relidlistActions = la.id_action
-        LEFT JOIN sucursal s ON ua.sucursalIdUserAction = s.id_sucursal
         LEFT JOIN itemsSections its ON ua.relItemAction = its.id_type_Item
         WHERE $whereClause
         ORDER BY $orderBy $orderDirection
@@ -134,7 +130,6 @@ try {
             date('d/m/Y H:i', strtotime($row['dateAction'])),
             $row['name_action'] ?: 'N/A',
             $row['logTxt'] ?: 'Sin descripción',
-            $row['nombre_sucursal'] ?: 'Sin sucursal',
             $row['ipNumberUser'] ?: 'N/A',
             $row['urlAction'] ?: 'N/A',
             $row['itemnameText'] ?: 'N/A'

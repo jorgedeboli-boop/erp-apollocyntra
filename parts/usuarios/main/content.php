@@ -23,64 +23,68 @@
               u.email,
               u.estado_usuario,
               u.telefono_usuario,
-              u.sucursal_usuario,
               u.privilegio_usuario,
               u.observaciones_usuario,
               u.ultimo_acceso,
               u.fecAlta,
               u.usuario_root,
               u.super_admin,
-              s.nombre_sucursal,
               p.nombre_privilegio
           FROM usuarios u
-          LEFT JOIN sucursal s ON u.sucursal_usuario = s.id_sucursal
           LEFT JOIN privilegios_usuarios p ON u.privilegio_usuario = p.id_privilegios
           WHERE u.id_usuario = ?
       ";
       
       $stmt_usuario = mysqli_prepare($conexion, $query_usuario);
-      mysqli_stmt_bind_param($stmt_usuario, 'i', $id_usuario);
-      mysqli_stmt_execute($stmt_usuario);
-      $result_usuario = mysqli_stmt_get_result($stmt_usuario);
-      
-      if ($result_usuario && mysqli_num_rows($result_usuario) > 0) {
-          $usuario = mysqli_fetch_assoc($result_usuario);
+      if ($stmt_usuario) {
+          mysqli_stmt_bind_param($stmt_usuario, 'i', $id_usuario);
+          mysqli_stmt_execute($stmt_usuario);
+          $result_usuario = mysqli_stmt_get_result($stmt_usuario);
+          
+          if ($result_usuario && mysqli_num_rows($result_usuario) > 0) {
+              $usuario = mysqli_fetch_assoc($result_usuario);
 
-          if (!$es_usuario_root && ($usuario['usuario_root'] ?? 'false') === 'true') {
-              $acceso_denegado = true;
-          }
-          if (!$es_usuario_root && !$es_usuario_super_administrador && ($usuario['super_admin'] ?? 'false') === 'true') {
-              $acceso_denegado = true;
-          }
+              if (!$es_usuario_root && ($usuario['usuario_root'] ?? 'false') === 'true') {
+                  $acceso_denegado = true;
+              }
+              if (!$es_usuario_root && !$es_usuario_super_administrador && ($usuario['super_admin'] ?? 'false') === 'true') {
+                  $acceso_denegado = true;
+              }
 
-          $puede_editar_ficha = $puede_acceder_editar && !$acceso_denegado;
-          
-          // Consulta para obtener el estado de conexión del usuario
-          $query_conexion = "
-              SELECT 
-                  uc.state_connection
-              FROM usersConexions uc
-              WHERE uc.userId = ?
-              ORDER BY uc.idUserConexion DESC
-              LIMIT 1
-          ";
-          
-          $stmt_conexion = mysqli_prepare($conexion, $query_conexion);
-          mysqli_stmt_bind_param($stmt_conexion, 'i', $id_usuario);
-          mysqli_stmt_execute($stmt_conexion);
-          $result_conexion = mysqli_stmt_get_result($stmt_conexion);
-          
-          $estado_conexion = 'Desconectado';
-          if ($result_conexion && mysqli_num_rows($result_conexion) > 0) {
-              $conexion_data = mysqli_fetch_assoc($result_conexion);
-              $estado_conexion = ($conexion_data['state_connection'] == 'true') ? 'Conectado' : 'Desconectado';
+              $puede_editar_ficha = $puede_acceder_editar && !$acceso_denegado;
+              
+              // Consulta para obtener el estado de conexión del usuario
+              $query_conexion = "
+                  SELECT 
+                      uc.state_connection
+                  FROM usersConexions uc
+                  WHERE uc.userId = ?
+                  ORDER BY uc.idUserConexion DESC
+                  LIMIT 1
+              ";
+              
+              $stmt_conexion = mysqli_prepare($conexion, $query_conexion);
+              if ($stmt_conexion) {
+                  mysqli_stmt_bind_param($stmt_conexion, 'i', $id_usuario);
+                  mysqli_stmt_execute($stmt_conexion);
+                  $result_conexion = mysqli_stmt_get_result($stmt_conexion);
+                  
+                  $estado_conexion = 'Desconectado';
+                  if ($result_conexion && mysqli_num_rows($result_conexion) > 0) {
+                      $conexion_data = mysqli_fetch_assoc($result_conexion);
+                      $estado_conexion = ($conexion_data['state_connection'] == 'true') ? 'Conectado' : 'Desconectado';
+                  }
+                  
+                  mysqli_stmt_close($stmt_conexion);
+              } else {
+                  $estado_conexion = 'Desconectado';
+              }
+              mysqli_stmt_close($stmt_usuario);
+          } else {
+              echo '<div class="alert alert-danger">Usuario no encontrado</div>';
           }
-          
-          mysqli_stmt_close($stmt_conexion);
-          mysqli_stmt_close($stmt_usuario);
       } else {
           echo '<div class="alert alert-danger">Usuario no encontrado</div>';
-          
       }
       
       mysqli_close($conexion);
@@ -106,9 +110,6 @@
                           <div class="user-profile-info">
                             <h4 class="mb-2"><?php echo isset($usuario['nombre_usuario']) ? htmlspecialchars($usuario['nombre_usuario'] . ' ' . $usuario['apellido_usuario']) : 'Usuario no encontrado'; ?></h4>
                             <ul class="list-inline mb-0 d-flex align-items-center flex-wrap justify-content-sm-start justify-content-center gap-4">
-                              <li class="list-inline-item">
-                                <i class="icon-base ri ri-building-line me-2 icon-24px"></i><span class="fw-medium">Sucursal: <?php echo isset($usuario['nombre_sucursal']) ? htmlspecialchars($usuario['nombre_sucursal']) : 'Sin sucursal'; ?></span>
-                              </li>
                               <li class="list-inline-item">
                                 <i class="icon-base ri ri-calendar-line me-2 icon-24px"></i><span class="fw-medium">Alta: <?php echo isset($usuario['fecAlta']) ? date('d/m/Y', strtotime($usuario['fecAlta'])) : 'N/A'; ?></span>
                               </li>
@@ -257,9 +258,6 @@
                         <li class="d-flex align-items-center mb-4">
                           <i class="icon-base ri ri-calendar-line icon-24px"></i><span class="fw-medium mx-2">Fecha Alta:</span> <span><?php echo isset($usuario['fecAlta']) ? date('d/m/Y', strtotime($usuario['fecAlta'])) : 'N/A'; ?></span>
                         </li>
-                        <li class="d-flex align-items-center mb-4">
-                          <i class="icon-base ri ri-building-line icon-24px"></i><span class="fw-medium mx-2">Sucursal:</span> <span><?php echo isset($usuario['nombre_sucursal']) ? htmlspecialchars($usuario['nombre_sucursal']) : 'Sin sucursal'; ?></span>
-                        </li>
                         <li class="d-flex align-items-center">
                           <i class="icon-base ri ri-id-card-line icon-24px"></i><span class="fw-medium mx-2">ID Usuario:</span> <span><?php echo isset($usuario['id_usuario']) ? htmlspecialchars($usuario['id_usuario']) : 'N/A'; ?></span>
                         </li>
@@ -372,7 +370,6 @@
                                 <th>Fecha</th>
                                 <th>Acción</th>
                                 <th>Descripción</th>
-                                <th>Sucursal</th>
                                 <th>IP</th>
                                 <th>URL</th>
                                 <th>Item</th>
@@ -439,7 +436,6 @@
                                 <th>Fecha</th>
                                 <th>Estado</th>
                                 <th>IP</th>
-                                <th>Sucursal</th>
                                 <th>User Agent</th>
                                 <th>Ubicación</th>
                                 <th>Token</th>

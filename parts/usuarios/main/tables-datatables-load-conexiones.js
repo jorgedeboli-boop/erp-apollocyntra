@@ -57,10 +57,9 @@ function inicializarDataTableConexiones(idUsuario) {
                 { data: 1 }, // Fecha
                 { data: 2 }, // Estado
                 { data: 3 }, // IP
-                { data: 4 }, // Sucursal
-                { data: 5 }, // User Agent
-                { data: 6 }, // Ubicación
-                { data: 7 }  // Token
+                { data: 4 }, // User Agent
+                { data: 5 }, // Ubicación
+                { data: 6 }  // Token
             ],
             
             // Configuración de columnas
@@ -112,24 +111,9 @@ function inicializarDataTableConexiones(idUsuario) {
                     }
                 },
                 {
-                    // Sucursal column
+                    // User Agent column
                     targets: 4,
                     responsivePriority: 5,
-                    render: function (data, type, full, meta) {
-                        if (data && data !== 'Sin sucursal') {
-                            return '<span class="badge bg-label-info rounded-pill">' +
-                                   '<i class="icon-base ri ri-building-line me-1"></i>' +
-                                   data +
-                                   '</span>';
-                        } else {
-                            return '<span class="text-muted">Sin sucursal</span>';
-                        }
-                    }
-                },
-                {
-                    // User Agent column
-                    targets: 5,
-                    responsivePriority: 6,
                     render: function (data, type, full, meta) {
                         if (data && data !== 'N/A') {
                             return '<span class="text-truncate d-inline-block" style="max-width: 200px;" title="' + data + '">' + data + '</span>';
@@ -140,8 +124,8 @@ function inicializarDataTableConexiones(idUsuario) {
                 },
                 {
                     // Ubicación column
-                    targets: 6,
-                    responsivePriority: 7,
+                    targets: 5,
+                    responsivePriority: 6,
                     render: function (data, type, full, meta) {
                         if (data && data !== 'N/A') {
                             return '<span class="badge bg-label-warning rounded-pill">' +
@@ -155,8 +139,8 @@ function inicializarDataTableConexiones(idUsuario) {
                 },
                 {
                     // Token column
-                    targets: 7,
-                    responsivePriority: 8,
+                    targets: 6,
+                    responsivePriority: 7,
                     render: function (data, type, full, meta) {
                         if (data && data !== 'N/A') {
                             return '<code class="text-secondary text-truncate d-inline-block" style="max-width: 150px;" title="' + data + '">' + data + '</code>';

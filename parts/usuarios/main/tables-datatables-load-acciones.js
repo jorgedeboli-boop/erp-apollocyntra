@@ -57,10 +57,9 @@ function inicializarDataTableAcciones(idUsuario) {
                 { data: 1 }, // Fecha
                 { data: 2 }, // Acción
                 { data: 3 }, // Descripción
-                { data: 4 }, // Sucursal
-                { data: 5 }, // IP
-                { data: 6 }, // URL
-                { data: 7 }  // Item
+                { data: 4 }, // IP
+                { data: 5 }, // URL
+                { data: 6 }  // Item
             ],
             
             // Configuración de columnas
@@ -109,24 +108,9 @@ function inicializarDataTableAcciones(idUsuario) {
                     }
                 },
                 {
-                    // Sucursal column
+                    // IP column
                     targets: 4,
                     responsivePriority: 5,
-                    render: function (data, type, full, meta) {
-                        if (data && data !== 'Sin sucursal') {
-                            return '<span class="badge bg-label-info rounded-pill">' +
-                                   '<i class="icon-base ri ri-building-line me-1"></i>' +
-                                   data +
-                                   '</span>';
-                        } else {
-                            return '<span class="text-muted">Sin sucursal</span>';
-                        }
-                    }
-                },
-                {
-                    // IP column
-                    targets: 5,
-                    responsivePriority: 6,
                     render: function (data, type, full, meta) {
                         if (data && data !== 'N/A') {
                             return '<code class="text-primary">' + data + '</code>';
@@ -137,8 +121,8 @@ function inicializarDataTableAcciones(idUsuario) {
                 },
                 {
                     // URL column
-                    targets: 6,
-                    responsivePriority: 7,
+                    targets: 5,
+                    responsivePriority: 6,
                     render: function (data, type, full, meta) {
                         if (data && data !== 'N/A') {
                             return '<span class="text-truncate d-inline-block" style="max-width: 150px;" title="' + data + '">' + data + '</span>';
@@ -149,8 +133,8 @@ function inicializarDataTableAcciones(idUsuario) {
                 },
                 {
                     // Item column
-                    targets: 7,
-                    responsivePriority: 8,
+                    targets: 6,
+                    responsivePriority: 7,
                     render: function (data, type, full, meta) {
                         if (data && data !== 'N/A') {
                             return '<span class="badge bg-label-secondary rounded-pill">' +
