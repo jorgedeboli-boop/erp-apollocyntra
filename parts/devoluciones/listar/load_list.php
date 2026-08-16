@@ -35,8 +35,7 @@ try {
             av.forma_de_pago_devolucion LIKE ? OR
             ventas.id_venta_sucursal LIKE ? OR
             CONCAT(clientes.nombre, ' ', clientes.apellido) LIKE ? OR
-            articulos_venta.descripcion LIKE ? OR
-            CAST(articulos_venta.id AS CHAR) LIKE ?
+            CAST(av.articulo_devolucion AS CHAR) LIKE ?
         )";
         $searchParam = '%' . $searchValue . '%';
         $params[] = $searchParam;
@@ -49,8 +48,7 @@ try {
         $params[] = $searchParam;
         $params[] = $searchParam;
         $params[] = $searchParam;
-        $params[] = $searchParam;
-        $types .= 'sssssssssss';
+        $types .= 'ssssssssss';
     }
     
     $whereClause = '';
@@ -63,7 +61,6 @@ try {
         FROM devoluciones AS av
         LEFT JOIN ventas ON av.id_venta_original = ventas.id
         LEFT JOIN clientes ON av.cliente_devolucion = clientes.id_cliente
-        LEFT JOIN articulos_venta ON av.articulo_devolucion = articulos_venta.id
         $whereClause
     ";
     
@@ -101,8 +98,8 @@ try {
         2 => 'av.fecha_devolucion',
         3 => 'CLIENTEDATA',
         4 => 'av.motivo_devolucion',
-        5 => 'SKUARTICULO',
-        6 => 'articulos_venta.descripcion',
+        5 => 'av.articulo_devolucion',
+        6 => 'av.articulo_devolucion',
         7 => 'av.importe_devolucion',
         8 => 'av.forma_de_pago_devolucion',
         9 => 'av.devolucion_web'
@@ -115,8 +112,7 @@ try {
         'av.fecha_devolucion',
         'CLIENTEDATA',
         'av.motivo_devolucion',
-        'SKUARTICULO',
-        'articulos_venta.descripcion',
+        'av.articulo_devolucion',
         'av.importe_devolucion',
         'av.forma_de_pago_devolucion',
         'av.devolucion_web'
@@ -142,8 +138,7 @@ try {
                 av.devolucion_web,
                 ventas.id_venta_sucursal,
                 CONCAT(clientes.nombre, ' ', clientes.apellido) AS CLIENTEDATA,
-                articulos_venta.id AS SKUARTICULO,
-                articulos_venta.descripcion
+                av.articulo_devolucion AS SKUARTICULO
               " . $queryBase . "
               ORDER BY $orderBy $orderDir
               LIMIT ? OFFSET ?";
@@ -182,7 +177,7 @@ try {
             $row['CLIENTEDATA'] ?: '-',
             $row['motivo_devolucion'] ?: '-',
             $row['SKUARTICULO'] ?: '-',
-            $row['descripcion'] ?: '-',
+            '-',
             number_format($row['importe_devolucion'], 2, ',', '.') . ' €',
             $row['forma_de_pago_devolucion'] ?: '-',
             $row['devolucion_web'] ?: '-'

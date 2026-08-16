@@ -40,7 +40,6 @@ try {
     
     $queryBase = "
         FROM facturas_rectificativas f
-        LEFT JOIN sucursal s ON f.id_sucursal = s.id_sucursal
         LEFT JOIN clientes c ON f.cliente_factura = c.id_cliente
         LEFT JOIN usuarios u ON f.facturado_por = u.id_usuario
         $whereClause
@@ -102,7 +101,6 @@ try {
                 f.factura_regimen,
                 f.id_rel_factura_fiskaly,
                 f.rel_id_empresa,
-                s.empresa_id,
                 CONCAT(c.nombre, ' ', c.apellido) AS CLIENTEDATA
               " . $queryBase . "
               ORDER BY $orderBy $orderDir
@@ -130,9 +128,6 @@ try {
     while ($row = mysqli_fetch_assoc($result)) {
         $idFiskaly = (int) ($row['id_rel_factura_fiskaly'] ?? 0);
         $idEmpresa = (int) ($row['rel_id_empresa'] ?? 0);
-        if ($idEmpresa <= 0) {
-            $idEmpresa = (int) ($row['empresa_id'] ?? 0);
-        }
         $row['_id_empresa_fiskaly'] = $idEmpresa;
         if ($idFiskaly > 0 && $idEmpresa > 0) {
             if (!isset($idsPorEmpresa[$idEmpresa])) {

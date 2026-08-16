@@ -49,10 +49,8 @@ try {
                 f.prefijo_factura_original,
                 f.id_rel_factura_fiskaly,
                 f.rel_id_empresa,
-                s.empresa_id,
                 CONCAT(c.nombre, ' ', c.apellido) AS CLIENTEDATA
               FROM facturas_rectificativas f
-              LEFT JOIN sucursal s ON f.id_sucursal = s.id_sucursal
               LEFT JOIN clientes c ON f.cliente_factura = c.id_cliente
               $whereClause
               ORDER BY f.fecha_factura DESC, f.hora_factura DESC";
@@ -74,9 +72,6 @@ try {
     while ($row = mysqli_fetch_assoc($result)) {
         $idFiskaly = (int) ($row['id_rel_factura_fiskaly'] ?? 0);
         $idEmpresa = (int) ($row['rel_id_empresa'] ?? 0);
-        if ($idEmpresa <= 0) {
-            $idEmpresa = (int) ($row['empresa_id'] ?? 0);
-        }
         if ($idFiskaly > 0 && $idEmpresa > 0) {
             if (!isset($idsPorEmpresa[$idEmpresa])) {
                 $idsPorEmpresa[$idEmpresa] = array();

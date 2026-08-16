@@ -30,10 +30,8 @@ try {
 
     $stmt = mysqli_prepare(
         $conexion,
-        "SELECT f.id_factura, f.id_sucursal, f.id_rel_factura_fiskaly, f.rel_id_factura, f.rel_id_empresa,
-                s.empresa_id
+        "SELECT f.id_factura, f.id_sucursal, f.id_rel_factura_fiskaly, f.rel_id_factura, f.rel_id_empresa
          FROM {$tablaRect} f
-         LEFT JOIN sucursal s ON s.id_sucursal = f.id_sucursal
          WHERE f.id_factura = ?
          LIMIT 1"
     );
@@ -55,9 +53,6 @@ try {
     $id_fiskaly = (int) ($row['id_rel_factura_fiskaly'] ?? 0);
     $id_original_tpv = (int) ($row['rel_id_factura'] ?? 0);
     $id_empresa = (int) ($row['rel_id_empresa'] ?? 0);
-    if ($id_empresa <= 0) {
-        $id_empresa = (int) ($row['empresa_id'] ?? 0);
-    }
 
     if ($id_sucursal <= 0) {
         mysqli_close($conexion);

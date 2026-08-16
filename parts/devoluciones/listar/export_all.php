@@ -36,7 +36,7 @@ try {
             av.forma_de_pago_devolucion LIKE ? OR
             ventas.id_venta_sucursal LIKE ? OR
             CONCAT(clientes.nombre, ' ', clientes.apellido) LIKE ? OR
-            articulos_venta.descripcion LIKE ?
+            CAST(av.articulo_devolucion AS CHAR) LIKE ?
         )";
         $searchParam = '%' . $searchValue . '%';
         $params[] = $searchParam;
@@ -71,12 +71,10 @@ try {
                 av.devolucion_web,
                 ventas.id_venta_sucursal,
                 CONCAT(clientes.nombre, ' ', clientes.apellido) AS CLIENTEDATA,
-                articulos_venta.id AS SKUARTICULO,
-                articulos_venta.descripcion
+                av.articulo_devolucion AS SKUARTICULO
               FROM devoluciones AS av
               LEFT JOIN ventas ON av.id_venta_original = ventas.id
               LEFT JOIN clientes ON av.cliente_devolucion = clientes.id_cliente
-              LEFT JOIN articulos_venta ON av.articulo_devolucion = articulos_venta.id
               $whereClause
               ORDER BY av.fecha_devolucion DESC
     ";
@@ -109,7 +107,7 @@ try {
             $row['CLIENTEDATA'] ?: '-',
             $row['motivo_devolucion'] ?: '-',
             $row['SKUARTICULO'] ?: '-',
-            $row['descripcion'] ?: '-',
+            '-',
             number_format($row['importe_devolucion'], 2, ',', '.') . ' €',
             $row['forma_de_pago_devolucion'] ?: '-',
             ($row['devolucion_web'] === 'si' || $row['devolucion_web'] === 'true' || $row['devolucion_web'] === '1') ? 'Sí' : 'No'
