@@ -3443,9 +3443,18 @@ function usuario_puede_acceder_permiso_accion_por_nombre($id_privilegio_usuario,
 }
 
 /**
- * Permiso edit fotos del cliente (ítem fotos_cliente_edit bajo listar lotes).
+ * Permiso edit fotos del cliente (ítem fotos_cliente_edit bajo listar clientes, o lotes si existe).
  */
 function usuario_puede_acceder_fotos_cliente_edit($id_privilegio_usuario) {
+    if (isset($_SESSION['usuario_root']) && $_SESSION['usuario_root'] === 'true') {
+        return true;
+    }
+
+    $id_padre_clientes = crud_id_listar_modulo('clientes');
+    if ($id_padre_clientes > 0 && usuario_puede_acceder_permiso_accion_por_nombre($id_privilegio_usuario, $id_padre_clientes, 'fotos_cliente_edit')) {
+        return true;
+    }
+
     $id_padre_lotes = crud_id_listar_modulo('lotes');
     return usuario_puede_acceder_permiso_accion_por_nombre($id_privilegio_usuario, $id_padre_lotes, 'fotos_cliente_edit');
 }
@@ -3454,6 +3463,10 @@ function usuario_puede_acceder_fotos_cliente_edit($id_privilegio_usuario) {
  * Permiso edit fotos del lote (ítem fotos_lote_edit bajo listar lotes).
  */
 function usuario_puede_acceder_fotos_lote_edit($id_privilegio_usuario) {
+    if (isset($_SESSION['usuario_root']) && $_SESSION['usuario_root'] === 'true') {
+        return true;
+    }
+
     $id_padre_lotes = crud_id_listar_modulo('lotes');
     return usuario_puede_acceder_permiso_accion_por_nombre($id_privilegio_usuario, $id_padre_lotes, 'fotos_lote_edit');
 }

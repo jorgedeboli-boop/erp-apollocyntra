@@ -99,7 +99,20 @@ if (mysqli_num_rows($resultitemsSections) == 0) {
     $puede_acceder_fotos_lote_edit = usuario_puede_acceder_fotos_lote_edit($usuario_privilegio_id);
     $puede_acceder_renovar_empeno = usuario_puede_acceder_permiso_accion_por_nombre($usuario_privilegio_id, $id_padre_listar, 'renovar_empeno');
     $puede_acceder_renovar_empeno_eliminar = usuario_puede_acceder_permiso_accion_por_nombre($usuario_privilegio_id, $id_padre_listar, 'renovar_empeno_eliminar');
-    $puede_acceder_renovar_empeno_recuperar = usuario_puede_acceder_permiso_accion_por_nombre($usuario_privilegio_id, $id_padre_listar, 'renovar_empeno_recuperar');    
+    $puede_acceder_renovar_empeno_recuperar = usuario_puede_acceder_permiso_accion_por_nombre($usuario_privilegio_id, $id_padre_listar, 'renovar_empeno_recuperar');
+
+    if ($usuario_root == 'true') {
+        $puede_acceder_main = true;
+        $puede_acceder_editar = true;
+        $puede_acceder_crear = true;
+        $puede_acceder_borrar = true;
+        $puede_acceder_edit = true;
+        $puede_acceder_fotos_cliente_edit = true;
+        $puede_acceder_fotos_lote_edit = true;
+        $puede_acceder_renovar_empeno = true;
+        $puede_acceder_renovar_empeno_eliminar = true;
+        $puede_acceder_renovar_empeno_recuperar = true;
+    }
 
     if($usuario_root == "true"){
 
