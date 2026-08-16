@@ -49,6 +49,47 @@
           }
           
           $estado_articulo_header = strtolower((string) ($articulo['estado'] ?? ''));
+          $estado_badge_class = 'secondary';
+          switch ($estado_articulo_header) {
+              case 'noetiquetado_c':
+              case 'noetiquetado_u':
+                  $estado_badge_class = 'primary';
+                  break;
+              case 'enventa':
+              case 'en_venta':
+                  $estado_badge_class = 'info';
+                  break;
+              case 'vendido':
+              case 'vendido_web':
+              case 'publicadoweb':
+                  $estado_badge_class = 'success';
+                  break;
+              case 'retirado':
+              case 'mermado':
+                  $estado_badge_class = 'warning';
+                  break;
+              case 'enviado':
+              case 'enreparacion':
+                  $estado_badge_class = 'dark';
+                  break;
+          }
+          $estado_texto_badge = trim((string) ($articulo['estado_articulo'] ?? ''));
+          if ($estado_texto_badge === '') {
+              $estados_texto_fallback = array(
+                  'noetiquetado_c' => 'No etiquetado',
+                  'noetiquetado_u' => 'No etiquetado',
+                  'enventa' => 'En venta',
+                  'en_venta' => 'En venta',
+                  'vendido' => 'Vendido',
+                  'vendido_web' => 'Vendido web',
+                  'retirado' => 'Retirado',
+                  'mermado' => 'Mermado',
+                  'enviado' => 'Enviado',
+                  'enreparacion' => 'En reparación',
+                  'publicadoweb' => 'Publicado web',
+              );
+              $estado_texto_badge = $estados_texto_fallback[$estado_articulo_header] ?? ($articulo['estado'] ?? '—');
+          }
   ?>
 <?php if (!$puede_acceder_editar): ?>
 <style>
@@ -93,6 +134,7 @@
                 <?php if ($mostrar_badge_venta): ?>
                 <div class="badge bg-label-secondary rounded-pill lh-xs badget-estados">Venta Nº <?php echo htmlspecialchars($venta_num_display); ?></div>
                 <?php endif; ?>
+                <div id="articulo_estado_badge_header" class="badge bg-label-<?php echo htmlspecialchars($estado_badge_class); ?> rounded-pill lh-xs badget-estados"><?php echo htmlspecialchars($estado_texto_badge); ?></div>
               </div>
             </div>
           </div>
