@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__ . '/../../include/session.php';
 require_once __DIR__ . '/../../include/functions.php';
+require_once __DIR__ . '/../lib/camera_qr_multifoto.php';
 
 ob_start();
 ob_clean();
@@ -51,6 +52,7 @@ try {
     if (!$conexion) {
         throw new Exception('Sin conexión a la base de datos');
     }
+    camera_token_ensure_type_item_column($conexion);
 
     $rel_id_empresa = 0;
     if ($tipo_qr === 'cliente') {
@@ -62,6 +64,16 @@ try {
             $row_cli = $res_cli ? mysqli_fetch_assoc($res_cli) : null;
             mysqli_stmt_close($stmt_cli);
             $rel_id_empresa = (int) ($row_cli['rel_id_empresa'] ?? 0);
+        }
+    } elseif ($tipo_qr === 'articulo') {
+        $stmt_art = mysqli_prepare($conexion, 'SELECT empresa_id_rel FROM articulos WHERE sku = ? LIMIT 1');
+        if ($stmt_art) {
+            mysqli_stmt_bind_param($stmt_art, 'i', $id_item);
+            mysqli_stmt_execute($stmt_art);
+            $res_art = mysqli_stmt_get_result($stmt_art);
+            $row_art = $res_art ? mysqli_fetch_assoc($res_art) : null;
+            mysqli_stmt_close($stmt_art);
+            $rel_id_empresa = (int) ($row_art['empresa_id_rel'] ?? 0);
         }
     }
     if ($rel_id_empresa <= 0 && defined('APP_ID')) {

@@ -16,18 +16,11 @@ $vImagenesArticulo = filemtime(__DIR__ . '/imagenes_articulo.js');
 <script src="camera/js/camera-doc-panel.js?v=<?php echo $vCameraDocPanel; ?>"></script>
 <?php
 if (isset($articulo) && !empty($articulo['id'])) {
-    $_qr_suc = (int) (!empty($articulo['id_sucursal_destino']) ? $articulo['id_sucursal_destino'] : $usuario_sucursal);
-    if ($_qr_suc <= 0) {
-        $_qr_suc = (int) $usuario_sucursal;
-    }
-    if ($_qr_suc <= 0 && !empty($articulo['id_sucursal_origen'])) {
-        $_qr_suc = (int) $articulo['id_sucursal_origen'];
-    }
     ?>
 <script>
 window.articuloFotoMovilIds = {
   idArticulo: <?php echo (int) $articulo['id']; ?>,
-  idSucursal: <?php echo $_qr_suc; ?>
+  idSucursal: 0
 };
 </script>
 <?php } ?>

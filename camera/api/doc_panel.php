@@ -30,7 +30,7 @@ try {
     if ($id <= 0) {
         throw new InvalidArgumentException('id no válido');
     }
-    if ($id_sucursal <= 0 && $tipo !== 'cliente') {
+    if ($id_sucursal <= 0 && !in_array($tipo, array('cliente', 'articulo'), true)) {
         throw new InvalidArgumentException('id_sucursal no válido');
     }
 

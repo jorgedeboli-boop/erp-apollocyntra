@@ -30,19 +30,20 @@ try {
     if (empty($data['id_item'])) {
         throw new Exception('ID de item no proporcionado');
     }
-    if (!isset($data['id_sucursal']) && trim((string) ($data['tipo_qr'] ?? '')) !== 'cliente') {
+    $tipo_qr = trim((string) ($data['tipo_qr'] ?? ''));
+    $sin_sucursal = in_array($tipo_qr, array('cliente', 'articulo'), true);
+    if (!isset($data['id_sucursal']) && !$sin_sucursal) {
         throw new Exception('ID de sucursal no proporcionado');
     }
 
     $id_token = (int) $data['id_token'];
-    $tipo_qr = trim($data['tipo_qr']);
     $id_item = (int) $data['id_item'];
     $id_sucursal = isset($data['id_sucursal']) ? (int) $data['id_sucursal'] : 0;
 
     if ($id_token <= 0 || $id_item <= 0) {
         throw new Exception('Parámetros no válidos');
     }
-    if ($tipo_qr === 'cliente') {
+    if ($sin_sucursal) {
         $id_sucursal = 0;
     } elseif ($id_sucursal <= 0) {
         throw new Exception('Parámetros no válidos');

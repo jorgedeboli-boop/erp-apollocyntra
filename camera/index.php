@@ -26,8 +26,9 @@ $error = null;
 $success = false;
 
 // Validar que los parámetros existan.
-// type=cliente no usa sucursal; id_sucursal=0 es válido (en PHP "0" es falsy).
-if (!$type || !$id || !$token || !$id_token || ($type !== 'cliente' && $id_sucursal <= 0)) {
+// cliente/articulo no usan sucursal; id_sucursal=0 es válido (en PHP "0" es falsy).
+$tipo_sin_sucursal = in_array((string) $type, array('cliente', 'articulo'), true);
+if (!$type || !$id || !$token || !$id_token || (!$tipo_sin_sucursal && $id_sucursal <= 0)) {
     if (!$type) {
         $error = 'Faltan parámetros requeridos (type)';
     } elseif (!$id) {
@@ -36,7 +37,7 @@ if (!$type || !$id || !$token || !$id_token || ($type !== 'cliente' && $id_sucur
         $error = 'Faltan parámetros requeridos (token)';
     } elseif (!$id_token) {
         $error = 'Faltan parámetros requeridos (id_token)';
-    } elseif ($type !== 'cliente' && $id_sucursal <= 0) {
+    } elseif (!$tipo_sin_sucursal && $id_sucursal <= 0) {
         $error = 'Faltan parámetros requeridos (id_sucursal)';
     }
 
@@ -336,7 +337,7 @@ mysqli_close($conexion);
             const type = urlParams.get('type');
             const id = urlParams.get('id');
             const id_sucursal = urlParams.get('id_sucursal');
-            if (!type || !id || (type !== 'cliente' && (id_sucursal === null || id_sucursal === ''))) {
+            if (!type || !id || ((type !== 'cliente' && type !== 'articulo') && (id_sucursal === null || id_sucursal === ''))) {
                 Swal.fire({
                     title: 'Error',
                     text: 'Faltan parámetros necesarios',

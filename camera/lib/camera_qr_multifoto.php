@@ -12,6 +12,16 @@ function camera_qr_tipos_multifoto(): array
     return array('cliente', 'lote', 'articulo', 'venta', 'articulo_venta', 'gasto');
 }
 
+/**
+ * Tipos de QR que en este ERP no usan sucursal (columna eliminada).
+ *
+ * @param string $tipo
+ */
+function camera_tipo_sin_sucursal($tipo)
+{
+    return in_array((string) $tipo, array('cliente', 'articulo'), true);
+}
+
 function camera_qr_es_multifoto(string $tipo): bool
 {
     return in_array($tipo, camera_qr_tipos_multifoto(), true);
@@ -31,6 +41,27 @@ function camera_token_ensure_foto_count_column($conexion): void
         );
     }
     if ($r) {
+        mysqli_free_result($r);
+    }
+    $done = true;
+}
+
+/**
+ * type_item era ENUM sin 'articulo' (y otros tipos de cámara).
+ * Se amplía a VARCHAR para poder guardar tokens de ficha de artículo.
+ */
+function camera_token_ensure_type_item_column($conexion): void
+{
+    static $done = false;
+    if ($done) {
+        return;
+    }
+    $r = @mysqli_query($conexion, "SHOW COLUMNS FROM tokens_actions LIKE 'type_item'");
+    if ($r && ($col = mysqli_fetch_assoc($r))) {
+        $type = strtolower((string) ($col['Type'] ?? ''));
+        if (strpos($type, 'enum(') === 0) {
+            @mysqli_query($conexion, 'ALTER TABLE tokens_actions MODIFY type_item VARCHAR(32) NOT NULL');
+        }
         mysqli_free_result($r);
     }
     $done = true;

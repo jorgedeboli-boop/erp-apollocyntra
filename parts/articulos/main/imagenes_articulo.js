@@ -450,16 +450,32 @@
 
   window.abrirModalFotoMovilArticulo = function abrirModalFotoMovilArticulo() {
     var ids = global.articuloFotoMovilIds;
-    if (!ids || !ids.idArticulo || !ids.idSucursal) {
+    if (!ids || !ids.idArticulo) {
+      if (typeof Swal !== 'undefined') {
+        Swal.fire({
+          title: 'Error',
+          text: 'No se pudo identificar el artículo',
+          icon: 'error',
+          confirmButtonText: 'Aceptar'
+        });
+      }
       return;
     }
     if (global.CameraDocPanel && typeof global.CameraDocPanel.open === 'function') {
       global.CameraDocPanel.open({
         tipo: 'articulo',
         id: ids.idArticulo,
-        idSucursal: ids.idSucursal
+        idSucursal: 0
       }).catch(function (err) {
         console.error('CameraDocPanel', err);
+        if (typeof Swal !== 'undefined') {
+          Swal.fire({
+            title: 'Error',
+            text: err && err.message ? err.message : 'No se pudo abrir el visor de cámara',
+            icon: 'error',
+            confirmButtonText: 'Aceptar'
+          });
+        }
       });
     }
     if (typeof window.iniciarVerificacion_fotos === 'function') {
