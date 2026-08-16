@@ -44,8 +44,7 @@ document.addEventListener('DOMContentLoaded', function (e) {
         { data: 1 },
         { data: 2 },
         { data: 3 },
-        { data: 4 },
-        { data: 5 }
+        { data: 4 }
       ],
 
       createdRow: function (row, data) {
@@ -126,18 +125,6 @@ document.addEventListener('DOMContentLoaded', function (e) {
           }
         },
         {
-          // Sucursal
-          targets: 4,
-          render: function (data, type, full, meta) {
-            const sucursal = data;
-
-            return '<span class="badge bg-label-info rounded-pill">' +
-                   '<i class="icon-base ri ri-building-line me-1"></i>' +
-                   sucursal +
-                   '</span>';
-          }
-        },
-        {
           // Última conexión
           targets: 2,
           render: function (data, type, full, meta) {
@@ -152,7 +139,7 @@ document.addEventListener('DOMContentLoaded', function (e) {
         },
         {
           // User Status
-          targets: 5,
+          targets: 4,
           render: function (data, type, full, meta) {
             const status = data;
             
@@ -190,7 +177,7 @@ document.addEventListener('DOMContentLoaded', function (e) {
                       text: `<span class="d-flex align-items-center"><i class="icon-base ri ri-file-excel-line me-1"></i>Excel</span>`,
                       className: 'dropdown-item',
                       exportOptions: {
-                        columns: [1, 2, 3, 4, 5],
+                        columns: [1, 2, 3, 4],
                         format: {
                           body: function (inner, coldex, rowdex) {
                             if (inner.length <= 0) return inner;
@@ -213,7 +200,7 @@ document.addEventListener('DOMContentLoaded', function (e) {
                       text: `<span class="d-flex align-items-center"><i class="icon-base ri ri-file-pdf-line me-1"></i>PDF</span>`,
                       className: 'dropdown-item',
                       exportOptions: {
-                        columns: [1, 2, 3, 4, 5],
+                        columns: [1, 2, 3, 4],
                         format: {
                           body: function (inner, coldex, rowdex) {
                             if (inner.length <= 0) return inner;
@@ -236,7 +223,7 @@ document.addEventListener('DOMContentLoaded', function (e) {
                       text: `<i class="icon-base ri ri-file-copy-line me-1"></i>Copiar`,
                       className: 'dropdown-item',
                       exportOptions: {
-                        columns: [1, 2, 3, 4, 5],
+                        columns: [1, 2, 3, 4],
                         format: {
                           body: function (inner, coldex, rowdex) {
                             if (inner.length <= 0) return inner;
@@ -381,11 +368,7 @@ document.addEventListener('DOMContentLoaded', function (e) {
           });
         };
 
-        // Sucursal filter with Select2
-        createFilter(4, '.user_sucursal', 'UserSucursal', 'Seleccionar Sucursal');
-
-        // Estado filter with Select2
-        createFilter(5, '.user_estado', 'UserEstado', 'Seleccionar Estado');
+        createFilter(4, '.user_estado', 'UserEstado', 'Seleccionar Estado');
 
         // Jerarquía filter with Select2
         const jerarquiaFilter = document.createElement('select');
@@ -459,11 +442,7 @@ document.addEventListener('DOMContentLoaded', function (e) {
           });
         };
 
-        // Sucursal filter
-        createFilter(4, '.user_sucursal', 'UserSucursal', 'Seleccionar Sucursal');
-
-        // Estado filter
-        createFilter(5, '.user_estado', 'UserEstado', 'Seleccionar Estado');
+        createFilter(4, '.user_estado', 'UserEstado', 'Seleccionar Estado');
 
         // Jerarquía filter
         const jerarquiaFilter = document.createElement('select');

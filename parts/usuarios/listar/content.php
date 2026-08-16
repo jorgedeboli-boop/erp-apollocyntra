@@ -98,9 +98,8 @@
                 <div class="card-header border-bottom card-header-forms">
                   <h5 class="card-title mb-0">Usuarios</h5>
                   <div class="d-flex justify-content-between align-items-center row gx-5 pt-4 gap-5 gap-md-0 select2-btn-height">
-                    <div class="col-md-4 user_sucursal"></div>
-                    <div class="col-md-4 user_estado"></div>
-                    <div class="col-md-4 user_jerarquia"></div>
+                    <div class="col-md-6 user_estado"></div>
+                    <div class="col-md-6 user_jerarquia"></div>
                   </div>
                 </div>
                 <div class="card-datatable">
@@ -111,7 +110,6 @@
                         <th>Usuario</th>
                         <th>Ultima conexión</th>
                         <th>Jerarquía</th>
-                        <th>Sucursal</th>
                         <th>Estado</th>
                       </tr>
                     </thead>

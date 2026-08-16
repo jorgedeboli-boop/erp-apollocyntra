@@ -19,7 +19,6 @@ try {
     $es_usuario_root = (isset($usuario_root) && $usuario_root === 'true');
     $es_usuario_super_administrador = (isset($usuario_super_administrador) && $usuario_super_administrador === 'true');
 
-    // Consulta con JOINs para obtener privilegio y sucursal
     $query = "
         SELECT 
             u.id_usuario, 
@@ -30,13 +29,10 @@ try {
             u.estado_usuario, 
             u.privilegio_usuario,
             u.ultimo_acceso,
-            u.sucursal_usuario,
             COALESCE(p.nombre_privilegio, 'Sin privilegio') as nombre_privilegio,
-            COALESCE(p.color_label_privilegio, 'secondary') as color_label_privilegio,
-            COALESCE(s.nombre_sucursal, 'Sin sucursal') as nombre_sucursal
+            COALESCE(p.color_label_privilegio, 'secondary') as color_label_privilegio
         FROM usuarios u
         LEFT JOIN privilegios_usuarios p ON u.privilegio_usuario = p.id_privilegios
-        LEFT JOIN sucursal s ON u.sucursal_usuario = s.id_sucursal
     ";
 
     $where = [];
@@ -73,7 +69,6 @@ try {
                 'nombre' => $row['nombre_privilegio'],
                 'color' => $row['color_label_privilegio']
             ], // Jerarquía (privilegio con color)
-            $row['nombre_sucursal'], // Sucursal
             $row['estado_usuario'] === 'true' ? 'Habilitado' : 'Sin acceso' // Estado formateado
         ];
     }
