@@ -44,11 +44,20 @@ document.addEventListener('DOMContentLoaded', function (e) {
           return d;
         },
         dataSrc: function(json) {
-          return json.data || [];
+          if (json && json.error) {
+            console.error('Error listado devoluciones:', json.error);
+          }
+          return (json && json.data) ? json.data : [];
         },
         error: function(xhr, error, thrown) {
-          console.error('Error AJAX:', error, thrown);
-          console.log('Respuesta del servidor:', xhr.responseText);
+          let detalle = thrown || error || '';
+          try {
+            const j = JSON.parse(xhr.responseText);
+            if (j && j.error) {
+              detalle = j.error;
+            }
+          } catch (e) {}
+          console.error('Error AJAX:', detalle, xhr.responseText);
         }
       },
       

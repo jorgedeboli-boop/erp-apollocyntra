@@ -34,8 +34,7 @@ try {
             CAST(av.articulo_devolucion AS CHAR) LIKE ? OR
             CAST(av.importe_devolucion AS CHAR) LIKE ? OR
             av.forma_de_pago_devolucion LIKE ? OR
-            ventas.id_venta_sucursal LIKE ? OR
-            CONCAT(clientes.nombre, ' ', clientes.apellido) LIKE ? OR
+            CONCAT(IFNULL(clientes.nombre, ''), ' ', IFNULL(clientes.apellido, '')) LIKE ? OR
             CAST(av.articulo_devolucion AS CHAR) LIKE ?
         )";
         $searchParam = '%' . $searchValue . '%';
@@ -49,8 +48,7 @@ try {
         $params[] = $searchParam;
         $params[] = $searchParam;
         $params[] = $searchParam;
-        $params[] = $searchParam;
-        $types .= 'sssssssssss';
+        $types .= 'ssssssssss';
     }
     
     $whereClause = '';
@@ -69,11 +67,9 @@ try {
                 av.importe_devolucion,
                 av.forma_de_pago_devolucion,
                 av.devolucion_web,
-                ventas.id_venta_sucursal,
-                CONCAT(clientes.nombre, ' ', clientes.apellido) AS CLIENTEDATA,
+                CONCAT(IFNULL(clientes.nombre, ''), ' ', IFNULL(clientes.apellido, '')) AS CLIENTEDATA,
                 av.articulo_devolucion AS SKUARTICULO
               FROM devoluciones AS av
-              LEFT JOIN ventas ON av.id_venta_original = ventas.id
               LEFT JOIN clientes ON av.cliente_devolucion = clientes.id_cliente
               $whereClause
               ORDER BY av.fecha_devolucion DESC
