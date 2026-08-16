@@ -3,11 +3,7 @@
     <div class="card-header border-bottom card-header-forms">
       <div class="d-flex justify-content-between align-items-center w-100">
         <h5 class="card-title mb-0">Servicios <span id="texto_servicios_titulo"></span></h5>
-        <?php if ($puede_acceder_crear): ?>
-        <button type="button" id="btn_nuevo_servicio" class="btn btn-primary waves-effect waves-light px-3 btn-create-record">
-          <span class="icon-base ri ri-add-fill icon-22px me-1"></span>Nuevo servicio
-        </button>
-        <?php endif; ?>
+  
       </div>
       <div class="d-flex justify-content-between align-items-center row gx-5 pt-4 gap-5 gap-md-0 mt-3">
         <div class="col-md-4 servicio_empresa select2-btn-height"></div>
