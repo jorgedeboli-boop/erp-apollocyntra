@@ -2088,7 +2088,7 @@ function iniciar_sesion($usuario_data) {
     actualizar_ultimo_acceso($usuario_data['id_usuario']);
     
     // Registrar el inicio de sesión en usersConexions
-    registrar_inicio_sesion($usuario_data['id_usuario'], $usuario_data['sucursal_usuario'], $_SESSION['usuario']);
+    registrar_inicio_sesion($usuario_data['id_usuario'], $_SESSION['usuario']);
 }
 
 /**
@@ -2215,10 +2215,11 @@ function desconectar_sucursal($sucursalId) {
     $conexion = conectar_bd();
     if (!$conexion) return false;
     
-    $query = "UPDATE usersConexions
-              SET state_connection = 'false'
-              WHERE state_connection = 'true'
-              AND sucursalIdUserConexion = ?";
+    $query = "UPDATE usersConexions uc
+              INNER JOIN usuarios u ON uc.userId = u.id_usuario
+              SET uc.state_connection = 'false'
+              WHERE uc.state_connection = 'true'
+              AND u.sucursal_usuario = ?";
     
     $stmt = mysqli_prepare($conexion, $query);
     mysqli_stmt_bind_param($stmt, 'i', $sucursalId);
@@ -2242,13 +2243,12 @@ function cerrar_sesion() {
     
     // Obtener datos del usuario antes de destruir la sesión
     $usuario_id = $_SESSION['usuario_id'] ?? null;
-    $usuario_sucursal = $_SESSION['usuario_sucursal'] ?? null;
     $usuario = $_SESSION['usuario'] ?? null;
     $token = $_SESSION['tokensessioncontrol'] ?? '';
     
     // Registrar el cierre de sesión en usersConexions y desactivar el token
-    if ($usuario_id && $usuario_sucursal) {
-        registrar_cierre_sesion($usuario_id, $usuario_sucursal, $usuario, $token);
+    if ($usuario_id) {
+        registrar_cierre_sesion($usuario_id, $usuario, $token);
     }
     
     // Destruir todas las variables de sesión
@@ -2479,7 +2479,7 @@ function obtener_user_agent() {
 /**
  * Función para registrar el inicio de sesión en usersConexions
  */
-function registrar_inicio_sesion($usuario_id, $usuario_sucursal, $usuario_parset) {
+function registrar_inicio_sesion($usuario_id, $usuario_parset) {
     $conexion = conectar_bd();
    
     
@@ -2493,7 +2493,6 @@ function registrar_inicio_sesion($usuario_id, $usuario_sucursal, $usuario_parset
 
     $query = "INSERT INTO usersConexions (
         state_connection, 
-        sucursalIdUserConexion, 
         dateConexion, 
         userId, 
         userAgent, 
@@ -2501,7 +2500,7 @@ function registrar_inicio_sesion($usuario_id, $usuario_sucursal, $usuario_parset
         logTxt, 
         groupId,
         tokensessioncontrol
-    ) VALUES (?, ?, NOW(), ?, ?, ?, ?, ?, ?)";
+    ) VALUES (?, NOW(), ?, ?, ?, ?, ?, ?)";
     
     $stmt = mysqli_prepare($conexion, $query);
     
@@ -2514,9 +2513,8 @@ function registrar_inicio_sesion($usuario_id, $usuario_sucursal, $usuario_parset
     $logTxt = 'El usuario '.$usuario_parset.' logeado correctamente';
     $groupId = '52';
     
-    mysqli_stmt_bind_param($stmt, 'ssisssss', 
+    mysqli_stmt_bind_param($stmt, 'sisssss', 
         $state_connection, 
-        $usuario_sucursal, 
         $usuario_id, 
         $userAgent, 
         $ipvVisitante, 
@@ -2538,7 +2536,7 @@ function registrar_inicio_sesion($usuario_id, $usuario_sucursal, $usuario_parset
 /**
  * Función para registrar el cierre de sesión en usersConexions
  */
-function registrar_cierre_sesion($usuario_id, $usuario_sucursal, $usuario_parset, $token = '') {
+function registrar_cierre_sesion($usuario_id, $usuario_parset, $token = '') {
     $conexion = conectar_bd();
     
     if (!$conexion) {
@@ -2566,14 +2564,13 @@ function registrar_cierre_sesion($usuario_id, $usuario_sucursal, $usuario_parset
     // 2. Registrar el log de cierre de sesión (tu INSERT actual)
     $query = "INSERT INTO usersConexions (
         state_connection, 
-        sucursalIdUserConexion, 
         dateConexion, 
         userId, 
         userAgent, 
         ipNumberUser, 
         logTxt, 
         groupId
-    ) VALUES (?, ?, NOW(), ?, ?, ?, ?, ?)";
+    ) VALUES (?, NOW(), ?, ?, ?, ?, ?)";
     
     $stmt = mysqli_prepare($conexion, $query);
     
@@ -2586,9 +2583,8 @@ function registrar_cierre_sesion($usuario_id, $usuario_sucursal, $usuario_parset
     $logTxt = 'El usuario '.$usuario_parset.' ha cerrado sesión correctamente';
     $groupId = '57';
     
-    mysqli_stmt_bind_param($stmt, 'ssissss', 
+    mysqli_stmt_bind_param($stmt, 'sissss', 
         $state_connection, 
-        $usuario_sucursal, 
         $usuario_id, 
         $userAgent, 
         $ipvVisitante, 
@@ -2616,14 +2612,13 @@ function registrar_cierre_sesion($usuario_id, $usuario_sucursal, $usuario_parset
     
     $query = "INSERT INTO usersConexions (
         state_connection, 
-        sucursalIdUserConexion, 
         dateConexion, 
         userId, 
         userAgent, 
         ipNumberUser, 
         logTxt, 
         groupId
-    ) VALUES (?, ?, NOW(), ?, ?, ?, ?, ?)";
+    ) VALUES (?, NOW(), ?, ?, ?, ?, ?)";
     
     $stmt = mysqli_prepare($conexion, $query);
     
@@ -2636,9 +2631,8 @@ function registrar_cierre_sesion($usuario_id, $usuario_sucursal, $usuario_parset
     $logTxt = 'El usuario '.$usuario_parset.' ha cerrado sesión correctamente';
     $groupId = '57';
     
-    mysqli_stmt_bind_param($stmt, 'ssissss', 
+    mysqli_stmt_bind_param($stmt, 'sissss', 
         $state_connection, 
-        $usuario_sucursal, 
         $usuario_id, 
         $userAgent, 
         $ipvVisitante, 

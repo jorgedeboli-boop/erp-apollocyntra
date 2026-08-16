@@ -28,7 +28,8 @@ $query = "
             WHEN EXISTS (
                 SELECT 1
                 FROM usersConexions uc
-                WHERE uc.sucursalIdUserConexion = s.id_sucursal
+                INNER JOIN usuarios u ON uc.userId = u.id_usuario
+                WHERE u.sucursal_usuario = s.id_sucursal
                   AND uc.state_connection = 'true'
             ) THEN 'true'
             ELSE 'false'

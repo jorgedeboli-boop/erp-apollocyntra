@@ -663,7 +663,7 @@ TABLA: usersConexions  (log de sesiones/conexiones)
 - idUserConexion INT PK
 - userId INT → usuarios.id_usuario
 - dateConexion DATETIME, state_connection ENUM('false','true')
-- sucursalIdUserConexion INT, companyIdUserConexion INT
+- companyIdUserConexion INT
 - groupId INT, logTxt TEXT, tokensessioncontrol VARCHAR
 - ipNumberUser VARCHAR, userAgent VARCHAR
 - locationLong / locationLat VARCHAR

@@ -37,7 +37,7 @@ try {
         throw new Exception('Error de conexión');
     }
 
-    $query_usuario = "SELECT usuario_root, super_admin FROM usuarios WHERE id_usuario = ?";
+    $query_usuario = "SELECT usuario, usuario_root, super_admin FROM usuarios WHERE id_usuario = ?";
     $stmt_usuario = mysqli_prepare($conexion, $query_usuario);
     mysqli_stmt_bind_param($stmt_usuario, 'i', $id_usuario);
     mysqli_stmt_execute($stmt_usuario);
@@ -102,19 +102,33 @@ try {
         exit;
     }
 
+    $queryUpdate = "UPDATE usersConexions
+                    SET state_connection = 'false'
+                    WHERE userId = ?
+                    AND state_connection = 'true'";
+    $stmtUpdate = mysqli_prepare($conexion, $queryUpdate);
+    if ($stmtUpdate) {
+        mysqli_stmt_bind_param($stmtUpdate, 'i', $id_usuario);
+        mysqli_stmt_execute($stmtUpdate);
+        mysqli_stmt_close($stmtUpdate);
+    }
+
     $state_connection = 'false';
-    $groupId = 55;
+    $usuario_parset = $usuario_objetivo['usuario'] ?? '';
+    $userAgent = obtener_user_agent();
+    $ipvVisitante = obtener_ip_visitante();
+    $logTxt = 'Desde central se han cerrado todas las sesiones del usuario '.$usuario_parset;
+    $groupId = '55';
 
     $query = "INSERT INTO usersConexions (
         state_connection, 
-        sucursalIdUserConexion, 
         dateConexion, 
         userId, 
         userAgent, 
         ipNumberUser, 
         logTxt, 
         groupId
-    ) VALUES (?, ?, NOW(), ?, ?, ?, ?, ?)";
+    ) VALUES (?, NOW(), ?, ?, ?, ?, ?)";
     
     $stmt = mysqli_prepare($conexion, $query);
     
@@ -123,14 +137,9 @@ try {
         return false;
     }
     
-    $state_connection = 'false';
-    $logTxt = 'Desde central se han cerrado todas las sesiones del usuario '.$usuario_parset;
-    $groupId = '55';
-    
-    mysqli_stmt_bind_param($stmt, 'ssissss', 
+    mysqli_stmt_bind_param($stmt, 'sissss', 
         $state_connection, 
-        $usuario_sucursal, 
-        $usuario_id, 
+        $id_usuario, 
         $userAgent, 
         $ipvVisitante, 
         $logTxt, 

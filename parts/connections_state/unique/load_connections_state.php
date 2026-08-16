@@ -45,14 +45,14 @@ try {
             uc.locationLat,
             uc.locationLong,
             uc.tokensessioncontrol,
-            uc.sucursalIdUserConexion,
+            u.sucursal_usuario,
             s.nombre_sucursal,
             u.nombre_usuario,
             u.apellido_usuario,
             u.usuario
         FROM usersConexions uc
-        LEFT JOIN sucursal s ON uc.sucursalIdUserConexion = s.id_sucursal
         LEFT JOIN usuarios u ON uc.userId = u.id_usuario
+        LEFT JOIN sucursal s ON u.sucursal_usuario = s.id_sucursal
         WHERE uc.state_connection = 'true'
         ORDER BY s.nombre_sucursal ASC, uc.dateConexion DESC
     ";
@@ -69,7 +69,7 @@ try {
     while ($row = mysqli_fetch_assoc($result)) {
         $totalConexiones++;
 
-        $idSucursal = (int) ($row['sucursalIdUserConexion'] ?? 0);
+        $idSucursal = (int) ($row['sucursal_usuario'] ?? 0);
         $nombreSucursal = trim((string) ($row['nombre_sucursal'] ?? ''));
         if ($nombreSucursal === '') {
             $nombreSucursal = $idSucursal > 0 ? 'Sucursal #' . $idSucursal : 'Sin sucursal';

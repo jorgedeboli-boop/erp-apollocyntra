@@ -76,7 +76,8 @@ try {
     $queryCount = "
         SELECT COUNT(*) as total
         FROM usersConexions uc
-        LEFT JOIN sucursal s ON uc.sucursalIdUserConexion = s.id_sucursal
+        LEFT JOIN usuarios u ON uc.userId = u.id_usuario
+        LEFT JOIN sucursal s ON u.sucursal_usuario = s.id_sucursal
         WHERE $whereClause
     ";
     
@@ -105,7 +106,8 @@ try {
             uc.locationLong,
             uc.tokensessioncontrol
         FROM usersConexions uc
-        LEFT JOIN sucursal s ON uc.sucursalIdUserConexion = s.id_sucursal
+        LEFT JOIN usuarios u ON uc.userId = u.id_usuario
+        LEFT JOIN sucursal s ON u.sucursal_usuario = s.id_sucursal
         WHERE $whereClause
         ORDER BY $orderBy $orderDirection
         LIMIT ?, ?
