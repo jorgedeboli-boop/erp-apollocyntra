@@ -8803,7 +8803,6 @@ function verificarIdentificacion($identificacion) {
             nombre,
             apellido,
             telefono,
-            sucursal,
             f_alta,
             estado
         FROM clientes WHERE identificacion = ?";

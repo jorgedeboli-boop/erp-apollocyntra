@@ -707,6 +707,14 @@ function verificarIdentificacionExistente(identificacion) {
             console.error('Error al verificar identificación:', error);
             console.error('Status:', status);
             console.error('Response:', xhr.responseText);
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({
+                    title: 'Error',
+                    text: 'No se pudo comprobar la identificación. Inténtelo de nuevo.',
+                    icon: 'error',
+                    confirmButtonText: 'Aceptar'
+                });
+            }
         }
     });
 }
@@ -727,6 +735,16 @@ function ejecutarComprobacionIdentificacionCliente() {
     const tipoIdValor = tipoIdentificacion.value;
 
     if (!identificacionValor || !tipoIdValor) {
+        if (typeof Swal !== 'undefined') {
+            Swal.fire({
+                title: 'Faltan datos',
+                text: !tipoIdValor
+                    ? 'Seleccione primero el tipo de identificación'
+                    : 'Escriba el número de identificación',
+                icon: 'warning',
+                confirmButtonText: 'Aceptar'
+            });
+        }
         return;
     }
 
@@ -1112,11 +1130,9 @@ function inicializarSelect2Direcciones() {
 }
 
 </script>
-<?php if($app_country_id == 68){ ?>
-    <?php
+<?php
 $vComprobarIdentificacionSpain = filemtime(__DIR__ . '/../../universal/js/comprobar_identificacion_spain.js');
 $vJavascriptDirecciones = filemtime(__DIR__ . '/../../universal/js/javascript_direcciones.js');
 ?>
 <script src="parts/universal/js/comprobar_identificacion_spain.js?v=<?php echo $vComprobarIdentificacionSpain; ?>"></script>
-<?php } ?>
 <script src="parts/universal/js/javascript_direcciones.js?v=<?php echo $vJavascriptDirecciones; ?>"></script>

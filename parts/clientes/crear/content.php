@@ -116,7 +116,7 @@
                               <!-- Dirección (se cargará dinámicamente) -->
                               <div class="col-md-6" id="container_direccion">
                                 <?php
-                                require_once 'parts/lotes/crear/formulario_direccion_insert.php';
+                                require_once __DIR__ . '/formulario_direccion_insert.php';
                                 ?>
                               </div>
                               
