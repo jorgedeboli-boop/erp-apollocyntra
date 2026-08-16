@@ -1,7 +1,7 @@
 <?php
 /**
  * Registra una venta TPV: una sola fila en `ventas` por ticket, histórico por línea en `rel_articulos_venta`,
- * actualiza `articulos_venta` y `rel_articulos_estados`, trazabilidad.
+ * actualiza `articulos` y trazabilidad.
  */
 require_once __DIR__ . '/../../../include/session.php';
 require_once __DIR__ . '/../../../include/functions.php';
@@ -181,164 +181,15 @@ try {
     mysqli_begin_transaction($conexion);
 
 
-    // comprobar si existe articulo_venta, comprobar si existe rel_articulos_estados, si no existe, crearlo
-
-    if (!function_exists('crear_rel_articulos_estados_desde_articulos_venta')) {
-        /**
-         * Crea el registro en rel_articulos_estados cuando falta (a partir de articulos_venta y tablas origen).
-         * Requerido para ventas donde el histórico no se generó previamente.
-         */
-        function crear_rel_articulos_estados_desde_articulos_venta(mysqli $conexion, int $id_articulo_venta, int $id_sucursal_venta, float $precio_venta): void
-        {
-            // Leer articulos_venta completo
-            $stmt = mysqli_prepare($conexion, 'SELECT * FROM articulos_venta WHERE id = ? LIMIT 1');
-            if (!$stmt) {
-                throw new Exception('Error al preparar SELECT articulos_venta: ' . mysqli_error($conexion));
-            }
-            mysqli_stmt_bind_param($stmt, 'i', $id_articulo_venta);
-            if (!mysqli_stmt_execute($stmt)) {
-                throw new Exception('Error al ejecutar SELECT articulos_venta: ' . mysqli_stmt_error($stmt));
-            }
-            $res = mysqli_stmt_get_result($stmt);
-            $row = $res ? mysqli_fetch_assoc($res) : null;
-            mysqli_stmt_close($stmt);
-            if (!$row) {
-                throw new Exception('No se encontró articulos_venta para el artículo ' . $id_articulo_venta . '.');
-            }
-
-            $id_sucursal_origen = (int) ($row['id_sucursal_origen'] ?? 0);
-            $id_lote_origen = (int) ($row['id_lote_origen'] ?? 0);
-            $rel_id_articulo = (int) ($row['id_articulo_sucursal'] ?? 0);
-            $ley = (string) ($row['ley'] ?? '');
-            $peso = (float) ($row['peso'] ?? 0);
-            $precio_coste = (float) ($row['precio_coste'] ?? 0);
-
-            // Tipo de artículo (Oro/Plata)
-            $tipo_raw = strtolower(trim((string) ($row['tipo_articulo'] ?? $row['tipo'] ?? '')));
-            $tipo_de_articulo = ($tipo_raw === 'oro') ? 'Oro' : 'Plata';
-
-            // Defaults
-            $fecha_compra_articulo = '0000-00-00';
-            $articulo_auditado = 'false';
-            $rel_id_proforma = 0;
-            $rel_proforma_state = 'false';
-            $rel_id_item_proforma = 0;
-            $rel_numero_semana = 0;
-
-            // Leer articulos_{id_sucursal_origen}
-            if ($id_sucursal_origen > 0 && $rel_id_articulo > 0) {
-                $tabla_articulos = 'articulos_' . (int) $id_sucursal_origen;
-                $sqlArt = "SELECT * FROM `$tabla_articulos` WHERE id_articulo = ? LIMIT 1";
-                $stmt2 = mysqli_prepare($conexion, $sqlArt);
-                if (!$stmt2) {
-                    throw new Exception('Error al preparar SELECT ' . $tabla_articulos . ': ' . mysqli_error($conexion));
-                }
-                mysqli_stmt_bind_param($stmt2, 'i', $rel_id_articulo);
-                if (mysqli_stmt_execute($stmt2)) {
-                    $res2 = mysqli_stmt_get_result($stmt2);
-                    $row2 = $res2 ? mysqli_fetch_assoc($res2) : null;
-                    if ($row2) {
-                        $fecha_compra_articulo = (string) ($row2['fecha_compra_articulo'] ?? $fecha_compra_articulo);
-                        $articulo_auditado = (string) ($row2['articulo_auditado'] ?? $articulo_auditado);
-                        $rel_id_proforma = (int) ($row2['rel_id_proforma'] ?? $rel_id_proforma);
-                        $rel_proforma_state = (string) ($row2['rel_proforma_state'] ?? $rel_proforma_state);
-                        $rel_id_item_proforma = (int) ($row2['rel_id_item_proforma'] ?? $rel_id_item_proforma);
-                        $rel_numero_semana = (int) ($row2['rel_numero_semana'] ?? $rel_numero_semana);
-                    }
-                }
-                mysqli_stmt_close($stmt2);
-            }
-
-            // Leer lotes_{id_sucursal_origen} para envío/empeño
-            $rel_id_envio = 0;
-            $articulo_empeno = 'false';
-            if ($id_sucursal_origen > 0 && $id_lote_origen > 0) {
-                $tabla_lotes = 'lotes_' . (int) $id_sucursal_origen;
-                $sqlLote = "SELECT envio_numero, compra_opcion FROM `$tabla_lotes` WHERE id_lote = ? LIMIT 1";
-                $stmt3 = mysqli_prepare($conexion, $sqlLote);
-                if ($stmt3) {
-                    mysqli_stmt_bind_param($stmt3, 'i', $id_lote_origen);
-                    if (mysqli_stmt_execute($stmt3)) {
-                        $res3 = mysqli_stmt_get_result($stmt3);
-                        $row3 = $res3 ? mysqli_fetch_assoc($res3) : null;
-                        if ($row3) {
-                            $rel_id_envio = (int) ($row3['envio_numero'] ?? 0);
-                            $compra_opcion = (string) ($row3['compra_opcion'] ?? 'no');
-                            $articulo_empeno = ($compra_opcion === 'no') ? 'false' : 'true';
-                        }
-                    }
-                    mysqli_stmt_close($stmt3);
-                }
-            }
-
-            // Empresa de sucursal origen
-            $rel_id_empresa = obtener_rel_id_empresa_sesion();
-
-            // Insert en rel_articulos_estados
-            $sqlInsRel = "
-                INSERT INTO rel_articulos_estados (
-                    rel_id_articulo,
-                    rel_id_sucursal,
-                    ley,
-                    rel_id_lote,
-                    tipo_de_articulo,
-                    peso_articulo,
-                    precio_compra_articulo,
-                    fecha_compra_articulo,
-                    estado_articulo,
-                    articulo_auditado,
-                    rel_id_proforma,
-                    rel_proforma_state,
-                    rel_id_item_proforma,
-                    rel_numero_semana,
-                    rel_id_empresa,
-                    rel_id_envio,
-                    rel_id_articulo_venta,
-                    rel_id_sucursal_venta,
-                    precio_venta,
-                    articulo_empeno
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'Stock', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            ";
-            $stmtIns = mysqli_prepare($conexion, $sqlInsRel);
-            if (!$stmtIns) {
-                throw new Exception('Error al preparar INSERT rel_articulos_estados: ' . mysqli_error($conexion));
-            }
-
-            mysqli_stmt_bind_param(
-                $stmtIns,
-                'iisisddssisiiiiiids',
-                $rel_id_articulo,
-                $id_sucursal_origen,
-                $ley,
-                $id_lote_origen,
-                $tipo_de_articulo,
-                $peso,
-                $precio_coste,
-                $fecha_compra_articulo,
-                $articulo_auditado,
-                $rel_id_proforma,
-                $rel_proforma_state,
-                $rel_id_item_proforma,
-                $rel_numero_semana,
-                $rel_id_empresa,
-                $rel_id_envio,
-                $id_articulo_venta,
-                $id_sucursal_venta,
-                $precio_venta,
-                $articulo_empeno
-            );
-            if (!mysqli_stmt_execute($stmtIns)) {
-                throw new Exception('Error al insertar rel_articulos_estados: ' . mysqli_stmt_error($stmtIns));
-            }
-            mysqli_stmt_close($stmtIns);
-        }
-    }
-
-    // 1) Validar que TODOS los artículos existen en articulos_venta (si falta alguno, parar)
     $idsNoEncontrados = [];
-    $stmtExisteAV = mysqli_prepare($conexion, 'SELECT id FROM articulos_venta WHERE id = ? LIMIT 1');
+    $stmtExisteAV = mysqli_prepare(
+        $conexion,
+        "SELECT sku FROM articulos
+         WHERE sku = ? AND empresa_id_rel = ? AND estado IN ('enventa', 'en_venta')
+         LIMIT 1"
+    );
     if (!$stmtExisteAV) {
-        throw new Exception('Error al preparar comprobación de articulos_venta: ' . mysqli_error($conexion));
+        throw new Exception('Error al preparar comprobación de artículos: ' . mysqli_error($conexion));
     }
     foreach ($articulos as $artTmp) {
         $idTmp = isset($artTmp['id_articulo']) ? (int) $artTmp['id_articulo'] : 0;
@@ -346,10 +197,10 @@ try {
             $idsNoEncontrados[] = $idTmp;
             continue;
         }
-        mysqli_stmt_bind_param($stmtExisteAV, 'i', $idTmp);
+        mysqli_stmt_bind_param($stmtExisteAV, 'ii', $idTmp, $rel_id_empresa_usuario);
         if (!mysqli_stmt_execute($stmtExisteAV)) {
             mysqli_stmt_close($stmtExisteAV);
-            throw new Exception('Error al comprobar articulos_venta: ' . mysqli_stmt_error($stmtExisteAV));
+            throw new Exception('Error al comprobar artículos: ' . mysqli_stmt_error($stmtExisteAV));
         }
         $rTmp = mysqli_stmt_get_result($stmtExisteAV);
         $ok = ($rTmp && mysqli_fetch_row($rTmp)) ? true : false;
@@ -359,29 +210,8 @@ try {
     }
     mysqli_stmt_close($stmtExisteAV);
     if (count($idsNoEncontrados) > 0) {
-        throw new Exception('Artículos en articulos_venta no encontrados: ' . implode(',', $idsNoEncontrados));
+        throw new Exception('Artículos no encontrados o no están en venta: ' . implode(',', $idsNoEncontrados));
     }
-
-    // 2) Asegurar rel_articulos_estados para TODOS los artículos (si falta, crearlo)
-    $stmtExisteRel = mysqli_prepare($conexion, 'SELECT 1 FROM rel_articulos_estados WHERE rel_id_articulo_venta = ? LIMIT 1');
-    if (!$stmtExisteRel) {
-        throw new Exception('Error al preparar comprobación de rel_articulos_estados: ' . mysqli_error($conexion));
-    }
-    foreach ($articulos as $artTmp) {
-        $idTmp = isset($artTmp['id_articulo']) ? (int) $artTmp['id_articulo'] : 0;
-        $precioTmp = isset($artTmp['precio']) ? (float) $artTmp['precio'] : 0;
-        mysqli_stmt_bind_param($stmtExisteRel, 'i', $idTmp);
-        if (!mysqli_stmt_execute($stmtExisteRel)) {
-            mysqli_stmt_close($stmtExisteRel);
-            throw new Exception('Error al comprobar rel_articulos_estados: ' . mysqli_stmt_error($stmtExisteRel));
-        }
-        $rTmp = mysqli_stmt_get_result($stmtExisteRel);
-        $existeRel = ($rTmp && mysqli_fetch_row($rTmp)) ? true : false;
-        if (!$existeRel) {
-            crear_rel_articulos_estados_desde_articulos_venta($conexion, $idTmp, $sucursal_venta, $precioTmp);
-        }
-    }
-    mysqli_stmt_close($stmtExisteRel);
 
     $id_venta_sucursal = 1;
     $id_cliente = asegurarClienteParaVenta($conexion, $datos_cliente_venta, $usuario_id, $sucursal_venta);
@@ -477,9 +307,9 @@ try {
 
     $stmtA = mysqli_prepare(
         $conexion,
-        'SELECT id, estado, id_sucursal_destino, descripcion, precio_coste, tipo_iva_articulo, system_codigo_regimen,
-                peso, articulo_web, tipo
-         FROM articulos_venta WHERE id = ? LIMIT 1'
+        'SELECT sku AS id, estado, descripcion, precio_coste, tipo_iva_articulo, system_codigo_regimen,
+                categoria_articulo
+         FROM articulos WHERE sku = ? AND empresa_id_rel = ? LIMIT 1'
     );
     if (!$stmtA) {
         throw new Exception('Error al leer artículo: ' . mysqli_error($conexion));
@@ -494,7 +324,7 @@ try {
             throw new Exception('Datos de artículo inválidos.');
         }
 
-        mysqli_stmt_bind_param($stmtA, 'i', $id_art);
+        mysqli_stmt_bind_param($stmtA, 'ii', $id_art, $rel_id_empresa_usuario);
         mysqli_stmt_execute($stmtA);
         $resA = mysqli_stmt_get_result($stmtA);
         $fila = $resA ? mysqli_fetch_assoc($resA) : null;
@@ -502,8 +332,9 @@ try {
         if (!$fila) {
             throw new Exception('Artículo no encontrado: ' . $id_art);
         }
-        if (strtolower((string) ($fila['estado'] ?? '')) !== 'enventa') {
-            throw new Exception('El artículo ' . $id_art . ' no está en venta (enventa).');
+        $estado_fila = strtolower((string) ($fila['estado'] ?? ''));
+        if (!in_array($estado_fila, ['enventa', 'en_venta'], true)) {
+            throw new Exception('El artículo ' . $id_art . ' no está en venta.');
         }
 
         $desc_rel = trim((string) ($fila['descripcion'] ?? ''));
@@ -543,20 +374,15 @@ try {
 
         $stmtU = mysqli_prepare(
             $conexion,
-            "UPDATE articulos_venta SET
+            "UPDATE articulos SET
                 estado = ?,
-                fecha_vendido = CURDATE(),
-                hora_vendido = CURTIME(),
-                precio = ?,
-                last_id_venta = ?,
-                id_venta_sucursal = ?,
                 update_register = CURDATE()
-             WHERE id = ? AND id_sucursal_destino = ? AND estado = 'enventa'"
+             WHERE sku = ? AND empresa_id_rel = ? AND estado IN ('enventa', 'en_venta')"
         );
         if (!$stmtU) {
-            throw new Exception('Error al preparar UPDATE articulos_venta: ' . mysqli_error($conexion));
+            throw new Exception('Error al preparar UPDATE articulos: ' . mysqli_error($conexion));
         }
-        mysqli_stmt_bind_param($stmtU, 'sdiiii', $estado_articulo, $precio_linea, $id_venta_pk, $id_venta_sucursal, $id_art, $sucursal_venta);
+        mysqli_stmt_bind_param($stmtU, 'sii', $estado_articulo, $id_art, $rel_id_empresa_usuario);
         if (!mysqli_stmt_execute($stmtU)) {
             throw new Exception('Error al actualizar artículo: ' . mysqli_stmt_error($stmtU));
         }
@@ -565,55 +391,14 @@ try {
             throw new Exception('No se pudo actualizar el estado del artículo ' . $id_art . '.');
         }
         mysqli_stmt_close($stmtU);
-        $numero_semana = numeroSemanaActual();
-        $year_rel = numeroSemanaActualConAnyo();
-
-        $stmtR = mysqli_prepare(
-            $conexion,
-            "UPDATE rel_articulos_estados SET
-                estado_articulo = ?,
-                rel_id_sucursal_venta = ?,
-                precio_venta = ?,
-                fecha_venta = CURDATE(),
-                rel_id_venta = ?,
-                rel_numero_semana_venta = ?,
-                year_rel = ?
-             WHERE rel_id_articulo_venta = ?"
-        );
-        if (!$stmtR) {
-            throw new Exception('Error al preparar UPDATE rel_articulos_estados: ' . mysqli_error($conexion));
-        }
-        mysqli_stmt_bind_param($stmtR, 'sisiiii', $estado_articulo, $sucursal_venta, $precio_linea, $id_venta_pk, $numero_semana, $year_rel, $id_art);
-        if (!mysqli_stmt_execute($stmtR)) {
-            throw new Exception('Error al actualizar relación: ' . mysqli_stmt_error($stmtR));
-        }
-        $affectedR = mysqli_stmt_affected_rows($stmtR);
-        mysqli_stmt_close($stmtR);
-        // Un UPDATE puede devolver 0 filas afectadas aunque exista el registro (si los valores ya eran iguales).
-        if ($affectedR === 0) {
-            $stmtChk = mysqli_prepare($conexion, 'SELECT 1 FROM rel_articulos_estados WHERE rel_id_articulo_venta = ? LIMIT 1');
-            if (!$stmtChk) {
-                throw new Exception('Error al comprobar rel_articulos_estados: ' . mysqli_error($conexion));
-            }
-            mysqli_stmt_bind_param($stmtChk, 'i', $id_art);
-            if (!mysqli_stmt_execute($stmtChk)) {
-                throw new Exception('Error al comprobar rel_articulos_estados: ' . mysqli_stmt_error($stmtChk));
-            }
-            $resChk = mysqli_stmt_get_result($stmtChk);
-            $existe = ($resChk && mysqli_fetch_row($resChk)) ? true : false;
-            mysqli_stmt_close($stmtChk);
-            if (!$existe) {
-                throw new Exception('No se encontró rel_articulos_estados para el artículo ' . $id_art . '.');
-            }
-        }
-        $comentarios_accion = 'Artículo vendido SKU: ' . $id_art . ' en la venta Nº: ' . $id_venta_sucursal;
+        $comentarios_accion = 'Artículo vendido SKU: ' . $id_art . ' en la venta Nº: ' . $id_venta_pk;
         try {
             trazabilidad_articulos_venta(
-                $id_venta_sucursal,
+                $id_venta_pk,
                 $usuario_id,
                 $estado_articulo,
                 $comentarios_accion,
-                $sucursal_venta,
+                $rel_id_empresa_usuario,
                 $id_art,
                 $id_venta_pk
             );
@@ -1175,39 +960,12 @@ try {
 
         // Revertir artículos tocados por la venta si el flujo falló a mitad
         if (!empty($articulos) && is_array($articulos)) {
-            // Nombre de sucursal para dejarlo consistente en articulos_venta (primera letra en mayúscula)
-            $nombre_sucursal_venta = '';
-            $nomSucRaw = obtener_nombre_sucursal($sucursal_venta);
-            if ($nomSucRaw !== false) {
-                $nombre_sucursal_venta = trim((string) $nomSucRaw);
-            }
-            if ($nombre_sucursal_venta !== '') {
-                $nombre_sucursal_venta = ucfirst(mb_strtolower($nombre_sucursal_venta, 'UTF-8'));
-            }
-
             $stmtRevertAV = mysqli_prepare(
                 $conexion,
-                "UPDATE articulos_venta SET
+                "UPDATE articulos SET
                     estado = 'enventa',
-                    fecha_vendido = '0000-00-00',
-                    hora_vendido = '00:00:00',
-                    last_id_venta = 0,
-                    id_venta_sucursal = 0,
-                    nombre_sucursal_venta = ?,
                     update_register = CURDATE()
-                 WHERE id = ?"
-            );
-            $stmtRevertRel = mysqli_prepare(
-                $conexion,
-                "UPDATE rel_articulos_estados SET
-                    estado_articulo = 'Stock',
-                    rel_id_sucursal_venta = 0,
-                    precio_venta = 0,
-                    fecha_venta = '0000-00-00',
-                    rel_id_venta = 0,
-                    rel_numero_semana_venta = 0,
-                    year_rel = 0
-                 WHERE rel_id_articulo_venta = ?"
+                 WHERE sku = ? AND empresa_id_rel = ?"
             );
 
             foreach ($articulos as $artTmp) {
@@ -1216,39 +974,32 @@ try {
                     continue;
                 }
                 if ($stmtRevertAV) {
-                    mysqli_stmt_bind_param($stmtRevertAV, 'si', $nombre_sucursal_venta, $idTmp);
+                    mysqli_stmt_bind_param($stmtRevertAV, 'ii', $idTmp, $rel_id_empresa_usuario);
                     mysqli_stmt_execute($stmtRevertAV);
-                }
-                if ($stmtRevertRel) {
-                    mysqli_stmt_bind_param($stmtRevertRel, 'i', $idTmp);
-                    mysqli_stmt_execute($stmtRevertRel);
                 }
             }
 
             if ($stmtRevertAV) {
                 mysqli_stmt_close($stmtRevertAV);
             }
-            if ($stmtRevertRel) {
-                mysqli_stmt_close($stmtRevertRel);
-            }
         }
 
         if ($id_venta_pk > 0) {
             $stmtDelRel = mysqli_prepare(
                 $conexion,
-                'DELETE FROM rel_articulos_venta WHERE rel_id_venta = ? AND sucursal_venta = ?'
+                'DELETE FROM rel_articulos_venta WHERE rel_id_venta = ?'
             );
             if ($stmtDelRel) {
-                mysqli_stmt_bind_param($stmtDelRel, 'ii', $id_venta_pk, $sucursal_venta);
+                mysqli_stmt_bind_param($stmtDelRel, 'i', $id_venta_pk);
                 mysqli_stmt_execute($stmtDelRel);
                 mysqli_stmt_close($stmtDelRel);
             }
             $stmtDelV = mysqli_prepare(
                 $conexion,
-                'DELETE FROM ventas WHERE id = ? AND id_sucursal = ? LIMIT 1'
+                'DELETE FROM ventas WHERE id = ? LIMIT 1'
             );
             if ($stmtDelV) {
-                mysqli_stmt_bind_param($stmtDelV, 'ii', $id_venta_pk, $sucursal_venta);
+                mysqli_stmt_bind_param($stmtDelV, 'i', $id_venta_pk);
                 mysqli_stmt_execute($stmtDelV);
                 mysqli_stmt_close($stmtDelV);
             }

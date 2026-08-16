@@ -1347,8 +1347,8 @@ function agregarArticuloAutomaticamente(articulo, sku) {
     sku: String(sku).trim(),
     descripcion: articulo.descripcion,
     unidades: 1,
-    peso: articulo.peso,
-    tipo: articulo.tipo,
+    peso: parseFloat(articulo.peso) || 0,
+    tipo: articulo.tipo || '',
     precio: articulo.precio,
     precio_original: parseFloat(articulo.precio) || 0
   };
