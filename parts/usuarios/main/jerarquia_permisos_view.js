@@ -2,7 +2,6 @@
   'use strict';
 
   const SECTION_LABELS = {
-    sucursal_section: 'Sucursal',
     central_section: 'Central',
     recepcion_lotes_section: 'Recepción de lotes',
     auditoria_section: 'Auditoría',
