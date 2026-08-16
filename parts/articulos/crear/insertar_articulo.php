@@ -44,15 +44,10 @@ try {
         if (!in_array($tipo_iva_articulo, $tipos_iva_validos, true)) {
             throw new Exception('Tipo de IVA no válido');
         }
-        $id_sucursal_destino = 2;
-
-        // Obtener datos de la sucursal de destino
-        $sucursal_origen = (int)$_POST['sucursal_origen'];
+        $id_sucursal_destino = 0;
+        $id_sucursal_origen = 0;
         $lote_origen = isset($_POST['lote_origen']) ? trim($_POST['lote_origen']) : '';
-        // Convertir id_lote_origen para rel_articulos_estados
         $id_lote_origen = !empty($lote_origen) ? (int)$lote_origen : 0;
-        // Convertir id_lote_origen para rel_articulos_estados
-        $id_sucursal_origen = !empty($sucursal_origen) ? (int)$sucursal_origen : 0;
         
         
         $precio_coste = (float)$_POST['precio_coste'];
@@ -77,27 +72,7 @@ try {
             throw new Exception("No se pudo determinar el usuario");
         }
         
-        // Validar que la sucursal exista
-        $query_sucursal = "SELECT id_sucursal FROM sucursal WHERE id_sucursal = ? LIMIT 1";
-        $stmt_sucursal = mysqli_prepare($conexion, $query_sucursal);
-        mysqli_stmt_bind_param($stmt_sucursal, 'i', $id_sucursal_destino);
-        mysqli_stmt_execute($stmt_sucursal);
-        $result_sucursal = mysqli_stmt_get_result($stmt_sucursal);
-        if (mysqli_num_rows($result_sucursal) == 0) {
-            mysqli_stmt_close($stmt_sucursal);
-            throw new Exception("La sucursal seleccionada no existe");
-        }
-        mysqli_stmt_close($stmt_sucursal);
-        
-        // Obtener empresa_id de la sucursal
-        $query_empresa = "SELECT empresa_id FROM sucursal WHERE id_sucursal = ? LIMIT 1";
-        $stmt_empresa = mysqli_prepare($conexion, $query_empresa);
-        mysqli_stmt_bind_param($stmt_empresa, 'i', $id_sucursal_destino);
-        mysqli_stmt_execute($stmt_empresa);
-        $result_empresa = mysqli_stmt_get_result($stmt_empresa);
-        $row_empresa = mysqli_fetch_assoc($result_empresa);
-        $rel_id_empresa = $row_empresa['empresa_id'];
-        mysqli_stmt_close($stmt_empresa);
+        $rel_id_empresa = 0;
         
         // Obtener número de semana actual
         $query_semana = "SELECT numero_semana FROM listado_numero_semanas WHERE CURDATE() BETWEEN fecha_semana_desde AND fecha_semana_hasta AND anyo_listado = YEAR(CURDATE()) LIMIT 1";
@@ -260,7 +235,7 @@ try {
         
         // INSERT 3: Trazabilidad
         $accion_trazabilidad_venta = 'creado';
-        $comentarios_trazabilidad_venta = "Artículo creado en la sucursal " . $id_sucursal_destino . " por el usuario " . $_SESSION['usuario_id'];
+        $comentarios_trazabilidad_venta = "Artículo creado por el usuario " . $_SESSION['usuario_id'];
         
         try {
             trazabilidad_articulos_venta( 0, $_SESSION['usuario_id'], $accion_trazabilidad_venta, $comentarios_trazabilidad_venta, $id_sucursal_destino, $last_id, 0);

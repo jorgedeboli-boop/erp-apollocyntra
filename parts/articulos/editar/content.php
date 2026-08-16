@@ -10,12 +10,8 @@
       // Consulta para obtener datos del artículo
       $query_articulo = "
           SELECT 
-              av.*,
-              s_destino.nombre_sucursal as nombre_sucursal_destino,
-              s_origen.nombre_sucursal as nombre_sucursal_origen
+              av.*
           FROM articulos_venta av
-          LEFT JOIN sucursal s_destino ON av.id_sucursal_destino = s_destino.id_sucursal
-          LEFT JOIN sucursal s_origen ON av.id_sucursal_origen = s_origen.id_sucursal
           WHERE av.id = ? AND av.estado IN ('noetiquetado_c', 'noetiquetado_u', 'enventa', 'enviado', 'enreparacion')
       ";
       
@@ -57,24 +53,6 @@
             <div class="row mb-4">
               <div class="col-12">
                 <h5 class="mb-4">Datos de vinculación</h5>
-              </div>
-              
-              <div class="col-md-6 mb-4">
-                <div class="form-floating form-floating-outline">
-                  <select class="form-select select2" id="sucursal_origen" name="sucursal_origen">
-                    <option value="">Seleccionar...</option>
-                    <?php 
-                    // Obtener todas las sucursales habilitadas para marcar la seleccionada
-                    $query_sucursales = "SELECT id_sucursal, nombre_sucursal FROM sucursal WHERE estado_tienda = 'habilitada' ORDER BY nombre_sucursal ASC";
-                    $result_sucursales = mysqli_query($conexion, $query_sucursales);
-                    while ($suc = mysqli_fetch_assoc($result_sucursales)) {
-                        $selected = ($articulo['id_sucursal_origen'] == $suc['id_sucursal']) ? 'selected' : '';
-                        echo '<option value="' . htmlspecialchars($suc['id_sucursal']) . '" ' . $selected . '>' . htmlspecialchars($suc['nombre_sucursal']) . '</option>';
-                    }
-                    ?>
-                  </select>
-                  <label for="sucursal_origen" class="form-label">Sucursal origen</label>
-                </div>
               </div>
               
               <div class="col-md-6 mb-3">

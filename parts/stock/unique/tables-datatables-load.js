@@ -7,17 +7,15 @@
 const COLUMNAS_EXPORTABLES_STOCK = [
   { index: 0, label: 'SKU' },
   { index: 1, label: 'Descripción' },
-  { index: 2, label: 'Sucursal Origen' },
-  { index: 3, label: 'Sucursal' },
-  { index: 4, label: 'Peso' },
-  { index: 5, label: 'Precio' },
-  { index: 6, label: 'Precio Coste' },
-  { index: 7, label: '€/g' },
-  { index: 8, label: 'Tipo' },
-  { index: 9, label: 'F. Enviado' },
-  { index: 10, label: 'F. En Venta' },
-  { index: 11, label: 'Creado Por' },
-  { index: 12, label: 'Origen' }
+  { index: 2, label: 'Peso' },
+  { index: 3, label: 'Precio' },
+  { index: 4, label: 'Precio Coste' },
+  { index: 5, label: '€/g' },
+  { index: 6, label: 'Tipo' },
+  { index: 7, label: 'F. Enviado' },
+  { index: 8, label: 'F. En Venta' },
+  { index: 9, label: 'Creado Por' },
+  { index: 10, label: 'Origen' }
 ];
 
 const SELECTORES_BOTONES_FECHA_STOCK = '#filtro_por_fecha_en_venta, #filtro_dia, #filtro_mes, #filtro_todos';
@@ -84,13 +82,11 @@ document.addEventListener('DOMContentLoaded', function (e) {
         url: 'parts/stock/unique/load_list.php',
         type: 'POST',
         data: function(d) {
-          const sucursalFilter = document.getElementById('filtro_sucursal_articulo');
           const tipoFilter = document.getElementById('filtro_tipo');
           const origenFilter = document.getElementById('filtro_origen');
           const fechaDesdeFilter = document.getElementById('filtro_fecha_desde');
           const fechaHastaFilter = document.getElementById('filtro_fecha_hasta');
           
-          d.filtro_sucursal = sucursalFilter ? sucursalFilter.value : '';
           d.filtro_tipo = tipoFilter ? tipoFilter.value : '';
           d.filtro_origen = origenFilter ? origenFilter.value : '';
           d.filtro_fecha_desde = fechaDesdeFilter ? fechaDesdeFilter.value : '';
@@ -112,18 +108,16 @@ document.addEventListener('DOMContentLoaded', function (e) {
       columns: [
         { data: 0 },  // SKU
         { data: 1 },  // Descripción
-        { data: 2 },  // Sucursal Origen
-        { data: 3 },  // Sucursal (destino)
-        { data: 4 },  // Peso
-        { data: 5 },  // Precio
-        { data: 6 },  // Precio Coste
-        { data: 7 },  // € gramo
-        { data: 8 },  // Tipo
-        { data: 9 },  // F. Enviado
-        { data: 10 }, // F. En Venta
-        { data: 11 }, // Creado Por
-        { data: 12 }, // Origen
-        { data: 13, visible: false } // ID (hidden para click)
+        { data: 2 },  // Peso
+        { data: 3 },  // Precio
+        { data: 4 },  // Precio Coste
+        { data: 5 },  // € gramo
+        { data: 6 },  // Tipo
+        { data: 7 },  // F. Enviado
+        { data: 8 },  // F. En Venta
+        { data: 9 },  // Creado Por
+        { data: 10 }, // Origen
+        { data: 11, visible: false } // ID (hidden para click)
       ],
       
       columnDefs: [
@@ -202,12 +196,7 @@ document.addEventListener('DOMContentLoaded', function (e) {
                         doc.styles.tableHeader.bold = true;
                         doc.styles.tableHeader.color = 'white';
                         
-                        const filtroSucursal = document.getElementById('filtro_sucursal_articulo');
-                        const nombreSucursal = (filtroSucursal && filtroSucursal.value && filtroSucursal.value !== '') 
-                          ? filtroSucursal.options[filtroSucursal.selectedIndex].text
-                          : 'todas las sucursales';
-                        
-                        let tituloPDF = 'Listado de Stock de ' + nombreSucursal;
+                        let tituloPDF = 'Listado de Stock';
                         
                         if (window.titulo_filtros_stock) {
                           tituloPDF += ' - ' + window.titulo_filtros_stock;
@@ -280,8 +269,8 @@ document.addEventListener('DOMContentLoaded', function (e) {
           if ($(e.target).closest('button, a, .select2').length > 0) {
             return;
           }
-          // Obtener el ID del artículo (columna 13)
-          const idArticulo = data[13];
+          // Obtener el ID del artículo (columna oculta)
+          const idArticulo = data[11];
           if (idArticulo) {
             window.location.href = 'articulo.php?id=' + idArticulo;
           }
@@ -392,13 +381,6 @@ document.addEventListener('DOMContentLoaded', function (e) {
     
     let partes = [];
     
-    // 0. Agregar sucursal si está seleccionada
-    const filtroSucursal = document.getElementById('filtro_sucursal_articulo');
-    let nombreSucursal = '';
-    if (filtroSucursal && filtroSucursal.value && filtroSucursal.value !== '') {
-      nombreSucursal = 'de ' + filtroSucursal.options[filtroSucursal.selectedIndex].text;
-    }
-    
     // 1. Agregar filtro de fechas si existe
     const filtroActivo = window.filtro_periodo_activo || 'todos';
     const filtroFechaDesde = document.getElementById('filtro_fecha_desde');
@@ -445,14 +427,9 @@ document.addEventListener('DOMContentLoaded', function (e) {
       partes.push('origen ' + textoOrigen);
     }
     
-    // Construir el texto final: sucursal al inicio si existe, luego el resto con guiones
-    let textoFinal = nombreSucursal;
+    let textoFinal = '';
     if (partes.length > 0) {
-      if (textoFinal) {
-        textoFinal += ' ' + partes.join(' - ');
-      } else {
-        textoFinal = partes.join(' - ');
-      }
+      textoFinal = partes.join(' - ');
     }
     
     textoTitulo.textContent = textoFinal;
@@ -523,7 +500,6 @@ document.addEventListener('DOMContentLoaded', function (e) {
 
   function ejecutarExportacionStock(tipo, dt, columnasSeleccionadas) {
     const searchValue = dt.search();
-    const filtroSucursal = document.getElementById('filtro_sucursal_articulo');
     const filtroTipo = document.getElementById('filtro_tipo');
     const filtroOrigen = document.getElementById('filtro_origen');
     const filtroFechaDesde = document.getElementById('filtro_fecha_desde');
@@ -540,7 +516,6 @@ document.addEventListener('DOMContentLoaded', function (e) {
 
     const formData = new FormData();
     formData.append('search', searchValue);
-    formData.append('filtro_sucursal', filtroSucursal ? filtroSucursal.value : '');
     formData.append('filtro_tipo', filtroTipo ? filtroTipo.value : '');
     formData.append('filtro_origen', filtroOrigen ? filtroOrigen.value : '');
     formData.append('filtro_fecha_desde', filtroFechaDesde ? filtroFechaDesde.value : '');
@@ -614,12 +589,7 @@ document.addEventListener('DOMContentLoaded', function (e) {
             doc.styles.tableHeader.bold = true;
             doc.styles.tableHeader.color = 'white';
 
-            const filtroSucursalEl = document.getElementById('filtro_sucursal_articulo');
-            const nombreSucursal = (filtroSucursalEl && filtroSucursalEl.value && filtroSucursalEl.value !== '')
-              ? filtroSucursalEl.options[filtroSucursalEl.selectedIndex].text
-              : 'todas las sucursales';
-
-            let tituloPDF = 'Listado de Stock de ' + nombreSucursal;
+            let tituloPDF = 'Listado de Stock';
 
             if (window.titulo_filtros_stock) {
               tituloPDF += ' - ' + window.titulo_filtros_stock;

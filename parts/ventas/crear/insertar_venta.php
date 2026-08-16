@@ -131,11 +131,6 @@ if ($usuario_id <= 0) {
     exit;
 }
 
-if ($sucursal_venta <= 0) {
-    echo json_encode(['success' => false, 'message' => 'Sucursal no válida']);
-    exit;
-}
-
 if ($venta_plazos_db === 'si') {
     $estado_venta = "enfecha";
     $estado_articulo = "reservado";
@@ -532,9 +527,6 @@ try {
 
         if (!$fila) {
             throw new Exception('Artículo no encontrado: ' . $id_art);
-        }
-        if ((int) $fila['id_sucursal_destino'] !== $sucursal_venta) {
-            throw new Exception('El artículo ' . $id_art . ' no pertenece a esta sucursal.');
         }
         if (strtolower((string) ($fila['estado'] ?? '')) !== 'enventa') {
             throw new Exception('El artículo ' . $id_art . ' no está en venta (enventa).');

@@ -18,7 +18,6 @@ try {
     $searchValue = isset($_POST['search']['value']) ? trim((string) $_POST['search']['value']) : '';
 
     $filtros = array(
-        'sucursal' => isset($_POST['filtro_sucursal']) ? trim((string) $_POST['filtro_sucursal']) : '',
         'periodo' => isset($_POST['filtro_periodo']) ? trim((string) $_POST['filtro_periodo']) : '',
         'fecha_desde' => isset($_POST['filtro_fecha_desde']) ? trim((string) $_POST['filtro_fecha_desde']) : '',
         'fecha_hasta' => isset($_POST['filtro_fecha_hasta']) ? trim((string) $_POST['filtro_fecha_hasta']) : '',
@@ -31,7 +30,6 @@ try {
     $types = $built['types'];
 
     $filtrosBase = array(
-        'sucursal' => $filtros['sucursal'],
         'periodo' => '',
         'fecha_desde' => '',
         'fecha_hasta' => '',
@@ -44,7 +42,6 @@ try {
 
     $fromJoin = '
         FROM articulos_venta av
-        LEFT JOIN sucursal s ON av.id_sucursal_destino = s.id_sucursal
         LEFT JOIN usuarios u ON av.creado_por = u.id_usuario
     ';
 
@@ -81,7 +78,6 @@ try {
             av.id AS id_articulo,
             av.descripcion,
             av.origen_articulo,
-            s.nombre_sucursal,
             av.fecha_alta,
             av.precio,
             av.peso,
@@ -109,7 +105,6 @@ try {
         $data[] = array(
             $skuHtml,
             htmlspecialchars($row['descripcion'] ?? ''),
-            htmlspecialchars($row['nombre_sucursal'] ?: '---'),
             etiquetas_format_origen($row['origen_articulo'] ?? ''),
             etiquetas_format_fecha($row['fecha_alta'] ?? ''),
             number_format((float) ($row['precio'] ?? 0), 0, ',', '.') . ' €',

@@ -12,7 +12,6 @@ function gastos_listar_datos_filtros() {
 
     $cache = [
         'empresas' => [],
-        'sucursales' => [],
         'proveedores' => [],
         'tipos_gasto' => [],
         'formas_pago' => [],
@@ -30,7 +29,6 @@ function gastos_listar_datos_filtros() {
 
     $queries = [
         'empresas' => 'SELECT id_empresa AS id, nombre_empresa AS nombre FROM empresas ORDER BY nombre_empresa',
-        'sucursales' => 'SELECT id_sucursal AS id, nombre_sucursal AS nombre FROM sucursal ORDER BY nombre_sucursal',
         'proveedores' => 'SELECT id_proveedor AS id, nombre_proveedor AS nombre FROM proveedores ORDER BY nombre_proveedor',
         'tipos_gasto' => 'SELECT id_tipo_gasto AS id, nombre_tipo_gasto AS nombre FROM tipo_de_gasto ORDER BY nombre_tipo_gasto',
         'formas_pago' => 'SELECT id_forma_de_pago AS id, nombre_forma_de_pago AS nombre FROM formas_de_pago ORDER BY nombre_forma_de_pago',
@@ -62,10 +60,6 @@ function gastos_listar_imprimir_opciones_filtro(array $items, $placeholder) {
 
 function gastos_listar_imprimir_opciones_empresas() {
     gastos_listar_imprimir_opciones_filtro(gastos_listar_datos_filtros()['empresas'], 'Empresas');
-}
-
-function gastos_listar_imprimir_opciones_sucursales() {
-    gastos_listar_imprimir_opciones_filtro(gastos_listar_datos_filtros()['sucursales'], 'Sucursales');
 }
 
 function gastos_listar_imprimir_opciones_proveedores() {

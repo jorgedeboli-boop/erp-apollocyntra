@@ -17,7 +17,6 @@ try {
     
     // Obtener parámetros de filtros
     $searchValue = isset($_POST['search']) ? trim($_POST['search']) : '';
-    $filtro_sucursal = isset($_POST['filtro_sucursal']) ? trim($_POST['filtro_sucursal']) : '';
     $filtro_tipo_venta = isset($_POST['filtro_tipo_venta']) ? trim($_POST['filtro_tipo_venta']) : '';
     $filtro_venta_web = isset($_POST['filtro_venta_web']) ? trim($_POST['filtro_venta_web']) : '';
     $filtro_forma_pago = isset($_POST['filtro_forma_pago']) ? trim($_POST['filtro_forma_pago']) : '';
@@ -31,12 +30,6 @@ try {
     
     // Condición fija
     $whereConditions[] = "av.estado = 'vendido'";
-    
-    // Filtro de sucursal
-    if (!empty($filtro_sucursal)) {
-        $whereConditions[] = "s.nombre_sucursal = ?";
-        $searchParams[] = $filtro_sucursal;
-    }
     
     // Filtro de tipo de venta
     if (!empty($filtro_tipo_venta)) {
@@ -88,12 +81,10 @@ try {
         $whereConditions[] = "(
             av.id_venta_sucursal LIKE ? OR
             av.tipo_pago LIKE ? OR
-            s.nombre_sucursal LIKE ? OR
             u.nombre_usuario LIKE ?
         )";
         $searchTerm = '%' . $searchValue . '%';
         $searchParams[] = $searchValue;
-        $searchParams[] = $searchTerm;
         $searchParams[] = $searchTerm;
         $searchParams[] = $searchTerm;
     }
@@ -108,17 +99,14 @@ try {
         SELECT 
             av.id AS identificador_venta,
             av.id_venta_sucursal,
-            av.id_sucursal,
             av.precio,
             av.fecha,
             av.comprado_por,
             av.venta_plazos,
             av.venta_web,
             av.tipo_pago,
-            s.nombre_sucursal,
             u.nombre_usuario
         FROM ventas av
-        LEFT JOIN sucursal s ON av.id_sucursal = s.id_sucursal
         LEFT JOIN usuarios u ON av.comprado_por = u.id_usuario
         $whereClause
         ORDER BY av.fecha DESC
@@ -164,7 +152,6 @@ try {
             $row['id_venta_sucursal'],
             number_format($row['precio'], 0, ',', '.') . ' €',
             !empty($row['fecha']) ? date('d/m/Y H:i', strtotime($row['fecha'])) : 'N/A',
-            $row['nombre_sucursal'],
             $row['nombre_usuario'] ? $row['nombre_usuario'] : 'N/A',
             $venta_plazos,
             $venta_web,

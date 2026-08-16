@@ -4,7 +4,6 @@
   opacity: 0;
 }
 
-#control_etiquetado_filtros_container:not(.control-etiquetado-filtros-ready) .control_etiquetado_sucursal,
 #control_etiquetado_filtros_container:not(.control-etiquetado-filtros-ready) .control_etiquetado_tipo {
   min-height: 38px;
 }

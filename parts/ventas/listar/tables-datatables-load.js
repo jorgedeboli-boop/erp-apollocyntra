@@ -28,10 +28,6 @@ document.addEventListener('DOMContentLoaded', function (e) {
     actualizarTituloVentas();
   }
 
-  const createFilterSucursal = function (containerClass, selectId) {
-    return FD.createFilterSucursal(containerClass, selectId, 'Sucursales', onFiltroVentaChange);
-  };
-
   const createFilterFijo = function (containerClass, selectId, defaultOptionText, opciones) {
     return FD.createFilterFijo(containerClass, selectId, defaultOptionText, opciones, onFiltroVentaChange);
   };
@@ -51,14 +47,12 @@ document.addEventListener('DOMContentLoaded', function (e) {
         url: 'parts/ventas/listar/load_list.php',
         type: 'POST',
         data: function(d) {
-          const sucursalFilter = document.getElementById('filtro_sucursal');
           const tipoVentaFilter = document.getElementById('filtro_tipo_venta');
           const ventaWebFilter = document.getElementById('filtro_venta_web');
           const formaPagoFilter = document.getElementById('filtro_forma_pago');
           const fechaDesdeFilter = document.getElementById('filtro_fecha_desde');
           const fechaHastaFilter = document.getElementById('filtro_fecha_hasta');
           
-          d.filtro_sucursal = sucursalFilter ? sucursalFilter.value : '';
           d.filtro_tipo_venta = tipoVentaFilter ? tipoVentaFilter.value : '';
           d.filtro_venta_web = ventaWebFilter ? ventaWebFilter.value : '';
           d.filtro_forma_pago = formaPagoFilter ? formaPagoFilter.value : '';
@@ -81,20 +75,19 @@ document.addEventListener('DOMContentLoaded', function (e) {
         { data: 0, responsivePriority: 1 },  // Nº venta
         { data: 1, responsivePriority: 2 },  // Total venta
         { data: 2, responsivePriority: 3 },  // Fecha venta
-        { data: 3, responsivePriority: 4 },  // Sucursal venta
-        { data: 4, responsivePriority: 10 }, // Vendido por
-        { data: 5, responsivePriority: 10 }, // Venta plazos
-        { data: 6, responsivePriority: 10 }, // Venta web
-        { data: 7, responsivePriority: 5 },  // Forma de pago
-        { data: 8, visible: false }          // ID (hidden)
+        { data: 3, responsivePriority: 10 }, // Vendido por
+        { data: 4, responsivePriority: 10 }, // Venta plazos
+        { data: 5, responsivePriority: 10 }, // Venta web
+        { data: 6, responsivePriority: 5 },  // Forma de pago
+        { data: 7, visible: false }          // ID (hidden)
       ],
       
       columnDefs: [
         {
-          // Nº venta (id_venta_sucursal) con enlace a ficha por identificador_venta (av.id) en full[8]
+          // Nº venta (id_venta_sucursal) con enlace a ficha por identificador_venta (av.id) en full[7]
           targets: 0,
           render: function (data, type, full, meta) {
-            const idVenta = full[8];
+            const idVenta = full[7];
             const numeroTicket = data;
             return (
               '<a href="venta.php?id=' +
@@ -219,9 +212,6 @@ document.addEventListener('DOMContentLoaded', function (e) {
 
   // Función para cargar los filtros
   function cargarFiltros() {
-    // Filtro de Sucursal
-    createFilterSucursal('.venta_sucursal', 'filtro_sucursal');
-
     // Filtro de Tipo de Venta
     const opcionesTipoVenta = [
       { value: 'normal', label: 'Venta' },
@@ -257,7 +247,6 @@ document.addEventListener('DOMContentLoaded', function (e) {
   function exportarTodosLosDatos(tipo, dt, button, config) {
     // Capturar filtros actuales
     const searchValue = dt.search();
-    const filtroSucursal = document.getElementById('filtro_sucursal');
     const filtroTipoVenta = document.getElementById('filtro_tipo_venta');
     const filtroVentaWeb = document.getElementById('filtro_venta_web');
     const filtroFormaPago = document.getElementById('filtro_forma_pago');
@@ -277,7 +266,6 @@ document.addEventListener('DOMContentLoaded', function (e) {
     // Preparar datos para enviar
     const formData = new FormData();
     formData.append('search', searchValue);
-    formData.append('filtro_sucursal', filtroSucursal ? filtroSucursal.value : '');
     formData.append('filtro_tipo_venta', filtroTipoVenta ? filtroTipoVenta.value : '');
     formData.append('filtro_venta_web', filtroVentaWeb ? filtroVentaWeb.value : '');
     formData.append('filtro_forma_pago', filtroFormaPago ? filtroFormaPago.value : '');
@@ -313,7 +301,7 @@ document.addEventListener('DOMContentLoaded', function (e) {
       const tempDiv = document.createElement('div');
       tempDiv.style.display = 'none';
       tempDiv.innerHTML = '<table id="' + tempTableId + '"><thead><tr>' +
-        '<th>Nº venta</th><th>Total venta</th><th>Fecha venta</th><th>Sucursal venta</th>' +
+        '<th>Nº venta</th><th>Total venta</th><th>Fecha venta</th>' +
         '<th>Vendido por</th><th>Venta plazos</th><th>Venta web</th><th>Forma de pago</th>' +
         '</tr></thead></table>';
       document.body.appendChild(tempDiv);
@@ -323,7 +311,7 @@ document.addEventListener('DOMContentLoaded', function (e) {
         data: responseData.data,
         columns: [
           { data: 0 }, { data: 1 }, { data: 2 }, { data: 3 },
-          { data: 4 }, { data: 5 }, { data: 6 }, { data: 7 }
+          { data: 4 }, { data: 5 }, { data: 6 }
         ],
         paging: false,
         searching: false,
@@ -346,12 +334,7 @@ document.addEventListener('DOMContentLoaded', function (e) {
           doc.styles.tableHeader.bold = true;
           doc.styles.tableHeader.color = 'white';
           
-          const filtroSucursal = document.getElementById('filtro_sucursal');
-          const nombreSucursal = (filtroSucursal && filtroSucursal.value && filtroSucursal.value !== '') 
-            ? filtroSucursal.options[filtroSucursal.selectedIndex].text
-            : 'todas las sucursales';
-          
-          let tituloPDF = 'Listado de Ventas de ' + nombreSucursal;
+          let tituloPDF = 'Listado de Ventas';
           
           if (window.titulo_filtros_ventas) {
             tituloPDF += ' - ' + window.titulo_filtros_ventas;
@@ -569,14 +552,6 @@ document.addEventListener('DOMContentLoaded', function (e) {
 
     const partes = [];
 
-    const filtroSucursal = document.getElementById('filtro_sucursal');
-    if (filtroSucursal && filtroSucursal.value) {
-      const selectedOption = filtroSucursal.options[filtroSucursal.selectedIndex];
-      if (selectedOption && selectedOption.value) {
-        partes.push('de ' + selectedOption.textContent.trim());
-      }
-    }
-
     agregarTextoFechasTituloVentas(partes);
 
     const filtroTipoVenta = document.getElementById('filtro_tipo_venta');
@@ -639,7 +614,7 @@ document.addEventListener('DOMContentLoaded', function (e) {
       const row = e.target.closest('tr');
       if (row && row.querySelector('td')) {
         const rowData = window.dt_ventas.row(row).data();
-        const idVenta = rowData[8]; // identificador_venta (PK ventas.id) para venta.php?id=
+        const idVenta = rowData[7]; // identificador_venta (PK ventas.id) para venta.php?id=
         if (idVenta) {
           window.location.href = 'venta.php?id=' + encodeURIComponent(idVenta);
         }
@@ -653,7 +628,6 @@ document.addEventListener('DOMContentLoaded', function (e) {
   window.exportarTodosLosDatos = function(tipo, dt, button, config) {
     // Capturar filtros actuales
     const searchValue = dt.search();
-    const filtroSucursal = document.getElementById('filtro_sucursal');
     const filtroTipoVenta = document.getElementById('filtro_tipo_venta');
     const filtroVentaWeb = document.getElementById('filtro_venta_web');
     const filtroFormaPago = document.getElementById('filtro_forma_pago');
@@ -673,7 +647,6 @@ document.addEventListener('DOMContentLoaded', function (e) {
     // Preparar datos para enviar
     const formData = new FormData();
     formData.append('search', searchValue);
-    formData.append('filtro_sucursal', filtroSucursal ? filtroSucursal.value : '');
     formData.append('filtro_tipo_venta', filtroTipoVenta ? filtroTipoVenta.value : '');
     formData.append('filtro_venta_web', filtroVentaWeb ? filtroVentaWeb.value : '');
     formData.append('filtro_forma_pago', filtroFormaPago ? filtroFormaPago.value : '');
@@ -709,7 +682,7 @@ document.addEventListener('DOMContentLoaded', function (e) {
       const tempDiv = document.createElement('div');
       tempDiv.style.display = 'none';
       tempDiv.innerHTML = '<table id="' + tempTableId + '"><thead><tr>' +
-        '<th>Nº venta</th><th>Total venta</th><th>Fecha venta</th><th>Sucursal venta</th>' +
+        '<th>Nº venta</th><th>Total venta</th><th>Fecha venta</th>' +
         '<th>Vendido por</th><th>Venta plazos</th><th>Venta web</th><th>Forma de pago</th>' +
         '</tr></thead></table>';
       document.body.appendChild(tempDiv);
@@ -719,7 +692,7 @@ document.addEventListener('DOMContentLoaded', function (e) {
         data: responseData.data,
         columns: [
           { data: 0 }, { data: 1 }, { data: 2 }, { data: 3 },
-          { data: 4 }, { data: 5 }, { data: 6 }, { data: 7 }
+          { data: 4 }, { data: 5 }, { data: 6 }
         ],
         paging: false,
         searching: false,
@@ -742,12 +715,7 @@ document.addEventListener('DOMContentLoaded', function (e) {
           doc.styles.tableHeader.bold = true;
           doc.styles.tableHeader.color = 'white';
           
-          const filtroSucursal = document.getElementById('filtro_sucursal');
-          const nombreSucursal = (filtroSucursal && filtroSucursal.value && filtroSucursal.value !== '') 
-            ? filtroSucursal.options[filtroSucursal.selectedIndex].text
-            : 'todas las sucursales';
-          
-          let tituloPDF = 'Listado de Ventas de ' + nombreSucursal;
+          let tituloPDF = 'Listado de Ventas';
           
           if (window.titulo_filtros_ventas) {
             tituloPDF += ' - ' + window.titulo_filtros_ventas;
@@ -804,60 +772,5 @@ document.addEventListener('DOMContentLoaded', function (e) {
     }
   };
   
-  // Manejar botón "Nueva venta" y select de sucursal
-  const btnNuevaVenta = document.getElementById('btn_nueva_venta');
-  const selectSucursalContainer = document.getElementById('select_sucursal_nueva_venta_container');
-  const selectSucursalNuevaVenta = $('#select_sucursal_nueva_venta');
-  
-  // Evento click en el botón "Nueva venta"
-  if (btnNuevaVenta) {
-    btnNuevaVenta.addEventListener('click', function() {
-      // Ocultar botón
-      btnNuevaVenta.style.display = 'none';
-      
-      // Mostrar select de sucursales
-      if (selectSucursalContainer) {
-        selectSucursalContainer.style.display = 'block';
-        
-        // Inicializar Select2 si aún no está inicializado
-        if (selectSucursalNuevaVenta.length && !selectSucursalNuevaVenta.hasClass('select2-hidden-accessible')) {
-          selectSucursalNuevaVenta.select2({
-            placeholder: 'Seleccionar sucursal para venta',
-            allowClear: false,
-            width: '100%',
-            containerCssClass: 'select-custom'
-          });
-        }
-        
-        // Abrir el dropdown automáticamente
-        setTimeout(() => {
-          selectSucursalNuevaVenta.select2('open');
-        }, 100);
-      }
-    });
-  }
-  
-  // Evento change para enviar por POST a crear_venta.php
-  if (selectSucursalNuevaVenta.length) {
-    selectSucursalNuevaVenta.on('change', function() {
-      const idSucursal = $(this).val();
-      
-      if (idSucursal) {
-        // Crear formulario oculto para enviar por POST
-        const form = document.createElement('form');
-        form.method = 'POST';
-        form.action = 'crear_venta.php';
-        
-        const input = document.createElement('input');
-        input.type = 'hidden';
-        input.name = 'id_sucursal';
-        input.value = idSucursal;
-        
-        form.appendChild(input);
-        document.body.appendChild(form);
-        form.submit();
-      }
-    });
-  }
 });
 

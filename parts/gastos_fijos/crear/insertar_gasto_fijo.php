@@ -16,8 +16,7 @@ try {
     $total = (float)str_replace(',', '.', (string)($_POST['total_gasto_fijo'] ?? '0'));
 
     $empresaId = (int)($_POST['empresa_gasto_fijo'] ?? 0);
-    $sucursalRaw = (string)($_POST['sucursal_gasto_fijo'] ?? '0');
-    $sucursalId = ($sucursalRaw === 'no_es_sucursal') ? 0 : (int)$sucursalRaw;
+    $sucursalId = 0;
     $proveedorId = (int)($_POST['proveedor_gasto_fijo'] ?? 0);
     $formaPagoId = (int)($_POST['forma_pago_gasto_fijo'] ?? 0);
     $tipoGastoId = (int)($_POST['tipo_de_gasto_fijo'] ?? 0);

@@ -8,7 +8,6 @@ try {
     $conexion = conectar_bd();
     
     // Obtener filtros
-    $filtro_sucursal = isset($_POST['filtro_sucursal']) ? trim($_POST['filtro_sucursal']) : '';
     $filtro_tipo_venta = isset($_POST['filtro_tipo_venta']) ? trim($_POST['filtro_tipo_venta']) : '';
     $filtro_venta_web = isset($_POST['filtro_venta_web']) ? trim($_POST['filtro_venta_web']) : '';
     $filtro_forma_pago = isset($_POST['filtro_forma_pago']) ? trim($_POST['filtro_forma_pago']) : '';
@@ -24,13 +23,6 @@ try {
     
     // Condición fija
     $whereConditions[] = "av.estado = 'vendido'";
-    
-    // Filtro de sucursal
-    if (!empty($filtro_sucursal)) {
-        $whereConditions[] = "s.nombre_sucursal = ?";
-        $params[] = $filtro_sucursal;
-        $types .= 's';
-    }
     
     // Filtro de tipo de venta
     if (!empty($filtro_tipo_venta)) {
@@ -105,14 +97,12 @@ try {
         $query = "
             SELECT COALESCE(SUM(av.precio), 0) as total
             FROM ventas av
-            LEFT JOIN sucursal s ON av.id_sucursal = s.id_sucursal
             $whereClause
         ";
     } else {
         $query = "
             SELECT COUNT(*) as total
             FROM ventas av
-            LEFT JOIN sucursal s ON av.id_sucursal = s.id_sucursal
             $whereClause
         ";
     }

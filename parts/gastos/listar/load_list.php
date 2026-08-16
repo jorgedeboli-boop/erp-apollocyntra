@@ -17,7 +17,6 @@ $search = isset($_POST['search']['value']) ? ltrim(trim($_POST['search']['value'
 
 // Filtros adicionales
 $filtro_empresa = isset($_POST['filtro_empresa']) ? trim($_POST['filtro_empresa']) : '';
-$filtro_sucursal = isset($_POST['filtro_sucursal']) ? trim($_POST['filtro_sucursal']) : '';
 $filtro_proveedor = isset($_POST['filtro_proveedor']) ? trim($_POST['filtro_proveedor']) : '';
 $filtro_estado = isset($_POST['filtro_estado']) ? trim($_POST['filtro_estado']) : '';
 $filtro_tipo_gasto = isset($_POST['filtro_tipo_gasto']) ? trim($_POST['filtro_tipo_gasto']) : '';
@@ -28,7 +27,6 @@ $filtro_fecha_hasta = isset($_POST['filtro_fecha_hasta']) ? trim($_POST['filtro_
 // Debug: mostrar filtros recibidos
 error_log('Filtros recibidos: ' . json_encode([
     'empresa' => $filtro_empresa,
-    'sucursal' => $filtro_sucursal,
     'proveedor' => $filtro_proveedor,
     'estado' => $filtro_estado,
     'tipo_gasto' => $filtro_tipo_gasto,
@@ -53,7 +51,6 @@ try {
     $query_base = "
         FROM gastos g
         LEFT JOIN empresas e ON g.empresa_gasto = e.id_empresa
-        LEFT JOIN sucursal s ON g.sucursal_gasto = s.id_sucursal
         LEFT JOIN proveedores p ON g.proveedor_gasto = p.id_proveedor
         LEFT JOIN tipo_de_gasto tg ON g.tipo_de_gasto = tg.id_tipo_gasto
         LEFT JOIN formas_de_pago fp ON g.forma_pago_gasto = fp.id_forma_de_pago
@@ -67,12 +64,6 @@ try {
     if (!empty($filtro_empresa)) {
         $query_base .= " AND g.empresa_gasto = ?";
         $params[] = $filtro_empresa;
-        $types .= 'i';
-    }
-    
-    if (!empty($filtro_sucursal)) {
-        $query_base .= " AND g.sucursal_gasto = ?";
-        $params[] = $filtro_sucursal;
         $types .= 'i';
     }
     
@@ -121,13 +112,12 @@ try {
             CAST(g.id_gasto AS CHAR) LIKE ? OR
             g.descripcion_gasto LIKE ? OR 
             e.nombre_empresa LIKE ? OR 
-            s.nombre_sucursal LIKE ? OR 
             p.nombre_proveedor LIKE ? OR 
             tg.nombre_tipo_gasto LIKE ? OR
             g.numero_factura_proveedor LIKE ?
         )";
         $search_param = "%$search%";
-        for ($i = 0; $i < 7; $i++) {
+        for ($i = 0; $i < 6; $i++) {
             $params[] = $search_param;
             $types .= 's';
         }
@@ -150,7 +140,6 @@ try {
             g.id_gasto,
             g.fecha_gasto,
             e.nombre_empresa,
-            s.nombre_sucursal,
             p.nombre_proveedor,
             tg.nombre_tipo_gasto,
             g.descripcion_gasto,
@@ -177,7 +166,6 @@ try {
             $row['id_gasto'],
             date('d/m/Y', strtotime($row['fecha_gasto'])),
             $row['nombre_empresa'] ?: 'N/A',
-            $row['nombre_sucursal'] ?: 'N/A',
             $row['nombre_proveedor'] ?: 'N/A',
             $row['nombre_tipo_gasto'] ?: 'N/A',
             $row['descripcion_gasto'] ?: 'Sin descripción',

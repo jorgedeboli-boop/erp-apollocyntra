@@ -17,19 +17,11 @@ try {
     
     // Obtener parámetros de filtros
     $searchValue = isset($_POST['search']) ? trim($_POST['search']) : '';
-    $filtro_sucursal = isset($_POST['filtro_sucursal']) ? trim($_POST['filtro_sucursal']) : '';
     
     // Construir WHERE clause
     $whereConditions = array();
     $params = array();
     $types = '';
-    
-    // Filtro de sucursal
-    if (!empty($filtro_sucursal)) {
-        $whereConditions[] = "sucursal.nombre_sucursal = ?";
-        $params[] = $filtro_sucursal;
-        $types .= 's';
-    }
     
     // Búsqueda global
     if (!empty($searchValue)) {
@@ -42,13 +34,11 @@ try {
             CAST(av.articulo_devolucion AS CHAR) LIKE ? OR
             CAST(av.importe_devolucion AS CHAR) LIKE ? OR
             av.forma_de_pago_devolucion LIKE ? OR
-            sucursal.nombre_sucursal LIKE ? OR
             ventas.id_venta_sucursal LIKE ? OR
             CONCAT(clientes.nombre, ' ', clientes.apellido) LIKE ? OR
             articulos_venta.descripcion LIKE ?
         )";
         $searchParam = '%' . $searchValue . '%';
-        $params[] = $searchParam;
         $params[] = $searchParam;
         $params[] = $searchParam;
         $params[] = $searchParam;
@@ -74,19 +64,16 @@ try {
                 av.id_venta_original,
                 av.fecha_devolucion,
                 av.cliente_devolucion,
-                av.sucursal_devolucion,
                 av.motivo_devolucion,
                 av.articulo_devolucion,
                 av.importe_devolucion,
                 av.forma_de_pago_devolucion,
                 av.devolucion_web,
-                sucursal.nombre_sucursal,
                 ventas.id_venta_sucursal,
                 CONCAT(clientes.nombre, ' ', clientes.apellido) AS CLIENTEDATA,
                 articulos_venta.id AS SKUARTICULO,
                 articulos_venta.descripcion
               FROM devoluciones AS av
-              LEFT JOIN sucursal ON av.sucursal_devolucion = sucursal.id_sucursal
               LEFT JOIN ventas ON av.id_venta_original = ventas.id
               LEFT JOIN clientes ON av.cliente_devolucion = clientes.id_cliente
               LEFT JOIN articulos_venta ON av.articulo_devolucion = articulos_venta.id
@@ -120,7 +107,6 @@ try {
             $row['id_venta_original'] ?: '-',
             $row['fecha_devolucion'] ? date('d/m/Y H:i', strtotime($row['fecha_devolucion'])) : '-',
             $row['CLIENTEDATA'] ?: '-',
-            $row['nombre_sucursal'] ?: '-',
             $row['motivo_devolucion'] ?: '-',
             $row['SKUARTICULO'] ?: '-',
             $row['descripcion'] ?: '-',

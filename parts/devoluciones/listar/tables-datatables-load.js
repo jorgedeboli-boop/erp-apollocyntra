@@ -41,11 +41,6 @@ document.addEventListener('DOMContentLoaded', function (e) {
         url: 'parts/devoluciones/listar/load_list.php',
         type: 'POST',
         data: function(d) {
-          // Agregar filtros de columna personalizados
-          const sucursalFilter = document.getElementById('filtro_sucursal');
-          
-          d.filtro_sucursal = sucursalFilter ? sucursalFilter.value : '';
-          
           return d;
         },
         dataSrc: function(json) {
@@ -62,13 +57,12 @@ document.addEventListener('DOMContentLoaded', function (e) {
         { data: 1, responsivePriority: 2 },  // ID Venta Original
         { data: 2, responsivePriority: 3 },  // Fecha Devolución
         { data: 3, responsivePriority: 4 },  // Cliente
-        { data: 4, responsivePriority: 5 },  // Sucursal
-        { data: 5, responsivePriority: 6 },  // Motivo
-        { data: 6, responsivePriority: 7 },  // SKU
-        { data: 7, responsivePriority: 8 },  // Descripción
-        { data: 8, responsivePriority: 9 }, // Importe
-        { data: 9, responsivePriority: 10 }, // Forma de Pago
-        { data: 10, responsivePriority: 11 } // Devolución Web
+        { data: 4, responsivePriority: 6 },  // Motivo
+        { data: 5, responsivePriority: 7 },  // SKU
+        { data: 6, responsivePriority: 8 },  // Descripción
+        { data: 7, responsivePriority: 9 },  // Importe
+        { data: 8, responsivePriority: 10 }, // Forma de Pago
+        { data: 9, responsivePriority: 11 }  // Devolución Web
       ],
       
       columnDefs: [
@@ -108,22 +102,15 @@ document.addEventListener('DOMContentLoaded', function (e) {
           }
         },
         {
-          // Sucursal
+          // Motivo
           targets: 4,
           render: function (data, type, full, meta) {
             return data || '-';
           }
         },
         {
-          // Motivo
-          targets: 5,
-          render: function (data, type, full, meta) {
-            return data || '-';
-          }
-        },
-        {
           // SKU - con link
-          targets: 6,
+          targets: 5,
           render: function (data, type, full, meta) {
             if (data && data !== '-') {
               return '<a href="articulo.php?id=' + data + '" class="fw-semibold text-primary" target="_blank">' + data + '</a>';
@@ -133,7 +120,7 @@ document.addEventListener('DOMContentLoaded', function (e) {
         },
         {
           // Descripción
-          targets: 7,
+          targets: 6,
           render: function (data, type, full, meta) {
             if (data && data.length > 50) {
               return '<span title="' + data + '">' + data.substring(0, 50) + '...</span>';
@@ -143,14 +130,14 @@ document.addEventListener('DOMContentLoaded', function (e) {
         },
         {
           // Importe
-          targets: 8,
+          targets: 7,
           render: function (data, type, full, meta) {
             return '<span class="fw-semibold text-success">' + data + '</span>';
           }
         },
         {
           // Forma de Pago - con badges
-          targets: 9,
+          targets: 8,
           render: function (data, type, full, meta) {
             if (!data || data === '-') {
               return '-';
@@ -176,7 +163,7 @@ document.addEventListener('DOMContentLoaded', function (e) {
         },
         {
           // Devolución Web
-          targets: 10,
+          targets: 9,
           render: function (data, type, full, meta) {
             if (data === 'si' || data === 'true' || data === '1') {
               return '<span class="badge bg-label-success rounded-pill">Sí</span>';
@@ -252,12 +239,7 @@ document.addEventListener('DOMContentLoaded', function (e) {
                         doc.styles.tableHeader.bold = true;
                         doc.styles.tableHeader.color = 'white';
                         
-                        const filtroSucursal = document.getElementById('filtro_sucursal');
-                        const nombreSucursal = (filtroSucursal && filtroSucursal.value && filtroSucursal.value !== '') 
-                          ? filtroSucursal.options[filtroSucursal.selectedIndex].text
-                          : 'todas las sucursales';
-                        
-                        let tituloPDF = 'Listado de Devoluciones de ' + nombreSucursal;
+                        let tituloPDF = 'Listado de Devoluciones';
                         
                         doc.content[0].text = tituloPDF;
                         doc.content[0].alignment = 'center';
@@ -376,7 +358,6 @@ document.addEventListener('DOMContentLoaded', function (e) {
   window.exportarTodosLosDatos = function(tipo, dt, button, config) {
     // Capturar filtros actuales
     const searchValue = dt.search();
-    const filtroSucursal = document.getElementById('filtro_sucursal');
     
     // Mostrar loading
     Swal.fire({
@@ -391,7 +372,6 @@ document.addEventListener('DOMContentLoaded', function (e) {
     // Preparar datos para enviar
     const formData = new FormData();
     formData.append('search', searchValue);
-    formData.append('filtro_sucursal', filtroSucursal ? filtroSucursal.value : '');
     
     // Hacer fetch con los filtros
     fetch('parts/devoluciones/listar/export_all.php', {
@@ -427,7 +407,7 @@ document.addEventListener('DOMContentLoaded', function (e) {
       const tempDiv = document.createElement('div');
       tempDiv.style.display = 'none';
       tempDiv.innerHTML = '<table id="' + tempTableId + '"><thead><tr>' +
-        '<th>Nº</th><th>VENTA</th><th>FECHA</th><th>CLIENTE</th><th>SUCURSAL</th>' +
+        '<th>Nº</th><th>VENTA</th><th>FECHA</th><th>CLIENTE</th>' +
         '<th>MOTIVO</th><th>SKU</th><th>DESCRIPCIÓN</th><th>IMPORTE</th><th>FORMA PAGO</th><th>DEV. WEB</th>' +
         '</tr></thead></table>';
       document.body.appendChild(tempDiv);
@@ -459,12 +439,7 @@ document.addEventListener('DOMContentLoaded', function (e) {
           doc.styles.tableHeader.bold = true;
           doc.styles.tableHeader.color = 'white';
           
-          const filtroSucursal = document.getElementById('filtro_sucursal');
-          const nombreSucursal = (filtroSucursal && filtroSucursal.value && filtroSucursal.value !== '') 
-            ? filtroSucursal.options[filtroSucursal.selectedIndex].text
-            : 'todas las sucursales';
-          
-          let tituloPDF = 'Listado de Devoluciones de ' + nombreSucursal;
+          let tituloPDF = 'Listado de Devoluciones';
           
           doc.content[0].text = tituloPDF;
           doc.content[0].alignment = 'center';

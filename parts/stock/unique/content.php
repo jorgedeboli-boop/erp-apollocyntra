@@ -15,11 +15,6 @@
 
         <div class="d-flex row gx-5 pt-4 gap-2" id="stock_filtros_container">
 
-          <div class="col-md-2 flex-fill articulo_sucursal select2-btn-height">
-            <select id="filtro_sucursal_articulo" class="form-select select2-filter text-capitalize select2-custom">
-              <option value="">Sucursales</option>
-            </select>
-          </div>
           <div class="col-md-2 flex-fill articulo_tipo select2-btn-height">
             <select id="filtro_tipo" class="form-select select2-filter text-capitalize select2-custom">
               <?php articulos_filtro_imprimir_opciones_tipo_venta(); ?>
@@ -59,8 +54,6 @@
           <tr>
             <th width="50">SKU</th>
             <th width="250">Descripción</th>
-            <th width="70">Sucursal Origen</th>
-            <th width="100">Sucursal</th>
             <th width="90">Peso</th>
             <th width="50">Precio</th>
             <th width="50">Precio Coste</th>

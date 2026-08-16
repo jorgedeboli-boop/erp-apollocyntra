@@ -1,22 +1,6 @@
 <?php
-// Recibir id_sucursal por POST
 $id_sucursal = isset($_POST['id_sucursal']) ? (int)$_POST['id_sucursal'] : 0;
-
-// Si no se recibió id_sucursal, redirigir a la lista de ventas
-if (!$id_sucursal) {
-    header('Location: ventas.php');
-    exit;
-}
-
-// Recibir id_articulo por POST (opcional)
 $id_articulo = isset($_POST['id_articulo']) ? (int)$_POST['id_articulo'] : 0;
-
-// Obtener nombre de la sucursal
-$nombre_sucursal = '';
-if ($id_sucursal) {
-    $nombre_raw = obtener_nombre_sucursal($id_sucursal);
-    $nombre_sucursal = $nombre_raw !== false ? (string) $nombre_raw : '';
-}
 ?>
 <!-- Content -->
 <div class="container-fluid flex-grow-1 container-p-y">
@@ -30,7 +14,6 @@ if ($id_sucursal) {
       <!-- Header integrado -->
       <div class="card-header border-bottom card-header-forms titulos-cards-pages pb-3">
           <h5 class="card-title mb-0">Nueva venta</h5>
-          <h4 class="text-muted p-0 m-0" style="line-height: 28px;"><span id="nombre_sucursal"><?php echo htmlspecialchars($nombre_sucursal); ?></span></h4>
           <button type="button" id="btn_volver_ventas" class="btn btn-text-primary btn-header-card-right mt-4">
             <i class="icon-base ri ri-arrow-left-s-line me-2"></i>Ventas
           </button>
@@ -40,7 +23,7 @@ if ($id_sucursal) {
       <div class="card-body p-5">
 
         <!-- Input hidden con id_sucursal recibido por POST -->
-        <input type="hidden" id="sucursal_venta" name="sucursal_venta" value="<?php echo htmlspecialchars($id_sucursal); ?>" />
+        <input type="hidden" id="sucursal_venta" name="sucursal_venta" value="<?php echo (int) $id_sucursal; ?>" />
         
         <!-- Input hidden con id_articulo recibido por POST (opcional) -->
         <?php if ($id_articulo): ?>
@@ -50,7 +33,7 @@ if ($id_sucursal) {
         <!-- Formulario oculto para INSERT de venta -->
         <form id="form_insert_venta" style="display: none;">
          <!-- Datos de la venta -->
-         <input type="hidden" id="insert_id_sucursal" name="id_sucursal" value="" />
+         <input type="hidden" id="insert_id_sucursal" name="id_sucursal" value="0" />
          <input type="hidden" value="" id="codigo_autorizacion_correcto">
           <input type="hidden" value="" id="id_autorizacion" name="id_autorizacion">
           <input type="hidden" name="precio_inicial" id="precio_inicial" value="">

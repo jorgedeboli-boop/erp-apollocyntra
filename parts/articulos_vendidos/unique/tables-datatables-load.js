@@ -7,46 +7,6 @@ document.addEventListener('DOMContentLoaded', function () {
   const dtTable = document.querySelector('.datatables-articulos-vendidos');
   let dtVendidos;
 
-  const createFilterSucursal = (containerClass, selectId) => {
-    const select = document.createElement('select');
-    select.id = selectId;
-    select.className = 'form-select select2-filter text-capitalize select2-custom';
-    select.innerHTML = `<option value="">Sucursales</option>`;
-    document.querySelector(containerClass).appendChild(select);
-
-    fetch('parts/clientes/listar/get_sucursales.php')
-      .then(r => r.json())
-      .then(data => {
-        if (!data.success) return;
-        data.sucursales.forEach(sucursal => {
-          const option = document.createElement('option');
-          option.value = sucursal.id_sucursal;
-          option.textContent = sucursal.nombre_sucursal;
-          select.appendChild(option);
-        });
-
-        const select2 = $(select);
-        if (select2.length) {
-          select2.each(function () {
-            const $this = $(this);
-            $this.select2({ dropdownParent: $this.parent() });
-            $this.on('select2:select select2:unselect', function () {
-              dtVendidos.ajax.reload();
-              actualizarTituloVendidos();
-            });
-          });
-        }
-
-        select.addEventListener('change', function () {
-          dtVendidos.ajax.reload();
-          actualizarTituloVendidos();
-        });
-      })
-      .catch(err => console.error('Error al cargar sucursales:', err));
-
-    return select;
-  };
-
   // Helper para filtros fijos (tipo oro/plata)
   const createFilterFijo = (containerClass, selectId, defaultOptionText, opciones) => {
     const select = document.createElement('select');
@@ -94,12 +54,10 @@ document.addEventListener('DOMContentLoaded', function () {
         url: 'parts/articulos_vendidos/unique/load_list.php',
         type: 'POST',
         data: function (d) {
-          const sucursalFilter = document.getElementById('filtro_sucursal_articulo_vendido');
           const tipoFilter = document.getElementById('filtro_tipo_vendidos');
           const fechaDesde = document.getElementById('filtro_fecha_desde');
           const fechaHasta = document.getElementById('filtro_fecha_hasta');
 
-          d.filtro_sucursal = sucursalFilter ? sucursalFilter.value : '';
           d.filtro_tipo = tipoFilter ? tipoFilter.value : '';
           d.filtro_fecha_desde = fechaDesde ? fechaDesde.value : '';
           d.filtro_fecha_hasta = fechaHasta ? fechaHasta.value : '';
@@ -118,14 +76,13 @@ document.addEventListener('DOMContentLoaded', function () {
       columns: [
         { data: 0 }, // SKU
         { data: 1 }, // Descripción
-        { data: 2 }, // Sucursal
-        { data: 3 }, // Fecha de venta
-        { data: 4 }, // Venta Nº
-        { data: 5 }, // Precio
-        { data: 6 }, // Coste
-        { data: 7 }, // Peso
-        { data: 8 }, // Tipo
-        { data: 9 }  // Web
+        { data: 2 }, // Fecha de venta
+        { data: 3 }, // Venta Nº
+        { data: 4 }, // Precio
+        { data: 5 }, // Coste
+        { data: 6 }, // Peso
+        { data: 7 }, // Tipo
+        { data: 8 }  // Web
       ],
       columnDefs: [
         {
@@ -200,7 +157,6 @@ document.addEventListener('DOMContentLoaded', function () {
       responsive: { details: false }
     });
 
-    createFilterSucursal('.articulo_vendido_sucursal', 'filtro_sucursal_articulo_vendido');
     createFilterFijo('.articulo_vendido_tipo', 'filtro_tipo_vendidos', 'Tipo', [
       { value: 'oro', label: 'Oro' },
       { value: 'plata', label: 'Plata' }
@@ -279,11 +235,6 @@ document.addEventListener('DOMContentLoaded', function () {
     if (!textoTitulo) return;
 
     let partes = [];
-    const filtroSucursal = document.getElementById('filtro_sucursal_articulo_vendido');
-    let nombreSucursal = '';
-    if (filtroSucursal && filtroSucursal.value) {
-      nombreSucursal = 'de ' + filtroSucursal.options[filtroSucursal.selectedIndex].text;
-    }
 
     const filtroActivo = window.filtro_periodo_activo_vendidos || 'todos';
     const fechaDesde = document.getElementById('filtro_fecha_desde')?.value || '';
@@ -312,9 +263,9 @@ document.addEventListener('DOMContentLoaded', function () {
       }
     }
 
-    let textoFinal = nombreSucursal;
+    let textoFinal = '';
     if (partes.length) {
-      textoFinal = (textoFinal ? textoFinal + ' ' : '') + partes.join(' - ');
+      textoFinal = partes.join(' - ');
     }
     textoTitulo.textContent = textoFinal;
     window.titulo_filtros_articulos_vendidos = textoFinal;
@@ -322,7 +273,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
   window.exportarTodosLosDatosVendidos = function (tipo, dt, button, config) {
     const searchValue = dt.search();
-    const filtroSucursal = document.getElementById('filtro_sucursal_articulo_vendido');
     const filtroTipo = document.getElementById('filtro_tipo_vendidos');
     const filtroFechaDesde = document.getElementById('filtro_fecha_desde');
     const filtroFechaHasta = document.getElementById('filtro_fecha_hasta');
@@ -336,7 +286,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
     const formData = new FormData();
     formData.append('search', searchValue);
-    formData.append('filtro_sucursal', filtroSucursal ? filtroSucursal.value : '');
     formData.append('filtro_tipo', filtroTipo ? filtroTipo.value : '');
     formData.append('filtro_fecha_desde', filtroFechaDesde ? filtroFechaDesde.value : '');
     formData.append('filtro_fecha_hasta', filtroFechaHasta ? filtroFechaHasta.value : '');
@@ -357,13 +306,13 @@ document.addEventListener('DOMContentLoaded', function () {
         tempDiv.style.display = 'none';
         tempDiv.innerHTML =
           '<table id="' + tempTableId + '"><thead><tr>' +
-          '<th>SKU</th><th>Descripción</th><th>Sucursal</th><th>Fecha de venta</th><th>Venta Nº</th><th>Precio</th><th>Coste</th><th>Peso</th><th>Tipo</th><th>Web</th>' +
+          '<th>SKU</th><th>Descripción</th><th>Fecha de venta</th><th>Venta Nº</th><th>Precio</th><th>Coste</th><th>Peso</th><th>Tipo</th><th>Web</th>' +
           '</tr></thead></table>';
         document.body.appendChild(tempDiv);
 
         const tempTable = $('#' + tempTableId).DataTable({
           data: responseData.data,
-          columns: [{ data: 0 }, { data: 1 }, { data: 2 }, { data: 3 }, { data: 4 }, { data: 5 }, { data: 6 }, { data: 7 }, { data: 8 }, { data: 9 }],
+          columns: [{ data: 0 }, { data: 1 }, { data: 2 }, { data: 3 }, { data: 4 }, { data: 5 }, { data: 6 }, { data: 7 }, { data: 8 }],
           paging: false,
           searching: false,
           ordering: false,
@@ -397,9 +346,7 @@ document.addEventListener('DOMContentLoaded', function () {
             doc.styles.tableHeader.bold = true;
             doc.styles.tableHeader.color = 'white';
 
-            const filtroSucursal = document.getElementById('filtro_sucursal_articulo_vendido');
-            const nombreSucursal = (filtroSucursal && filtroSucursal.value) ? filtroSucursal.options[filtroSucursal.selectedIndex].text : 'todas las sucursales';
-            let tituloPDF = 'Artículos vendidos de ' + nombreSucursal;
+            let tituloPDF = 'Artículos vendidos';
             if (window.titulo_filtros_articulos_vendidos) tituloPDF += ' - ' + window.titulo_filtros_articulos_vendidos;
             doc.content[0].text = tituloPDF;
             doc.content[0].alignment = 'center';

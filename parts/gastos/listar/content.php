@@ -25,11 +25,6 @@
               <?php gastos_listar_imprimir_opciones_empresas(); ?>
             </select>
           </div>
-          <div class="flex-fill gasto_sucursal">
-            <select id="filtro_sucursal" class="form-select select2-filter text-capitalize form-select-sm select2-custom">
-              <?php gastos_listar_imprimir_opciones_sucursales(); ?>
-            </select>
-          </div>
           <div class="flex-fill gasto_proveedor">
             <select id="filtro_proveedor" class="form-select select2-filter text-capitalize form-select-sm select2-custom">
               <?php gastos_listar_imprimir_opciones_proveedores(); ?>
@@ -78,7 +73,6 @@
             <th>DESCRIPCIÓN</th>
             <th>FECHA GASTO</th>
             <th>EMPRESA</th>
-            <th>SUCURSAL</th>
             <th>PROVEEDOR</th>
             <th>TIPO GASTO</th>
             <th>TOTAL</th>

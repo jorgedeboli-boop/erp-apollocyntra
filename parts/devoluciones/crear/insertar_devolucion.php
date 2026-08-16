@@ -73,7 +73,7 @@ try {
 
     $id_venta = (int)$venta['id'];
     $cliente = (int)$venta['cliente'];
-    $sucursal = (int)$venta['id_sucursal'];
+    $sucursal = isset($venta['id_sucursal']) ? (int)$venta['id_sucursal'] : 0;
     $importe = (float)$venta['precio'];
     $forma_pago = $venta['tipo_pago'] ?: '';
     $devolucion_web = ($venta['venta_web'] === 'true') ? 'true' : 'false';

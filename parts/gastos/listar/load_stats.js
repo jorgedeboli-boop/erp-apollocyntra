@@ -45,7 +45,6 @@ function obtenerFiltrosActuales() {
 
     return {
         filtro_empresa: valorFiltro('filtro_empresa'),
-        filtro_sucursal: valorFiltro('filtro_sucursal'),
         filtro_proveedor: valorFiltro('filtro_proveedor'),
         filtro_estado: valorFiltro('filtro_estado'),
         filtro_tipo_gasto: valorFiltro('filtro_tipo_gasto'),

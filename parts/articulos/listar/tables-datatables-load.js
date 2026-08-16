@@ -7,40 +7,36 @@
 const COLUMNAS_EXPORTABLES_ARTICULOS = [
   { index: 0, label: 'SKU' },
   { index: 1, label: 'Descripción' },
-  { index: 2, label: 'Sucursal Origen' },
-  { index: 3, label: 'Sucursal' },
-  { index: 4, label: 'Peso' },
-  { index: 5, label: 'Precio' },
-  { index: 6, label: 'Precio Coste' },
-  { index: 7, label: '€/g' },
-  { index: 8, label: 'Tipo' },
-  { index: 9, label: 'Estado' },
-  { index: 10, label: 'F. Enviado' },
-  { index: 11, label: 'F. En Venta' },
-  { index: 12, label: 'F. Vendido' },
-  { index: 13, label: 'F. Retirado' },
-  { index: 14, label: 'Creado Por' },
-  { index: 15, label: 'Origen' }
+  { index: 2, label: 'Peso' },
+  { index: 3, label: 'Precio' },
+  { index: 4, label: 'Precio Coste' },
+  { index: 5, label: '€/g' },
+  { index: 6, label: 'Tipo' },
+  { index: 7, label: 'Estado' },
+  { index: 8, label: 'F. Enviado' },
+  { index: 9, label: 'F. En Venta' },
+  { index: 10, label: 'F. Vendido' },
+  { index: 11, label: 'F. Retirado' },
+  { index: 12, label: 'Creado Por' },
+  { index: 13, label: 'Origen' }
 ];
 
 /** Columnas que no se pueden ocultar desde el selector de la página */
-const COLUMNAS_FIJAS_ARTICULOS = [0, 1, 5]; // SKU, Descripción, Precio
+const COLUMNAS_FIJAS_ARTICULOS = [0, 1, 3]; // SKU, Descripción, Precio
 
 const COLUMNAS_TOGGLEABLES_ARTICULOS = [
-  { index: 2, label: 'Sucursal Origen' },
-  { index: 3, label: 'Sucursal' },
-  { index: 4, label: 'Peso' },
-  { index: 6, label: 'Precio Coste' },
-  { index: 7, label: '€/g' },
-  { index: 8, label: 'Tipo' },
-  { index: 9, label: 'Estado' },
-  { index: 10, label: 'F. Enviado' },
-  { index: 11, label: 'F. En Venta' },
-  { index: 12, label: 'F. Vendido' },
-  { index: 13, label: 'F. Retirado' },
-  { index: 14, label: 'Creado Por' },
-  { index: 15, label: 'Origen' },
-  { index: 16, label: 'Venta' }
+  { index: 2, label: 'Peso' },
+  { index: 4, label: 'Precio Coste' },
+  { index: 5, label: '€/g' },
+  { index: 6, label: 'Tipo' },
+  { index: 7, label: 'Estado' },
+  { index: 8, label: 'F. Enviado' },
+  { index: 9, label: 'F. En Venta' },
+  { index: 10, label: 'F. Vendido' },
+  { index: 11, label: 'F. Retirado' },
+  { index: 12, label: 'Creado Por' },
+  { index: 13, label: 'Origen' },
+  { index: 14, label: 'Venta' }
 ];
 
 function crearHtmlSelectorColumnasArticulos() {
@@ -197,7 +193,7 @@ function activarBotonFiltroFechaArticulos(activeId) {
 }
 
 // Función global para vender artículo
-window.venderArticulo = function(idArticulo, descripcion, idSucursal) {
+window.venderArticulo = function(idArticulo, descripcion) {
   Swal.fire({
     title: '¿Estás seguro que quieres vender este artículo?',
     html: '<p class="mb-1"><strong>SKU:</strong> ' + idArticulo + '</p>' +
@@ -220,13 +216,7 @@ window.venderArticulo = function(idArticulo, descripcion, idSucursal) {
       inputArticulo.name = 'id_articulo';
       inputArticulo.value = idArticulo;
       
-      const inputSucursal = document.createElement('input');
-      inputSucursal.type = 'hidden';
-      inputSucursal.name = 'id_sucursal';
-      inputSucursal.value = idSucursal;
-      
       form.appendChild(inputArticulo);
-      form.appendChild(inputSucursal);
       document.body.appendChild(form);
       form.submit();
     }
@@ -280,14 +270,12 @@ document.addEventListener('DOMContentLoaded', function (e) {
         url: 'parts/articulos/listar/load_list.php',
         type: 'POST',
         data: function(d) {
-          const sucursalFilter = document.getElementById('filtro_sucursal_articulo');
           const tipoFilter = document.getElementById('filtro_tipo');
           const estadoFilter = document.getElementById('filtro_estado');
           const origenFilter = document.getElementById('filtro_origen');
           const fechaDesdeFilter = document.getElementById('filtro_fecha_desde');
           const fechaHastaFilter = document.getElementById('filtro_fecha_hasta');
           
-          d.filtro_sucursal = sucursalFilter ? sucursalFilter.value : '';
           d.filtro_tipo = tipoFilter ? tipoFilter.value : '';
           d.filtro_estado = estadoFilter ? estadoFilter.value : '';
           d.filtro_origen = origenFilter ? origenFilter.value : '';
@@ -310,22 +298,20 @@ document.addEventListener('DOMContentLoaded', function (e) {
       columns: [
         { data: 0 },  // SKU
         { data: 1 },  // Descripción
-        { data: 2 },  // Sucursal Origen
-        { data: 3 },  // Sucursal (destino)
-        { data: 4 },  // Peso
-        { data: 5 },  // Precio
-        { data: 6 },  // Precio Coste
-        { data: 7 },  // € gramo
-        { data: 8 },  // Tipo
-        { data: 9 },  // Estado
-        { data: 10 }, // F. Enviado
-        { data: 11 }, // F. En Venta
-        { data: 12 }, // F. Vendido
-        { data: 13 }, // F. Retirado
-        { data: 14 }, // Creado Por
-        { data: 15 }, // Origen
-        { data: 16 }, // Acciones
-        { data: 17, visible: false } // ID (hidden para click)
+        { data: 2 },  // Peso
+        { data: 3 },  // Precio
+        { data: 4 },  // Precio Coste
+        { data: 5 },  // € gramo
+        { data: 6 },  // Tipo
+        { data: 7 },  // Estado
+        { data: 8 },  // F. Enviado
+        { data: 9 },  // F. En Venta
+        { data: 10 }, // F. Vendido
+        { data: 11 }, // F. Retirado
+        { data: 12 }, // Creado Por
+        { data: 13 }, // Origen
+        { data: 14 }, // Acciones
+        { data: 15, visible: false } // ID (hidden para click)
       ],
       
       columnDefs: [
@@ -407,12 +393,7 @@ document.addEventListener('DOMContentLoaded', function (e) {
                         doc.styles.tableHeader.bold = true;
                         doc.styles.tableHeader.color = 'white';
                         
-                        const filtroSucursal = document.getElementById('filtro_sucursal_articulo');
-                        const nombreSucursal = (filtroSucursal && filtroSucursal.value && filtroSucursal.value !== '') 
-                          ? filtroSucursal.options[filtroSucursal.selectedIndex].text
-                          : 'todas las sucursales';
-                        
-                        let tituloPDF = 'Listado de Artículos Venta de ' + nombreSucursal;
+                        let tituloPDF = 'Listado de Artículos';
                         
                         if (window.titulo_filtros_articulos) {
                           tituloPDF += ' - ' + window.titulo_filtros_articulos;
@@ -485,8 +466,8 @@ document.addEventListener('DOMContentLoaded', function (e) {
           if ($(e.target).closest('button, a, .select2').length > 0) {
             return;
           }
-          // Obtener el ID del artículo (columna 17)
-          const idArticulo = data[17];
+          // Obtener el ID del artículo (columna 15)
+          const idArticulo = data[15];
           if (idArticulo) {
             window.location.href = 'articulo.php?id=' + idArticulo;
           }
@@ -616,13 +597,6 @@ document.addEventListener('DOMContentLoaded', function (e) {
     
     let partes = [];
     
-    // 0. Agregar sucursal si está seleccionada
-    const filtroSucursal = document.getElementById('filtro_sucursal_articulo');
-    let nombreSucursal = '';
-    if (filtroSucursal && filtroSucursal.value && filtroSucursal.value !== '') {
-      nombreSucursal = 'de ' + filtroSucursal.options[filtroSucursal.selectedIndex].text;
-    }
-    
     // 1. Agregar filtro de fechas si existe
     const filtroActivo = window.filtro_periodo_activo || 'todos';
     const filtroFechaDesde = document.getElementById('filtro_fecha_desde');
@@ -676,14 +650,9 @@ document.addEventListener('DOMContentLoaded', function (e) {
       partes.push('origen ' + textoOrigen);
     }
     
-    // Construir el texto final: sucursal al inicio si existe, luego el resto con guiones
-    let textoFinal = nombreSucursal;
+    let textoFinal = '';
     if (partes.length > 0) {
-      if (textoFinal) {
-        textoFinal += ' ' + partes.join(' - ');
-      } else {
-        textoFinal = partes.join(' - ');
-      }
+      textoFinal = partes.join(' - ');
     }
     
     textoTitulo.textContent = textoFinal;
@@ -754,7 +723,6 @@ document.addEventListener('DOMContentLoaded', function (e) {
 
   function ejecutarExportacionArticulos(tipo, dt, columnasSeleccionadas) {
     const searchValue = dt.search();
-    const filtroSucursal = document.getElementById('filtro_sucursal_articulo');
     const filtroTipo = document.getElementById('filtro_tipo');
     const filtroEstado = document.getElementById('filtro_estado');
     const filtroOrigen = document.getElementById('filtro_origen');
@@ -772,7 +740,6 @@ document.addEventListener('DOMContentLoaded', function (e) {
 
     const formData = new FormData();
     formData.append('search', searchValue);
-    formData.append('filtro_sucursal', filtroSucursal ? filtroSucursal.value : '');
     formData.append('filtro_tipo', filtroTipo ? filtroTipo.value : '');
     formData.append('filtro_estado', filtroEstado ? filtroEstado.value : '');
     formData.append('filtro_origen', filtroOrigen ? filtroOrigen.value : '');
@@ -847,12 +814,7 @@ document.addEventListener('DOMContentLoaded', function (e) {
             doc.styles.tableHeader.bold = true;
             doc.styles.tableHeader.color = 'white';
 
-            const filtroSucursalEl = document.getElementById('filtro_sucursal_articulo');
-            const nombreSucursal = (filtroSucursalEl && filtroSucursalEl.value && filtroSucursalEl.value !== '')
-              ? filtroSucursalEl.options[filtroSucursalEl.selectedIndex].text
-              : 'todas las sucursales';
-
-            let tituloPDF = 'Listado de Artículos Venta de ' + nombreSucursal;
+            let tituloPDF = 'Listado de Artículos';
 
             if (window.titulo_filtros_articulos) {
               tituloPDF += ' - ' + window.titulo_filtros_articulos;

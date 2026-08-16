@@ -13,17 +13,11 @@ header('Content-Type: application/json');
 try {
     $conexion = conectar_bd();
     $searchValue = isset($_POST['search']) ? trim($_POST['search']) : '';
-    $filtro_sucursal = isset($_POST['filtro_sucursal']) ? trim($_POST['filtro_sucursal']) : '';
     
     $whereConditions = array();
     $params = array();
     $types = '';
     
-    if (!empty($filtro_sucursal)) {
-        $whereConditions[] = "s.nombre_sucursal = ?";
-        $params[] = $filtro_sucursal;
-        $types .= 's';
-    }
     if (!empty($searchValue)) {
         $whereConditions[] = "(
             CAST(f.id_factura AS CHAR) LIKE ? OR
@@ -33,12 +27,11 @@ try {
             f.estado_factura LIKE ? OR
             f.tipo_pago_factura LIKE ? OR
             CAST(f.factura_original AS CHAR) LIKE ? OR
-            s.nombre_sucursal LIKE ? OR
             CONCAT(c.nombre, ' ', c.apellido) LIKE ?
         )";
         $searchParam = '%' . $searchValue . '%';
-        for ($i = 0; $i < 9; $i++) $params[] = $searchParam;
-        $types .= str_repeat('s', 9);
+        for ($i = 0; $i < 8; $i++) $params[] = $searchParam;
+        $types .= str_repeat('s', 8);
     }
     
     $whereClause = count($whereConditions) > 0 ? 'WHERE ' . implode(' AND ', $whereConditions) : '';
@@ -56,7 +49,6 @@ try {
                 f.prefijo_factura_original,
                 f.id_rel_factura_fiskaly,
                 f.rel_id_empresa,
-                s.nombre_sucursal,
                 s.empresa_id,
                 CONCAT(c.nombre, ' ', c.apellido) AS CLIENTEDATA
               FROM facturas_rectificativas f
@@ -114,7 +106,6 @@ try {
             $row['fecha_factura'] ?: '-',
             (trim((string) ($row['hora_factura'] ?? '')) !== '' ? substr(trim((string) $row['hora_factura']), 0, 8) : '-'),
             $row['CLIENTEDATA'] ?: '-',
-            $row['nombre_sucursal'] ?: '-',
             number_format($row['total_factura'], 2, ',', '.') . ' €',
             $row['estado_factura'],
             $row['tipo_pago_factura'] ?: '-',

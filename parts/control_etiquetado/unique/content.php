@@ -10,11 +10,6 @@
       </div>
 
       <div class="d-flex justify-content-between align-items-center row gx-5 pt-4 gap-5 gap-md-0 mt-3 listar-filtros-container" id="control_etiquetado_filtros_container">
-        <div class="col-12 col-md-3 control_etiquetado_sucursal select2-btn-height">
-          <select id="filtro_sucursal_control_etiquetado" class="form-select select2-filter text-capitalize select2-custom">
-            <option value="">Sucursal</option>
-          </select>
-        </div>
         <div class="col-12 col-md-3 control_etiquetado_tipo select2-btn-height">
           <select id="filtro_tipo_control_etiquetado" class="form-select select2-filter text-capitalize select2-custom">
             <?php control_etiquetado_imprimir_opciones_tipo(); ?>
@@ -48,7 +43,6 @@
             <th>Fecha</th>
             <th>Hora</th>
             <th>Usuario</th>
-            <th>Sucursal</th>
             <th>Envío Nº</th>
             <th>Total etiquetas</th>
             <th>Tipo</th>

@@ -24,37 +24,6 @@ document.addEventListener('DOMContentLoaded', function (e) {
     FD.initSelect2(select, onFiltroFacturaChange);
   };
 
-  const createFilterSucursal = function (containerClass, selectId) {
-    const select = document.createElement('select');
-    select.id = selectId;
-    select.className = 'form-select select2-filter text-capitalize form-select-sm select2-custom';
-    select.innerHTML = '<option value="">Sucursales</option>';
-    const container = document.querySelector(containerClass);
-    if (!container) {
-      return select;
-    }
-    container.appendChild(select);
-    attachFiltroReload(select);
-    fetch('parts/clientes/listar/get_sucursales.php')
-      .then(function (response) { return response.json(); })
-      .then(function (data) {
-        if (data.success && data.sucursales) {
-          data.sucursales.forEach(function (s) {
-            const opt = document.createElement('option');
-            opt.value = s.nombre_sucursal;
-            opt.textContent = s.nombre_sucursal;
-            select.appendChild(opt);
-          });
-          const $sel = $(select);
-          if ($sel.data('select2')) {
-            $sel.trigger('change.select2');
-          }
-        }
-      })
-      .catch(function (err) { console.error('Error cargar sucursales:', err); });
-    return select;
-  };
-
   const createFilterEstado = function (containerClass, selectId) {
     const select = document.createElement('select');
     select.id = selectId;
@@ -137,13 +106,11 @@ document.addEventListener('DOMContentLoaded', function (e) {
         url: 'parts/facturas/listar/load_list.php',
         type: 'POST',
         data: function (d) {
-          const s = document.getElementById('filtro_sucursal');
           const emp = document.getElementById('filtro_empresa');
           const tp = document.getElementById('filtro_tipo_pago');
           const est = document.getElementById('filtro_estado_factura');
           const fd = document.getElementById('filtro_fecha_desde');
           const fh = document.getElementById('filtro_fecha_hasta');
-          d.filtro_sucursal = s ? s.value : '';
           d.filtro_empresa = emp ? emp.value : '';
           d.filtro_tipo_pago = tp ? tp.value : '';
           d.filtro_estado_factura = est ? est.value : '';
@@ -157,20 +124,19 @@ document.addEventListener('DOMContentLoaded', function (e) {
       },
       columns: [
         { data: 0 }, { data: 1 }, { data: 2 }, { data: 3 }, { data: 4 }, { data: 5 },
-        { data: 6 }, { data: 7 }, { data: 8 }, { data: 9 }, { data: 10 }, { data: 11 },
-        { data: 12 }, { data: 13, visible: false }
+        { data: 6 }, { data: 7 }, { data: 8 }, { data: 9 }, { data: 10 },
+        { data: 11 }, { data: 12, visible: false }
       ],
       columnDefs: [
-        { targets: 0, render: function(data, type, row) { const url = row && row[13] ? row[13] : ('Impresiones/Facturas/factura.php?id_factura=' + data); return '<a href="' + url + '" target="_blank" class="fw-semibold text-primary">' + data + '</a>'; } },
+        { targets: 0, render: function(data, type, row) { const url = row && row[12] ? row[12] : ('Impresiones/Facturas/factura.php?id_factura=' + data); return '<a href="' + url + '" target="_blank" class="fw-semibold text-primary">' + data + '</a>'; } },
         { targets: 1, render: function(data) { return data || '-'; } },
         { targets: 2, render: function(data) { return data || '-'; } },
         { targets: 3, render: function(data) { return data || '-'; } },
         { targets: 4, render: function(data) { return data || '-'; } },
         { targets: 5, render: function(data) { return data || '-'; } },
-        { targets: 6, render: function(data) { return data || '-'; } },
-        { targets: 7, render: function(data) { return '<span class="fw-semibold text-success">' + (data || '-') + '</span>'; } },
+        { targets: 6, render: function(data) { return '<span class="fw-semibold text-success">' + (data || '-') + '</span>'; } },
         {
-          targets: 8,
+          targets: 7,
           render: function(data) {
             let c = 'secondary';
             if (data === 'pagada') c = 'success'; else if (data === 'anulada') c = 'danger'; else if (data === 'nopagada') c = 'warning';
@@ -178,7 +144,7 @@ document.addEventListener('DOMContentLoaded', function (e) {
           }
         },
         {
-          targets: 9,
+          targets: 8,
           render: function(data) {
             if (!data || data === '-') return '-';
             const v = (data || '').toLowerCase();
@@ -188,7 +154,7 @@ document.addEventListener('DOMContentLoaded', function (e) {
           }
         },
         {
-          targets: 10,
+          targets: 9,
           render: function(data) {
             if (!data || data === '-') return '-';
             const v = (data || '').toLowerCase();
@@ -200,7 +166,7 @@ document.addEventListener('DOMContentLoaded', function (e) {
           }
         },
         {
-          targets: 11,
+          targets: 10,
           render: function(data) {
             if (!data || data === '-') return '-';
             const v = String(data);
@@ -212,12 +178,12 @@ document.addEventListener('DOMContentLoaded', function (e) {
           }
         },
         {
-          targets: 12,
+          targets: 11,
           orderable: false,
           responsivePriority: 1,
           render: function(data, type, row) {
             const id = typeof data !== 'undefined' ? data : (row && row[0]);
-            const url = row && row[13] ? row[13] : ('Impresiones/Facturas/factura.php?id_factura=' + id);
+            const url = row && row[12] ? row[12] : ('Impresiones/Facturas/factura.php?id_factura=' + id);
             return '<div class="dropdown">' +
               '<button type="button" class="btn btn-sm btn-icon btn-text-secondary rounded-pill dropdown-toggle hide-arrow" data-bs-toggle="dropdown" aria-expanded="false">' +
               '<i class="icon-base ri ri-more-2-fill icon-28px"></i></button>' +
@@ -361,7 +327,6 @@ document.addEventListener('DOMContentLoaded', function (e) {
   }
 
   function exportarTodosLosDatos(tipo, dt) {
-    const filtro = document.getElementById('filtro_sucursal');
     const filtroEmp = document.getElementById('filtro_empresa');
     const filtroTp = document.getElementById('filtro_tipo_pago');
     const filtroEst = document.getElementById('filtro_estado_factura');
@@ -369,7 +334,6 @@ document.addEventListener('DOMContentLoaded', function (e) {
     const filtroFh = document.getElementById('filtro_fecha_hasta');
     const formData = new FormData();
     formData.append('search', dt.search());
-    formData.append('filtro_sucursal', filtro ? filtro.value : '');
     formData.append('filtro_empresa', filtroEmp ? filtroEmp.value : '');
     formData.append('filtro_tipo_pago', filtroTp ? filtroTp.value : '');
     formData.append('filtro_estado_factura', filtroEst ? filtroEst.value : '');
@@ -389,10 +353,10 @@ document.addEventListener('DOMContentLoaded', function (e) {
         const tid = 'temp-export-' + Date.now();
         const div = document.createElement('div');
         div.style.display = 'none';
-        div.innerHTML = '<table id="' + tid + '"><thead><tr><th>Nº</th><th>NÚMERO</th><th>FECHA</th><th>HORA</th><th>CLIENTE</th><th>SUCURSAL</th><th>EMPRESA</th><th>TOTAL</th><th>ESTADO</th><th>TIPO PAGO</th><th>TIPO</th><th>REGIMEN</th></tr></thead></table>';
+        div.innerHTML = '<table id="' + tid + '"><thead><tr><th>Nº</th><th>NÚMERO</th><th>FECHA</th><th>HORA</th><th>CLIENTE</th><th>EMPRESA</th><th>TOTAL</th><th>ESTADO</th><th>TIPO PAGO</th><th>TIPO</th><th>REGIMEN</th></tr></thead></table>';
         document.body.appendChild(div);
         const $t = $('#' + tid).DataTable({ data: data.data, searching: false, ordering: false, dom: 't' });
-        $t.button().add(0, { extend: tipo === 'excel' ? 'excelHtml5' : tipo }).trigger();
+        $t.button().add(0, { extend: tipo === 'excel' ? 'excelHtml5' : tipo, title: 'Facturas' }).trigger();
         setTimeout(function() { $t.destroy(); div.remove(); }, 1000);
       })
       .catch(err => { Swal.close(); Swal.fire({ icon: 'error', title: 'Error', text: err.message }); });
@@ -432,7 +396,6 @@ document.addEventListener('DOMContentLoaded', function (e) {
     }
   });
 
-  createFilterSucursal('.factura_sucursal', 'filtro_sucursal');
   createFilterEstado('.factura_estado', 'filtro_estado_factura');
   createFiltrosEmpresaTipoPago();
   if (FD) {

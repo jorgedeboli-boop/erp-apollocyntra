@@ -6,7 +6,6 @@
 
   const FILTER_IDS = [
     'filtro_empresa',
-    'filtro_sucursal',
     'filtro_proveedor',
     'filtro_estado',
     'filtro_tipo_gasto',

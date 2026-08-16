@@ -11,16 +11,10 @@
       $query_articulo = "
           SELECT 
               av.*,
-              s_destino.nombre_sucursal as nombre_sucursal_destino,
-              s_destino.id_sucursal as id_sucursal_destino,
-              s_origen.nombre_sucursal as nombre_sucursal_origen,
-              s_origen.id_sucursal as id_sucursal_origen,
               u.nombre_usuario,
               u.apellido_usuario,
               u.id_usuario
           FROM articulos_venta av
-          LEFT JOIN sucursal s_destino ON av.id_sucursal_destino = s_destino.id_sucursal
-          LEFT JOIN sucursal s_origen ON av.id_sucursal_origen = s_origen.id_sucursal
           LEFT JOIN usuarios u ON av.creado_por = u.id_usuario
           WHERE av.id = ?
       ";
@@ -29,12 +23,11 @@
       mysqli_stmt_bind_param($stmt_articulo, 'i', $id_articulo);
       mysqli_stmt_execute($stmt_articulo);
       $result_articulo = mysqli_stmt_get_result($stmt_articulo);
-
-      $sucursal_articulo = $articulo['id_sucursal_destino'];
       
       if ($result_articulo && mysqli_num_rows($result_articulo) > 0) {
           $articulo = mysqli_fetch_assoc($result_articulo);
           mysqli_stmt_close($stmt_articulo);
+          $sucursal_articulo = (int) ($articulo['id_sucursal_destino'] ?? 0);
 
           $trazabilidad_rows = array();
           $stmt_traz = mysqli_prepare($conexion, "
@@ -118,9 +111,6 @@
                 <h4 class="mb-2">Artículo #<?php echo htmlspecialchars($articulo['id']); ?></h4>
                 <ul class="list-inline mb-0 d-flex align-items-center flex-wrap justify-content-sm-start justify-content-center gap-4">
                   <li class="list-inline-item">
-                    <i class="icon-base ri ri-archive-line me-2 icon-24px"></i><span class="fw-medium">ID Sucursal: #<?php echo htmlspecialchars($articulo['id_articulo_sucursal']); ?></span>
-                  </li>
-                  <li class="list-inline-item">
                     <i class="icon-base ri ri-calendar-line me-2 icon-24px"></i><span class="fw-medium">Fecha: <?php echo !empty($articulo['fecha_alta']) ? date('d/m/Y', strtotime($articulo['fecha_alta'])) : 'N/A'; ?></span>
                   </li>
                 </ul>
@@ -130,9 +120,6 @@
                   <i class="icon-base ri ri-arrow-left-s-line me-2"></i>Artículos
                 </button>
                 <?php
-                $nombre_suc_dest_badge = isset($articulo['nombre_sucursal_destino']) && $articulo['nombre_sucursal_destino'] !== '' && $articulo['nombre_sucursal_destino'] !== null
-                    ? $articulo['nombre_sucursal_destino']
-                    : '—';
                 $codigo_regimen_badge = isset($articulo['system_codigo_regimen']) && $articulo['system_codigo_regimen'] !== '' && $articulo['system_codigo_regimen'] !== null
                     ? $articulo['system_codigo_regimen']
                     : '—';
@@ -145,7 +132,6 @@
                 $mostrar_badge_venta = in_array($estado_articulo_header, ['vendido', 'vendido_web'], true) && $venta_num_display !== '';
                 ?>
                 <div class="badge bg-label-success rounded-pill lh-xs badget-estados"><?php echo htmlspecialchars($precio_venta_badge); ?></div>
-                <div class="badge bg-label-primary rounded-pill lh-xs badget-estados"><?php echo htmlspecialchars($nombre_suc_dest_badge); ?></div>
                 <div class="badge bg-label-warning rounded-pill lh-xs badget-estados"><?php echo htmlspecialchars($codigo_regimen_badge); ?></div>
                 
                 <?php if ($mostrar_badge_venta): ?>
@@ -169,11 +155,6 @@
           <li class="nav-item" role="presentation">
             <button type="button" class="nav-link waves-effect waves-light active" role="tab" data-bs-toggle="tab" data-bs-target="#navs-pills-top-datos-articulo" aria-controls="navs-pills-top-datos-articulo" aria-selected="true">
               <i class="icon-base ri ri-shopping-bag-line icon-sm me-2"></i>Datos Artículo
-            </button>
-          </li>
-          <li class="nav-item" role="presentation">
-            <button type="button" class="nav-link waves-effect waves-light" role="tab" data-bs-toggle="tab" data-bs-target="#navs-pills-top-sucursales" aria-controls="navs-pills-top-sucursales" aria-selected="false" tabindex="-1">
-              <i class="icon-base ri ri-store-line icon-sm me-2"></i>Sucursales
             </button>
           </li>
           <li class="nav-item" role="presentation">
@@ -356,10 +337,6 @@
                 <?php endif; ?>
                 <?php if (!empty($articulo['id_lote_origen']) && (int) $articulo['id_lote_origen'] > 0): ?>
                 <li class="d-flex align-items-center mb-4">
-                  <i class="icon-base ri ri-building-line icon-24px"></i><span class="fw-medium mx-2">Sucursal origen:</span>
-                  <span><?php echo htmlspecialchars($articulo['nombre_sucursal_origen'] ?? 'N/A'); ?></span>
-                </li>
-                <li class="d-flex align-items-center mb-4">
                   <i class="icon-base ri ri-archive-line icon-24px"></i><span class="fw-medium mx-2">Lote origen:</span>
                   <?php if ($lote_origen_url !== ''): ?>
                   <a target="_blank" rel="noopener" href="<?php echo htmlspecialchars($lote_origen_url, ENT_QUOTES, 'UTF-8'); ?>"><?php echo htmlspecialchars($lote_origen_display); ?></a>
@@ -475,44 +452,6 @@
       </div>
     </div>
     <!-- /Tab Datos Artículo -->
-    
-    <!-- Tab Sucursales -->
-    <div class="tab-pane fade" id="navs-pills-top-sucursales" role="tabpanel">
-      <div class="card mt-0">
-        <div class="card-body">
-          <h5 class="card-title mb-4">Información de Sucursales</h5>
-          <div class="row">
-            <div class="col-md-6">
-              <div class="mb-4">
-                <h6 class="fw-medium mb-2">Sucursal Destino</h6>
-                <p class="text-body-secondary"><?php echo htmlspecialchars($articulo['nombre_sucursal_destino'] ?? 'N/A'); ?></p>
-              </div>
-              <div class="mb-4">
-                <h6 class="fw-medium mb-2">ID Sucursal Destino</h6>
-                <p class="text-body-secondary"><?php echo htmlspecialchars($articulo['id_sucursal_destino'] ?? 'N/A'); ?></p>
-              </div>
-            </div>
-            <div class="col-md-6">
-              <div class="mb-4">
-                <h6 class="fw-medium mb-2">Sucursal Origen</h6>
-                <p class="text-body-secondary"><?php echo htmlspecialchars($articulo['nombre_sucursal_origen'] ?? 'N/A'); ?></p>
-              </div>
-              <div class="mb-4">
-                <h6 class="fw-medium mb-2">ID Sucursal Origen</h6>
-                <p class="text-body-secondary"><?php echo htmlspecialchars($articulo['id_sucursal_origen'] ?? 'N/A'); ?></p>
-              </div>
-              <?php if (!empty($articulo['id_lote_origen'])): ?>
-              <div class="mb-4">
-                <h6 class="fw-medium mb-2">ID Lote Origen</h6>
-                <p class="text-body-secondary"><?php echo htmlspecialchars($articulo['id_lote_origen']); ?></p>
-              </div>
-              <?php endif; ?>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-    <!-- /Tab Sucursales -->
     
     <!-- Tab Precios -->
     <div class="tab-pane fade" id="navs-pills-top-precios" role="tabpanel">

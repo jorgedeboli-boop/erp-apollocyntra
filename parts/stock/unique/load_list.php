@@ -16,7 +16,6 @@ try {
     $length = isset($_POST['length']) ? (int) $_POST['length'] : 10;
     $searchValue = isset($_POST['search']['value']) ? $_POST['search']['value'] : '';
 
-    $filtro_sucursal = isset($_POST['filtro_sucursal']) ? trim($_POST['filtro_sucursal']) : '';
     $filtro_tipo = isset($_POST['filtro_tipo']) ? trim($_POST['filtro_tipo']) : '';
     $filtro_origen = isset($_POST['filtro_origen']) ? trim($_POST['filtro_origen']) : '';
     $filtro_fecha_desde = isset($_POST['filtro_fecha_desde']) ? trim($_POST['filtro_fecha_desde']) : '';
@@ -28,12 +27,6 @@ try {
     $whereConditions = array("av.estado = 'enventa'");
     $params = array();
     $types = '';
-
-    if (!empty($filtro_sucursal)) {
-        $whereConditions[] = 'av.id_sucursal_destino = ?';
-        $params[] = $filtro_sucursal;
-        $types .= 'i';
-    }
 
     if (!empty($filtro_tipo)) {
         $whereConditions[] = 'av.tipo = ?';
@@ -75,15 +68,13 @@ try {
         $whereConditions[] = '(
             av.id LIKE ? OR
             av.descripcion LIKE ? OR
-            av.estado LIKE ? OR
-            s.nombre_sucursal LIKE ?
+            av.estado LIKE ?
         )';
         $searchParam = '%' . $searchValue . '%';
         $params[] = $searchValue;
         $params[] = $searchParam;
         $params[] = $searchParam;
-        $params[] = $searchParam;
-        $types .= 'ssss';
+        $types .= 'sss';
     }
 
     $whereClause = 'WHERE ' . implode(' AND ', $whereConditions);
@@ -96,7 +87,6 @@ try {
     $query_filtered = "
         SELECT COUNT(*) as total
         FROM articulos_venta av
-        LEFT JOIN sucursal s ON av.id_sucursal_destino = s.id_sucursal
         $whereClause
     ";
 
@@ -118,7 +108,6 @@ try {
         SELECT
             av.id as id_articulo,
             av.id_articulo_sucursal,
-            av.id_sucursal_destino,
             av.descripcion,
             av.peso,
             av.precio,
@@ -131,12 +120,8 @@ try {
             av.fecha_vendido,
             av.fecha_retirado,
             av.origen_articulo,
-            s.nombre_sucursal,
-            s_origen.nombre_sucursal as sucursal_origen,
             u.nombre_usuario
         FROM articulos_venta av
-        LEFT JOIN sucursal s ON av.id_sucursal_destino = s.id_sucursal
-        LEFT JOIN sucursal s_origen ON av.id_sucursal_origen = s_origen.id_sucursal
         LEFT JOIN usuarios u ON av.creado_por = u.id_usuario
         $whereClause
         ORDER BY av.id DESC
@@ -177,14 +162,12 @@ try {
         if ($row['origen_articulo'] === 'central') {
             $origen_badge = '<span class="badge bg-label-primary ">Central</span>';
         } else {
-            $origen_badge = '<span class="badge bg-label-info ">Sucursal</span>';
+            $origen_badge = '<span class="badge bg-label-info ">Local</span>';
         }
 
         $data[] = [
             htmlspecialchars($row['id_articulo']),
             htmlspecialchars($row['descripcion']),
-            htmlspecialchars($row['sucursal_origen'] ?: '---'),
-            htmlspecialchars($row['nombre_sucursal'] ?: '---'),
             number_format($row['peso'], 2, ',', '.') . ' g',
             number_format($row['precio'], 0, ',', '.') . ' €',
             number_format($row['precio_coste'], 0, ',', '.') . ' €',

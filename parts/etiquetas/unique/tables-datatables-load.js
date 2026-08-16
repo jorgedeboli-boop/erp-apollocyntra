@@ -182,33 +182,14 @@ document.addEventListener('DOMContentLoaded', function () {
   function actualizarBotonImprimirMasivo() {
     const btn = document.getElementById('btn_imprimir_etiquetas_masivo');
     const textoBtn = document.getElementById('texto_btn_imprimir_etiquetas');
-    const filtroSucursal = document.getElementById('filtro_sucursal_etiquetas');
     if (!btn || !textoBtn) return;
 
-    const idSucursal = filtroSucursal && filtroSucursal.value ? parseInt(filtroSucursal.value, 10) : 0;
-    let url = 'Impresiones/Articulos/etiquetas_articulos.php?varios=true';
-    if (idSucursal > 0) {
-      url += '&por_sucursal=' + encodeURIComponent(String(idSucursal));
-      const nombre = filtroSucursal.options[filtroSucursal.selectedIndex].text;
-      textoBtn.textContent = 'Imprimir etiquetas de ' + nombre;
-    } else {
-      textoBtn.textContent = 'Imprimir todo';
-    }
-    btn.href = url;
+    btn.href = 'Impresiones/Articulos/etiquetas_articulos.php?varios=true';
+    textoBtn.textContent = 'Imprimir todo';
   }
 
   function actualizarTituloEtiquetas() {
-    const textoSucursal = document.getElementById('texto_etiquetas_sucursal_titulo');
     const textoFiltros = document.getElementById('texto_etiquetas_filtros_titulo');
-    const filtroSucursal = document.getElementById('filtro_sucursal_etiquetas');
-    if (!textoSucursal) return;
-
-    if (filtroSucursal && filtroSucursal.value) {
-      textoSucursal.textContent = filtroSucursal.options[filtroSucursal.selectedIndex].text;
-    } else {
-      textoSucursal.textContent = 'todas las sucursales operativas';
-    }
-
     if (!textoFiltros) return;
 
     const partes = [];
@@ -241,12 +222,10 @@ document.addEventListener('DOMContentLoaded', function () {
     const totalEl = document.getElementById('total_etiquetas');
     if (!totalEl) return;
 
-    const filtroSucursal = document.getElementById('filtro_sucursal_etiquetas');
     const filtroFechaDesde = document.getElementById('filtro_fecha_desde');
     const filtroFechaHasta = document.getElementById('filtro_fecha_hasta');
 
     const formData = new FormData();
-    formData.append('filtro_sucursal', filtroSucursal ? filtroSucursal.value : '');
     formData.append('filtro_fecha_desde', filtroFechaDesde ? filtroFechaDesde.value : '');
     formData.append('filtro_fecha_hasta', filtroFechaHasta ? filtroFechaHasta.value : '');
     formData.append('filtro_periodo', window.filtro_periodo_activo_etiquetas || '');
@@ -265,60 +244,6 @@ document.addEventListener('DOMContentLoaded', function () {
     window.cargarTotalEtiquetasPendientes();
   };
 
-  const createFilterSucursal = function (containerClass, selectId) {
-    const select = document.createElement('select');
-    select.id = selectId;
-    select.className = 'form-select select2-filter text-capitalize select2-custom';
-    select.innerHTML = '<option value="">Todas las sucursales</option>';
-    document.querySelector(containerClass).appendChild(select);
-
-    const sucursalInicial = document.getElementById('sucursal_articulo_inicial');
-    const idInicial = sucursalInicial ? String(sucursalInicial.value || '') : '';
-
-    fetch('parts/clientes/listar/get_sucursales.php')
-      .then(function (r) { return r.json(); })
-      .then(function (data) {
-        if (!data.success) return;
-        data.sucursales.forEach(function (sucursal) {
-          const option = document.createElement('option');
-          option.value = sucursal.id_sucursal;
-          option.textContent = sucursal.nombre_sucursal;
-          if (idInicial && String(sucursal.id_sucursal) === idInicial) {
-            option.selected = true;
-          }
-          select.appendChild(option);
-        });
-
-        const select2 = $(select);
-        if (select2.length) {
-          select2.each(function () {
-            const $this = $(this);
-            $this.select2({ dropdownParent: $this.parent(), allowClear: true, placeholder: 'Todas las sucursales' });
-            $this.on('select2:select select2:unselect', function () {
-              if (dtEtiquetas) dtEtiquetas.ajax.reload();
-              actualizarTituloEtiquetas();
-              window.cargarTotalEtiquetasPendientes();
-            });
-          });
-        }
-
-        select.addEventListener('change', function () {
-          if (dtEtiquetas) dtEtiquetas.ajax.reload();
-          actualizarTituloEtiquetas();
-          window.cargarTotalEtiquetasPendientes();
-        });
-
-        actualizarTituloEtiquetas();
-        if (dtEtiquetas) dtEtiquetas.ajax.reload();
-        window.cargarTotalEtiquetasPendientes();
-      })
-      .catch(function (err) {
-        console.error('Error al cargar sucursales:', err);
-      });
-
-    return select;
-  };
-
   if (dtTable) {
     dtEtiquetas = new DataTable(dtTable, {
       processing: true,
@@ -331,11 +256,9 @@ document.addEventListener('DOMContentLoaded', function () {
         url: 'parts/etiquetas/unique/load_list.php',
         type: 'POST',
         data: function (d) {
-          const sucursalFilter = document.getElementById('filtro_sucursal_etiquetas');
           const fechaDesde = document.getElementById('filtro_fecha_desde');
           const fechaHasta = document.getElementById('filtro_fecha_hasta');
 
-          d.filtro_sucursal = sucursalFilter ? sucursalFilter.value : '';
           d.filtro_fecha_desde = fechaDesde ? fechaDesde.value : '';
           d.filtro_fecha_hasta = fechaHasta ? fechaHasta.value : '';
           d.filtro_periodo = window.filtro_periodo_activo_etiquetas || '';
@@ -360,12 +283,11 @@ document.addEventListener('DOMContentLoaded', function () {
         { data: 6 },
         { data: 7 },
         { data: 8 },
-        { data: 9 },
-        { data: 10 }
+        { data: 9 }
       ],
       columnDefs: [
         {
-          targets: [3, 7, 10],
+          targets: [2, 6, 9],
           orderable: false
         },
         {
@@ -402,10 +324,10 @@ document.addEventListener('DOMContentLoaded', function () {
                       text: '<span class="d-flex align-items-center"><i class="icon-base ri ri-file-excel-line me-1"></i>Excel</span>',
                       className: 'dropdown-item',
                       title: function () {
-                        return 'Etiquetas pendientes ' + (document.getElementById('texto_etiquetas_sucursal_titulo')?.textContent || '');
+                        return 'Etiquetas pendientes';
                       },
                       exportOptions: {
-                        columns: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
+                        columns: [0, 1, 2, 3, 4, 5, 6, 7, 8],
                         format: {
                           body: function (data) {
                             if (typeof data === 'string') {
@@ -424,10 +346,10 @@ document.addEventListener('DOMContentLoaded', function () {
                       className: 'dropdown-item',
                       orientation: 'landscape',
                       title: function () {
-                        return 'Etiquetas pendientes ' + (document.getElementById('texto_etiquetas_sucursal_titulo')?.textContent || '');
+                        return 'Etiquetas pendientes';
                       },
                       exportOptions: {
-                        columns: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
+                        columns: [0, 1, 2, 3, 4, 5, 6, 7, 8],
                         format: {
                           body: function (data) {
                             if (typeof data === 'string') {
@@ -466,7 +388,8 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     window.dt_etiquetas_pendientes = dtEtiquetas;
-    createFilterSucursal('.etiquetas_sucursal', 'filtro_sucursal_etiquetas');
+    actualizarTituloEtiquetas();
+    window.cargarTotalEtiquetasPendientes();
     configurarFiltrosFechaEtiquetas();
   }
 

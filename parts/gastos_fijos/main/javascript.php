@@ -2,7 +2,7 @@
 <script>
 document.addEventListener('DOMContentLoaded', function () {
   // Select2
-  $('#periodo_gasto_fijo, #sucursal_gasto_fijo, #proveedor_gasto_fijo, #forma_pago_gasto_fijo, #tipo_de_gasto_fijo').each(function () {
+  $('#periodo_gasto_fijo, #proveedor_gasto_fijo, #forma_pago_gasto_fijo, #tipo_de_gasto_fijo').each(function () {
     const $this = $(this);
     if ($this.length) $this.select2({ dropdownParent: $this.parent() });
   });

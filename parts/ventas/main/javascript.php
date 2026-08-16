@@ -3211,7 +3211,7 @@ $vCameraDocPanel = filemtime(__DIR__ . '/../../../camera/js/camera-doc-panel.js'
                 return [];
               }
             },
-            columnDefs: [{ orderable: false, targets: [9, 10] }],
+            columnDefs: [{ orderable: false, targets: [8, 9] }],
             columns: [
               { data: 'num', className: 'text-nowrap' },
               {
@@ -3223,7 +3223,6 @@ $vCameraDocPanel = filemtime(__DIR__ . '/../../../camera/js/camera-doc-panel.js'
                   return d;
                 }
               },
-              { data: 'sucursal', className: 'text-nowrap' },
               {
                 data: 'importe_adelanto',
                 className: 'text-end fw-medium',

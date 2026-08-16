@@ -8,7 +8,7 @@ $vFiltrosListar = filemtime(__DIR__ . '/../../universal/filtros-listar.js');
 ?>
 <script>
 window.ListarFiltrosConfig = {
-  filterIds: ['filtro_periodo', 'filtro_sucursal', 'filtro_estado'],
+  filterIds: ['filtro_periodo', 'filtro_estado'],
   containerId: 'collapse_filtros_gastos_fijos',
   readyClass: 'gastos-fijos-filtros-ready',
   initMarkerId: 'filtro_periodo'

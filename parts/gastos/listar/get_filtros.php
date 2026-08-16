@@ -27,15 +27,6 @@ try {
     }
     $filtros['empresas'] = $empresas;
     
-    // Obtener sucursales
-    $query_sucursales = "SELECT id_sucursal, nombre_sucursal FROM sucursal ORDER BY nombre_sucursal";
-    $result_sucursales = mysqli_query($conexion, $query_sucursales);
-    $sucursales = [];
-    while ($row = mysqli_fetch_assoc($result_sucursales)) {
-        $sucursales[] = ['id' => $row['id_sucursal'], 'nombre' => $row['nombre_sucursal']];
-    }
-    $filtros['sucursales'] = $sucursales;
-    
     // Obtener proveedores
     $query_proveedores = "SELECT id_proveedor, nombre_proveedor FROM proveedores ORDER BY nombre_proveedor";
     $result_proveedores = mysqli_query($conexion, $query_proveedores);

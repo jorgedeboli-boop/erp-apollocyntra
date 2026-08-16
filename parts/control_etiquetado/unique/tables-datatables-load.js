@@ -21,14 +21,9 @@ document.addEventListener('DOMContentLoaded', function () {
     if (!textoFiltros) return;
 
     const partes = [];
-    const filtroSucursal = document.getElementById('filtro_sucursal_control_etiquetado');
     const periodo = window.filtro_periodo_activo_control_etiquetado || '';
     const fechaDesde = document.getElementById('filtro_fecha_desde')?.value || '';
     const fechaHasta = document.getElementById('filtro_fecha_hasta')?.value || '';
-
-    if (filtroSucursal && filtroSucursal.value) {
-      partes.push('de ' + filtroSucursal.options[filtroSucursal.selectedIndex].text);
-    }
 
     const filtroTipo = document.getElementById('filtro_tipo_control_etiquetado');
     if (filtroTipo && filtroTipo.value) {
@@ -68,12 +63,10 @@ document.addEventListener('DOMContentLoaded', function () {
         url: 'parts/control_etiquetado/unique/load_list.php',
         type: 'POST',
         data: function (d) {
-          const sucursalFilter = document.getElementById('filtro_sucursal_control_etiquetado');
           const tipoFilter = document.getElementById('filtro_tipo_control_etiquetado');
           const fechaDesde = document.getElementById('filtro_fecha_desde');
           const fechaHasta = document.getElementById('filtro_fecha_hasta');
 
-          d.filtro_sucursal = sucursalFilter ? sucursalFilter.value : '';
           d.filtro_tipo = tipoFilter ? tipoFilter.value : '';
           d.filtro_fecha_desde = fechaDesde ? fechaDesde.value : '';
           d.filtro_fecha_hasta = fechaHasta ? fechaHasta.value : '';
@@ -97,12 +90,11 @@ document.addEventListener('DOMContentLoaded', function () {
         { data: 4 },
         { data: 5 },
         { data: 6 },
-        { data: 7 },
-        { data: 8, visible: false }
+        { data: 7, visible: false }
       ],
       columnDefs: [
         {
-          targets: 7,
+          targets: 6,
           orderable: false
         },
         {
@@ -110,7 +102,7 @@ document.addEventListener('DOMContentLoaded', function () {
           responsivePriority: 1
         }
       ],
-      order: [[8, 'desc']],
+      order: [[7, 'desc']],
       pageLength: 25,
       lengthMenu: [10, 25, 50, 100],
       layout: {
@@ -130,7 +122,7 @@ document.addEventListener('DOMContentLoaded', function () {
                       className: 'dropdown-item',
                       title: 'Control de etiquetado',
                       exportOptions: {
-                        columns: [0, 1, 2, 3, 4, 5, 6, 7],
+                        columns: [0, 1, 2, 3, 4, 5, 6],
                         format: {
                           body: function (data) {
                             if (typeof data === 'string') {
@@ -150,7 +142,7 @@ document.addEventListener('DOMContentLoaded', function () {
                       orientation: 'landscape',
                       title: 'Control de etiquetado',
                       exportOptions: {
-                        columns: [0, 1, 2, 3, 4, 5, 6, 7],
+                        columns: [0, 1, 2, 3, 4, 5, 6],
                         format: {
                           body: function (data) {
                             if (typeof data === 'string') {
@@ -195,10 +187,10 @@ document.addEventListener('DOMContentLoaded', function () {
         return;
       }
       const rowData = dtControlEtiquetado.row(this).data();
-      if (!rowData || rowData[8] == null || rowData[8] === '') {
+      if (!rowData || rowData[7] == null || rowData[7] === '') {
         return;
       }
-      window.location.href = 'etiquetas_list_control.php?id=' + encodeURIComponent(String(rowData[8]));
+      window.location.href = 'etiquetas_list_control.php?id=' + encodeURIComponent(String(rowData[7]));
     });
 
 

@@ -7,7 +7,7 @@ function control_etiquetado_opciones_tipo() {
     return [
         'articulo' => 'Artículo',
         'envio' => 'Envío',
-        'sucursal' => 'Sucursal',
+        'sucursal' => 'Tienda',
         'todo' => 'Todo',
         'false' => '----',
     ];

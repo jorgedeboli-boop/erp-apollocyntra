@@ -125,11 +125,6 @@
                           <i class="icon-base ri ri-image-edit-fill icon-sm me-2"></i>Logotipo
                         </button>
                       </li>
-                      <li class="nav-item" role="presentation">
-                        <button type="button" class="nav-link waves-effect waves-light" role="tab" data-bs-toggle="tab" data-bs-target="#navs-pills-top-sucursales" aria-controls="navs-pills-top-configuracion" aria-selected="false" tabindex="-1">
-                          <i class="icon-base ri ri-building-fill icon-sm me-2"></i>Sucursales
-                        </button>
-                      </li>
                     </ul>
                   </div>
                 </div>
@@ -336,39 +331,6 @@
                   </div>
                 </div>
                 <!--/ Tab Tarjetas Banco -->
-
-                <!-- Tab Sucursales -->
-                <div class="tab-pane fade" id="navs-pills-top-sucursales" role="tabpanel">
-                  <div class="row">
-                    <div class="col-12">
-                      <!-- Lista de Sucursales -->
-                      <div class="card mb-6">
-                        <div class="card-header">
-                          <h5 class="card-title">Sucursales de la Empresa</h5>
-                        </div>
-                        <div class="card-body pt-5">
-                          <div class="card-datatable table-responsive">
-                            <table class="datatables-sucursales-empresa table border-top">
-                              <thead>
-                                <tr>
-                                  <th>ID</th>
-                                  <th>NOMBRE SUCURSAL</th>
-                                  <th>NOMBRE CORTO</th>
-                                  <th>POBLACIÓN</th>
-                                  <th>PROVINCIA</th>
-                                  <th>TELÉFONO</th>
-                                  <th>ESTADO</th>
-                                  <th>ACCIONES</th>
-                                </tr>
-                              </thead>
-                            </table>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <!--/ Tab Sucursales -->
 
                 <!-- Tab Logotipo -->
                 <div class="tab-pane fade" id="navs-pills-top-configuracion" role="tabpanel">

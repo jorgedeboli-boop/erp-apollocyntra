@@ -64,7 +64,6 @@ document.addEventListener('DOMContentLoaded', function (e) {
         type: 'POST',
         data: function(d) {
           d.filtro_empresa = obtenerValorFiltro('filtro_empresa');
-          d.filtro_sucursal = obtenerValorFiltro('filtro_sucursal');
           d.filtro_proveedor = obtenerValorFiltro('filtro_proveedor');
           d.filtro_estado = obtenerValorFiltro('filtro_estado');
           d.filtro_tipo_gasto = obtenerValorFiltro('filtro_tipo_gasto');
@@ -87,14 +86,13 @@ document.addEventListener('DOMContentLoaded', function (e) {
       // Configuración de columnas
       columns: [
         { data: 0, title: 'ID', width: '60px' },
-        { data: 6, title: 'DESCRIPCIÓN', width: '200px' },
+        { data: 5, title: 'DESCRIPCIÓN', width: '200px' },
         { data: 1, title: 'FECHA GASTO', width: '100px' },
         { data: 2, title: 'EMPRESA', width: '120px' },
-        { data: 3, title: 'SUCURSAL', width: '120px' },
-        { data: 4, title: 'PROVEEDOR', width: '120px' },
-        { data: 5, title: 'TIPO GASTO', width: '120px' },
-        { data: 7, title: 'TOTAL', width: '100px' },
-        { data: 8, title: 'ESTADO', width: '100px' }
+        { data: 3, title: 'PROVEEDOR', width: '120px' },
+        { data: 4, title: 'TIPO GASTO', width: '120px' },
+        { data: 6, title: 'TOTAL', width: '100px' },
+        { data: 7, title: 'ESTADO', width: '100px' }
       ],
       
       // Configuración de renderizado de columnas
@@ -137,7 +135,7 @@ document.addEventListener('DOMContentLoaded', function (e) {
           }
         },
         {
-          // Sucursal
+          // Proveedor
           targets: 4,
           render: function (data, type, full, meta) {
             if (data && data !== 'N/A') {
@@ -148,7 +146,7 @@ document.addEventListener('DOMContentLoaded', function (e) {
           }
         },
         {
-          // Proveedor
+          // Tipo Gasto
           targets: 5,
           render: function (data, type, full, meta) {
             if (data && data !== 'N/A') {
@@ -159,26 +157,15 @@ document.addEventListener('DOMContentLoaded', function (e) {
           }
         },
         {
-          // Tipo Gasto
-          targets: 6,
-          render: function (data, type, full, meta) {
-            if (data && data !== 'N/A') {
-              return '<span class="fw-semibold">' + data + '</span>';
-            } else {
-              return '<span class="text-muted">N/A</span>';
-            }
-          }
-        },
-        {
           // Total
-          targets: 7,
+          targets: 6,
           render: function (data, type, full, meta) {
             return '<span class="fw-bold text-success">' + data + '</span>';
           }
         },
         {
           // Estado
-          targets: 8,
+          targets: 7,
           render: function (data, type, full, meta) {
             let badgeClass = 'bg-label-secondary';
             let iconClass = 'ri-question-line';
@@ -230,7 +217,7 @@ document.addEventListener('DOMContentLoaded', function (e) {
                       text: `<span class="d-flex align-items-center"><i class="icon-base ri ri-file-excel-line me-1"></i>Excel</span>`,
                       className: 'dropdown-item',
                       exportOptions: {
-                        columns: [0, 1, 2, 3, 4, 5, 6, 7, 8],
+                        columns: [0, 1, 2, 3, 4, 5, 6, 7],
                         format: {
                           body: function (inner, coldex, rowdex) {
                             if (inner.length <= 0) return inner;
@@ -249,7 +236,7 @@ document.addEventListener('DOMContentLoaded', function (e) {
                       text: `<span class="d-flex align-items-center"><i class="icon-base ri ri-file-pdf-line me-1"></i>PDF</span>`,
                       className: 'dropdown-item',
                       exportOptions: {
-                        columns: [0, 1, 2, 3, 4, 5, 6, 7, 8],
+                        columns: [0, 1, 2, 3, 4, 5, 6, 7],
                         format: {
                           body: function (inner, coldex, rowdex) {
                             if (inner.length <= 0) return inner;
@@ -268,7 +255,7 @@ document.addEventListener('DOMContentLoaded', function (e) {
                       text: `<i class="icon-base ri ri-file-copy-line me-1"></i>Copiar`,
                       className: 'dropdown-item',
                       exportOptions: {
-                        columns: [0, 1, 2, 3, 4, 5, 6, 7, 8],
+                        columns: [0, 1, 2, 3, 4, 5, 6, 7],
                         format: {
                           body: function (inner, coldex, rowdex) {
                             if (inner.length <= 0) return inner;

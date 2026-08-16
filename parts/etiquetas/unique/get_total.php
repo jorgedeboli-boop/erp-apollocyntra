@@ -13,7 +13,6 @@ try {
     $conexion = conectar_bd();
 
     $filtros = array(
-        'sucursal' => isset($_POST['filtro_sucursal']) ? trim((string) $_POST['filtro_sucursal']) : '',
         'periodo' => isset($_POST['filtro_periodo']) ? trim((string) $_POST['filtro_periodo']) : '',
         'fecha_desde' => isset($_POST['filtro_fecha_desde']) ? trim((string) $_POST['filtro_fecha_desde']) : '',
         'fecha_hasta' => isset($_POST['filtro_fecha_hasta']) ? trim((string) $_POST['filtro_fecha_hasta']) : '',
@@ -28,7 +27,6 @@ try {
     $query = "
         SELECT COUNT(*) AS total
         FROM articulos_venta av
-        LEFT JOIN sucursal s ON av.id_sucursal_destino = s.id_sucursal
         LEFT JOIN usuarios u ON av.creado_por = u.id_usuario
         $whereClause
     ";

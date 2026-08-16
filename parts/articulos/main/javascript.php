@@ -266,17 +266,16 @@ function retirarArticulo(idArticulo) {
 }
 
 /**
- * Abre nueva venta en crear_venta.php con sucursal y artículo (mismo POST que la lista de ventas + id_articulo).
+ * Abre nueva venta en crear_venta.php con el artículo.
  */
-function enviarAVentaDesdeFichaArticulo(idSucursal, idArticulo) {
-  idSucursal = parseInt(idSucursal, 10) || 0;
+function enviarAVentaDesdeFichaArticulo(idArticulo) {
   idArticulo = parseInt(idArticulo, 10) || 0;
-  if (!idSucursal || !idArticulo) {
+  if (!idArticulo) {
     if (typeof Swal !== 'undefined') {
       Swal.fire({
         icon: 'warning',
         title: 'Datos incompletos',
-        text: 'Falta la sucursal o el identificador del artículo.'
+        text: 'Falta el identificador del artículo.'
       });
     }
     return;
@@ -301,51 +300,15 @@ function enviarAVentaDesdeFichaArticulo(idSucursal, idArticulo) {
     var form = document.createElement('form');
     form.method = 'POST';
     form.action = 'crear_venta.php';
-    var inputSuc = document.createElement('input');
-    inputSuc.type = 'hidden';
-    inputSuc.name = 'id_sucursal';
-    inputSuc.value = String(idSucursal);
     var inputArt = document.createElement('input');
     inputArt.type = 'hidden';
     inputArt.name = 'id_articulo';
     inputArt.value = String(idArticulo);
-    form.appendChild(inputSuc);
     form.appendChild(inputArt);
     document.body.appendChild(form);
     form.submit();
   });
 }
-
-(function () {
-  if (typeof window.jQuery === 'undefined' || !jQuery.fn.select2) {
-    return;
-  }
-  var $modal = jQuery('#modalTraspasarArticulo');
-  if (!$modal.length) {
-    return;
-  }
-  $modal.on('shown.bs.modal', function () {
-    var $sel = jQuery('#id_sucursal_traspaso');
-    if (!$sel.length) {
-      return;
-    }
-    if ($sel.hasClass('select2-hidden-accessible')) {
-      $sel.select2('destroy');
-    }
-    $sel.select2({
-      placeholder: $sel.data('placeholder') || 'Seleccionar sucursal…',
-      allowClear: false,
-      width: '100%',
-      dropdownParent: $modal
-    });
-  });
-  $modal.on('hidden.bs.modal', function () {
-    var $sel = jQuery('#id_sucursal_traspaso');
-    if ($sel.length && $sel.hasClass('select2-hidden-accessible')) {
-      $sel.select2('destroy');
-    }
-  });
-})();
 
 /**
  * Imprimir / Re-imprimir etiqueta:

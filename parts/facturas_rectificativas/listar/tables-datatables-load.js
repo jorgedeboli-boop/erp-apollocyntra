@@ -8,14 +8,6 @@ document.addEventListener('DOMContentLoaded', function (e) {
   const dt_table = document.querySelector('.datatables-facturas-rectificativas');
   window.dt_facturas_rectificativas = null;
 
-  const FD = window.FiltrosDinamicosListar;
-
-  function onFiltroRectificativaChange() {
-    if (window.dt_facturas_rectificativas) {
-      window.dt_facturas_rectificativas.ajax.reload();
-    }
-  }
-
   function badgeEstadoFiskaly(estado) {
     const raw = (estado || '').toString().trim().toLowerCase();
     if (!raw || raw === '—' || raw === '-') {
@@ -119,38 +111,6 @@ document.addEventListener('DOMContentLoaded', function (e) {
     });
   }
 
-  const createFilterSucursal = function (containerClass, selectId) {
-    const select = document.createElement('select');
-    select.id = selectId;
-    select.className = 'form-select select2-filter text-capitalize form-select-sm select2-custom';
-    select.innerHTML = '<option value="">Sucursales</option>';
-    const container = document.querySelector(containerClass);
-    if (!container) {
-      return select;
-    }
-    container.appendChild(select);
-    FD.registerSelect(select);
-    FD.initSelect2(select, onFiltroRectificativaChange);
-    fetch('parts/clientes/listar/get_sucursales.php')
-      .then(function (response) { return response.json(); })
-      .then(function (data) {
-        if (data.success && data.sucursales) {
-          data.sucursales.forEach(function (s) {
-            const opt = document.createElement('option');
-            opt.value = s.nombre_sucursal;
-            opt.textContent = s.nombre_sucursal;
-            select.appendChild(opt);
-          });
-          const $sel = $(select);
-          if ($sel.data('select2')) {
-            $sel.trigger('change.select2');
-          }
-        }
-      })
-      .catch(function (err) { console.error('Error cargar sucursales:', err); });
-    return select;
-  };
-
   if (dt_table) {
     window.dt_facturas_rectificativas = new DataTable(dt_table, {
       processing: true,
@@ -163,8 +123,6 @@ document.addEventListener('DOMContentLoaded', function (e) {
         url: 'parts/facturas_rectificativas/listar/load_list.php',
         type: 'POST',
         data: function(d) {
-          const s = document.getElementById('filtro_sucursal');
-          d.filtro_sucursal = s ? s.value : '';
           return d;
         },
         dataSrc: function(json) { return json.data || []; }
@@ -179,14 +137,14 @@ document.addEventListener('DOMContentLoaded', function (e) {
             }
             if (row[0] == null || row[0] === '') return '-';
             var texto = row[1] != null && row[1] !== '' ? row[1] : String(row[0]);
-            var url = row[11] ? row[11] : ('Impresiones/Facturas/factura_rectificativa.php?id_factura=' + row[0]);
+            var url = row[10] ? row[10] : ('Impresiones/Facturas/factura_rectificativa.php?id_factura=' + row[0]);
             return '<a href="' + url + '" target="_blank" class="fw-semibold text-primary">' + texto + '</a>';
           }
         },
-        { data: 2 }, { data: 3 }, { data: 4 }, { data: 5 },
-        { data: 6 }, { data: 7 }, { data: 8 }, { data: 9 },
+        { data: 2 }, { data: 3 }, { data: 4 },
+        { data: 5 }, { data: 6 }, { data: 7 }, { data: 8 },
         {
-          data: 12,
+          data: 11,
           orderable: false,
           render: function (data) {
             return badgeEstadoFiskaly(data);
@@ -199,7 +157,7 @@ document.addEventListener('DOMContentLoaded', function (e) {
           className: 'text-center',
           render: function (data, type, row) {
             const idFactura = row[0];
-            const puede = parseInt(row[15], 10) === 1;
+            const puede = parseInt(row[14], 10) === 1;
             if (!puede) {
               return '<span class="text-muted">—</span>';
             }
@@ -216,10 +174,9 @@ document.addEventListener('DOMContentLoaded', function (e) {
         { targets: 1, render: function(data) { return data || '-'; } },
         { targets: 2, render: function(data) { return data || '-'; } },
         { targets: 3, render: function(data) { return data || '-'; } },
-        { targets: 4, render: function(data) { return data || '-'; } },
-        { targets: 5, render: function(data) { return '<span class="fw-semibold text-success">' + (data || '-') + '</span>'; } },
+        { targets: 4, render: function(data) { return '<span class="fw-semibold text-success">' + (data || '-') + '</span>'; } },
         {
-          targets: 6,
+          targets: 5,
           render: function(data) {
             let c = 'secondary';
             if (data === 'pagada') c = 'success'; else if (data === 'anulada') c = 'danger'; else if (data === 'nopagada') c = 'warning';
@@ -227,7 +184,7 @@ document.addEventListener('DOMContentLoaded', function (e) {
           }
         },
         {
-          targets: 7,
+          targets: 6,
           render: function(data) {
             if (!data || data === '-') return '-';
             const v = (data || '').toLowerCase();
@@ -237,9 +194,9 @@ document.addEventListener('DOMContentLoaded', function (e) {
           }
         },
         {
-          targets: 8,
+          targets: 7,
           render: function (data, type, row) {
-            var idOriginal = row[10];
+            var idOriginal = row[9];
             return idOriginal ? '<a href="Impresiones/Facturas/factura.php?id_factura=' + idOriginal + '" target="_blank" class="fw-semibold text-primary">' + (data || idOriginal) + '</a>' : '-';
           }
         }
@@ -292,10 +249,8 @@ document.addEventListener('DOMContentLoaded', function (e) {
   }
 
   function exportarTodosLosDatos(tipo, dt) {
-    const filtro = document.getElementById('filtro_sucursal');
     const formData = new FormData();
     formData.append('search', dt.search());
-    formData.append('filtro_sucursal', filtro ? filtro.value : '');
     Swal.fire({ title: 'Generando exportación...', allowOutsideClick: false, didOpen: () => { Swal.showLoading(); } });
     fetch('parts/facturas_rectificativas/listar/export_all.php', { method: 'POST', body: formData })
       .then(r => r.json())
@@ -308,7 +263,7 @@ document.addEventListener('DOMContentLoaded', function (e) {
         const tid = 'temp-export-' + Date.now();
         const div = document.createElement('div');
         div.style.display = 'none';
-        div.innerHTML = '<table id="' + tid + '"><thead><tr><th>Nº factura</th><th>FECHA</th><th>HORA</th><th>CLIENTE</th><th>SUCURSAL</th><th>TOTAL</th><th>ESTADO</th><th>TIPO PAGO</th><th>FACT. ORIGINAL</th><th>ESTADO FISKALY</th></tr></thead></table>';
+        div.innerHTML = '<table id="' + tid + '"><thead><tr><th>Nº factura</th><th>FECHA</th><th>HORA</th><th>CLIENTE</th><th>TOTAL</th><th>ESTADO</th><th>TIPO PAGO</th><th>FACT. ORIGINAL</th><th>ESTADO FISKALY</th></tr></thead></table>';
         document.body.appendChild(div);
         const rowsExport = (data.data || []).map(function (r) {
           return [
@@ -317,14 +272,10 @@ document.addEventListener('DOMContentLoaded', function (e) {
           ];
         });
         const $t = $('#' + tid).DataTable({ data: rowsExport, searching: false, ordering: false, dom: 't' });
-        $t.button().add(0, { extend: tipo === 'excel' ? 'excelHtml5' : tipo }).trigger();
+        $t.button().add(0, { extend: tipo === 'excel' ? 'excelHtml5' : tipo, title: 'Facturas rectificativas' }).trigger();
         setTimeout(function() { $t.destroy(); div.remove(); }, 1000);
       })
       .catch(err => { Swal.close(); Swal.fire({ icon: 'error', title: 'Error', text: err.message }); });
   }
 
-  createFilterSucursal('.factura_rect_sucursal', 'filtro_sucursal');
-  if (FD) {
-    FD.finalize();
-  }
 });

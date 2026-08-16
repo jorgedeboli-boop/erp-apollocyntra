@@ -1,16 +1,6 @@
 <!-- JAVASCRIPT CUSTOM crear_articulo - crear  -->
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-  // Inicializar Select2 para los selects
-  if ($('#sucursal_origen').length) {
-    $('#sucursal_origen').select2({
-      dropdownParent: $('#sucursal_origen').closest('.form-floating'),
-      placeholder: 'Seleccionar...',
-      allowClear: false,
-      width: '100%'
-    });
-  }
-  
   // Inicializar Select2 para ley oro (por defecto visible)
   if ($('#leyoro').length) {
     $('#leyoro').select2({

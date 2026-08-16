@@ -5,7 +5,6 @@
     opacity: 0;
 }
 
-#articulos_filtros_container:not(.articulos-filtros-ready) .articulo_sucursal,
 #articulos_filtros_container:not(.articulos-filtros-ready) .articulo_tipo,
 #articulos_filtros_container:not(.articulos-filtros-ready) .articulo_estado,
 #articulos_filtros_container:not(.articulos-filtros-ready) .articulo_origen,
@@ -171,7 +170,6 @@
     font-size: 1rem;
 }
 @media (max-width: 767px) {
-    .articulo_sucursal,
     .articulo_tipo,
     .articulo_estado,
     .articulo_origen {

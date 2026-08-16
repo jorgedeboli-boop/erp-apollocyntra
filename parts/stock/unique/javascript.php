@@ -9,9 +9,7 @@ $vFlatpickrDatatable = filemtime(__DIR__ . '/../../universal/flatpickr-datatable
 window.ArticulosFiltrosConfig = {
   containerId: 'stock_filtros_container',
   readyClass: 'stock-filtros-ready',
-  filterIds: ['filtro_sucursal_articulo', 'filtro_tipo', 'filtro_origen'],
-  sucursalSelectId: 'filtro_sucursal_articulo',
-  sucursalValueField: 'id_sucursal'
+  filterIds: ['filtro_tipo', 'filtro_origen']
 };
 </script>
 <script src="parts/universal/filtros-articulos.js?v=<?php echo $vFiltrosArticulos; ?>"></script>

@@ -7,13 +7,7 @@
       <h5 class="card-title mb-0">Ventas <span id="texto_ventas_titulo"></span></h5>
       <button type="button" class="btn btn-text btn-sm waves-effect p-0  d-inline-flex d-sm-none" data-bs-toggle="collapse" data-bs-target="#collapse_filtros" aria-expanded="false" aria-controls="collapse_filtros"><i class="icon-base ri ri-equalizer-3-line icon-16px me-2"></i>filtrar</button>
       <?php if ($puede_acceder_crear): ?>
-      <a href="javascript:void(0);" type="button" class="btn btn-primary waves-effect waves-light px-3 btn-create-record" id="btn_nueva_venta"><span class="icon-base ri ri-add-fill icon-22px me-1"></span>Nueva venta</a>
-      <div style="max-width: 260px; width: 100%; display: none;" id="select_sucursal_nueva_venta_container">
-        <select class="form-select select2 select2-custom" id="select_sucursal_nueva_venta" name="sucursal_nueva_venta" autocomplete="off">
-          <option value="">Seleccionar sucursal para venta</option>
-          <?php obtener_select_sucursales_habilitadas(); ?>
-        </select>
-      </div>
+      <a href="crear_venta.php" class="btn btn-primary waves-effect waves-light px-3 btn-create-record" id="btn_nueva_venta"><span class="icon-base ri ri-add-fill icon-22px me-1"></span>Nueva venta</a>
       <?php endif; ?>
     </div>
     </div>
@@ -21,16 +15,14 @@
     <div class="card-body pb-0">
         <div class="collapse d-lg-block" id="collapse_filtros">
             <div class="d-flex justify-content-between align-items-center row gx-1 pt-4 gap-5 gap-md-0 select2-btn-height">
-            <div class="col-md-2 venta_sucursal select2-btn-height">
-      </div>
       <div class="col-md-2 venta_tipo select2-btn-height">
       </div>
-      <div class="col-md-1 venta_web select2-btn-height">
+      <div class="col-md-2 venta_web select2-btn-height">
       </div>
       <div class="col-md-2 venta_forma_pago select2-btn-height">
       </div>
       
-        <div class="col-md-5">
+        <div class="col-md-6">
         
           <div class="input-group">
                         <input type="text" id="rangeFechas" class="form-control flatpickr-input" placeholder="Selecciona fechas">
@@ -59,7 +51,6 @@
             <th style="width: 40px !important;">Nº venta</th>
             <th>Total venta</th>
             <th>Fecha venta</th>
-            <th>Sucursal venta</th>
             <th>Vendido por</th>
             <th width="150">Venta plazos</th>
             <th>Venta web</th>

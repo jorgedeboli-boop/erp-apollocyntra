@@ -7,8 +7,7 @@
       </div>
 
       <div class="d-flex justify-content-between align-items-center row gx-5 pt-4 gap-5 gap-md-0 mt-3">
-        <div class="col-12 col-md-3 articulo_vendido_sucursal select2-btn-height"></div>
-        <div class="col-12 col-md-2 articulo_vendido_tipo select2-btn-height"></div>
+        <div class="col-12 col-md-3 articulo_vendido_tipo select2-btn-height"></div>
 
         <div class="col-12 col-md-4">
           <div class="input-group">
@@ -35,7 +34,6 @@
           <tr>
             <th style="width: 40px !important;">SKU</th>
             <th>Descripción</th>
-            <th>Sucursal</th>
             <th>Fecha de venta</th>
             <th>Venta Nº</th>
             <th width="50">Precio</th>

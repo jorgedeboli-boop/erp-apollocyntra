@@ -16,22 +16,9 @@ function etiquetas_mysqli_bind_params($stmt, $types, array $params)
     return call_user_func_array(array($stmt, 'bind_param'), $bind_names);
 }
 
-function etiquetas_ids_sucursales_excluidas($conexion)
-{
-    $ids = array(49);
-    $query = "SELECT id_sucursal FROM sucursal WHERE estado_tienda = 'desabilitada'";
-    $result = mysqli_query($conexion, $query);
-    if ($result) {
-        while ($row = mysqli_fetch_assoc($result)) {
-            $ids[] = (int) $row['id_sucursal'];
-        }
-    }
-    return array_values(array_unique($ids));
-}
-
 /**
  * @param mysqli $conexion
- * @param array $filtros sucursal, periodo, fecha_desde, fecha_hasta, search
+ * @param array $filtros periodo, fecha_desde, fecha_hasta, search
  * @return array{where:string,params:array,types:string}
  */
 function etiquetas_build_where($conexion, array $filtros)
@@ -41,23 +28,6 @@ function etiquetas_build_where($conexion, array $filtros)
     $types = '';
 
     $whereConditions[] = "(av.estado = 'noetiquetado_c' OR av.estado = 'noetiquetado_u')";
-
-    $sucursal = isset($filtros['sucursal']) ? (int) $filtros['sucursal'] : 0;
-    if ($sucursal > 0) {
-        $whereConditions[] = 'av.id_sucursal_destino = ?';
-        $params[] = $sucursal;
-        $types .= 'i';
-    } else {
-        $excluidas = etiquetas_ids_sucursales_excluidas($conexion);
-        if (!empty($excluidas)) {
-            $placeholders = implode(',', array_fill(0, count($excluidas), '?'));
-            $whereConditions[] = "av.id_sucursal_destino NOT IN ($placeholders)";
-            foreach ($excluidas as $id) {
-                $params[] = $id;
-                $types .= 'i';
-            }
-        }
-    }
 
     $periodo = isset($filtros['periodo']) ? trim((string) $filtros['periodo']) : '';
     $fechaDesde = isset($filtros['fecha_desde']) ? trim((string) $filtros['fecha_desde']) : '';
@@ -97,7 +67,6 @@ function etiquetas_build_where($conexion, array $filtros)
             av.id LIKE ? OR
             av.descripcion LIKE ? OR
             av.origen_articulo LIKE ? OR
-            s.nombre_sucursal LIKE ? OR
             u.nombre_usuario LIKE ?
         )';
         $searchParam = '%' . $search . '%';
@@ -105,8 +74,7 @@ function etiquetas_build_where($conexion, array $filtros)
         $params[] = $searchParam;
         $params[] = $searchParam;
         $params[] = $searchParam;
-        $params[] = $searchParam;
-        $types .= 'sssss';
+        $types .= 'ssss';
     }
 
     return array(
@@ -123,7 +91,7 @@ function etiquetas_format_origen($origen)
         return '<span class="badge bg-label-primary">Central</span>';
     }
     if ($origen === 'sucursal') {
-        return '<span class="badge bg-label-info">Sucursal</span>';
+        return '<span class="badge bg-label-info">Tienda</span>';
     }
     return htmlspecialchars($origen !== '' ? $origen : '---');
 }

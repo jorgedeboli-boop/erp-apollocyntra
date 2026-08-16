@@ -32,7 +32,6 @@ try {
     $length = isset($_POST['length']) ? (int)$_POST['length'] : 10;
     $searchValue = isset($_POST['search']['value']) ? $_POST['search']['value'] : '';
 
-    $filtro_sucursal = isset($_POST['filtro_sucursal']) ? trim($_POST['filtro_sucursal']) : '';
     $filtro_tipo = isset($_POST['filtro_tipo']) ? trim($_POST['filtro_tipo']) : '';
     $filtro_fecha_desde = isset($_POST['filtro_fecha_desde']) ? trim($_POST['filtro_fecha_desde']) : '';
     $filtro_fecha_hasta = isset($_POST['filtro_fecha_hasta']) ? trim($_POST['filtro_fecha_hasta']) : '';
@@ -53,13 +52,6 @@ try {
     // Rango por defecto: últimos 6 años (solo cuando NO hay filtro de fecha explícito)
     if ($filtro_periodo === '' || $filtro_periodo === 'todos') {
         $whereConditions[] = "av.fecha_vendido BETWEEN DATE_SUB(NOW(), INTERVAL 6 YEAR) AND NOW()";
-    }
-
-    // Filtro sucursal destino
-    if (!empty($filtro_sucursal)) {
-        $whereConditions[] = "av.id_sucursal_destino = ?";
-        $params[] = $filtro_sucursal;
-        $types .= 'i';
     }
 
     // Filtro tipo (oro/plata) sobre av.tipo
@@ -102,7 +94,6 @@ try {
         $whereConditions[] = "(
             av.id LIKE ? OR
             av.descripcion LIKE ? OR
-            av.nombre_sucursal_venta LIKE ? OR
             av.last_id_venta LIKE ? OR
             av.id_venta_sucursal LIKE ?
         )";
@@ -111,8 +102,7 @@ try {
         $params[] = $searchParam;
         $params[] = $searchParam;
         $params[] = $searchParam;
-        $params[] = $searchParam;
-        $types .= 'sssss';
+        $types .= 'ssss';
     }
 
     $whereClause = 'WHERE ' . implode(' AND ', $whereConditions);
@@ -154,8 +144,6 @@ try {
             av.id as id_articulo,
             av.id_articulo_sucursal,
             av.descripcion,
-            av.id_sucursal_destino,
-            av.nombre_sucursal_venta,
             av.fecha_enviado,
             av.fecha_en_venta,
             av.fecha_vendido,
@@ -225,7 +213,6 @@ try {
         $data[] = [
             $skuHtml, // SKU (link)
             htmlspecialchars($row['descripcion'] ?? ''), // Descripción
-            htmlspecialchars($row['nombre_sucursal_venta'] ?: '---'), // Sucursal
             (!empty($row['fecha_vendido']) && $row['fecha_vendido'] !== '0000-00-00' && $row['fecha_vendido'] !== '0000-00-00 00:00:00')
                 ? date('d/m/Y', strtotime($row['fecha_vendido']))
                 : '-', // Fecha de venta

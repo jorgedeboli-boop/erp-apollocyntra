@@ -27,8 +27,7 @@ try {
     $irpf = (float)str_replace(',', '.', (string)($_POST['irpf'] ?? '0'));
 
     $empresaId = (int)($_POST['empresa_gasto'] ?? 0);
-    $sucursalRaw = (string)($_POST['sucursal_gasto'] ?? '0');
-    $sucursalId = ($sucursalRaw === 'no_es_sucursal') ? 0 : (int)$sucursalRaw;
+    $sucursalId = 0;
     $proveedorId = (int)($_POST['proveedor_gasto'] ?? 0);
     $formaPagoId = (int)($_POST['forma_pago_gasto'] ?? 0);
     $tipoGastoId = (int)($_POST['tipo_de_gasto'] ?? 0);

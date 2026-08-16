@@ -18,20 +18,10 @@ try {
     $length = isset($_POST['length']) ? (int)$_POST['length'] : 10;
     $searchValue = isset($_POST['search']['value']) ? trim($_POST['search']['value']) : '';
     
-    // Obtener filtros
-    $filtro_sucursal = isset($_POST['filtro_sucursal']) ? trim($_POST['filtro_sucursal']) : '';
-    
     // Construir WHERE clause
     $whereConditions = array();
     $params = array();
     $types = '';
-    
-    // Filtro de sucursal
-    if (!empty($filtro_sucursal)) {
-        $whereConditions[] = "sucursal.nombre_sucursal = ?";
-        $params[] = $filtro_sucursal;
-        $types .= 's';
-    }
     
     // Búsqueda global
     if (!empty($searchValue)) {
@@ -43,7 +33,6 @@ try {
             av.motivo_devolucion LIKE ? OR
             CAST(av.importe_devolucion AS CHAR) LIKE ? OR
             av.forma_de_pago_devolucion LIKE ? OR
-            sucursal.nombre_sucursal LIKE ? OR
             ventas.id_venta_sucursal LIKE ? OR
             CONCAT(clientes.nombre, ' ', clientes.apellido) LIKE ? OR
             articulos_venta.descripcion LIKE ? OR
@@ -61,8 +50,7 @@ try {
         $params[] = $searchParam;
         $params[] = $searchParam;
         $params[] = $searchParam;
-        $params[] = $searchParam;
-        $types .= 'ssssssssssss';
+        $types .= 'sssssssssss';
     }
     
     $whereClause = '';
@@ -73,7 +61,6 @@ try {
     // Consulta base
     $queryBase = "
         FROM devoluciones AS av
-        LEFT JOIN sucursal ON av.sucursal_devolucion = sucursal.id_sucursal
         LEFT JOIN ventas ON av.id_venta_original = ventas.id
         LEFT JOIN clientes ON av.cliente_devolucion = clientes.id_cliente
         LEFT JOIN articulos_venta ON av.articulo_devolucion = articulos_venta.id
@@ -113,13 +100,12 @@ try {
         1 => 'av.id_venta_original',
         2 => 'av.fecha_devolucion',
         3 => 'CLIENTEDATA',
-        4 => 'sucursal.nombre_sucursal',
-        5 => 'av.motivo_devolucion',
-        6 => 'SKUARTICULO',
-        7 => 'articulos_venta.descripcion',
-        8 => 'av.importe_devolucion',
-        9 => 'av.forma_de_pago_devolucion',
-        10 => 'av.devolucion_web'
+        4 => 'av.motivo_devolucion',
+        5 => 'SKUARTICULO',
+        6 => 'articulos_venta.descripcion',
+        7 => 'av.importe_devolucion',
+        8 => 'av.forma_de_pago_devolucion',
+        9 => 'av.devolucion_web'
     ];
     
     // Validar y sanitizar ORDER BY
@@ -128,7 +114,6 @@ try {
         'av.id_venta_original',
         'av.fecha_devolucion',
         'CLIENTEDATA',
-        'sucursal.nombre_sucursal',
         'av.motivo_devolucion',
         'SKUARTICULO',
         'articulos_venta.descripcion',
@@ -150,13 +135,11 @@ try {
                 av.id_venta_original,
                 av.fecha_devolucion,
                 av.cliente_devolucion,
-                av.sucursal_devolucion,
                 av.motivo_devolucion,
                 av.articulo_devolucion,
                 av.importe_devolucion,
                 av.forma_de_pago_devolucion,
                 av.devolucion_web,
-                sucursal.nombre_sucursal,
                 ventas.id_venta_sucursal,
                 CONCAT(clientes.nombre, ' ', clientes.apellido) AS CLIENTEDATA,
                 articulos_venta.id AS SKUARTICULO,
@@ -197,7 +180,6 @@ try {
             $row['id_venta_original'],
             $row['fecha_devolucion'],
             $row['CLIENTEDATA'] ?: '-',
-            $row['nombre_sucursal'] ?: '-',
             $row['motivo_devolucion'] ?: '-',
             $row['SKUARTICULO'] ?: '-',
             $row['descripcion'] ?: '-',

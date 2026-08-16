@@ -19,7 +19,6 @@ try {
     $searchValue = isset($_POST['search']['value']) ? $_POST['search']['value'] : '';
     
     // Obtener filtros
-    $filtro_sucursal = isset($_POST['filtro_sucursal']) ? trim($_POST['filtro_sucursal']) : '';
     $filtro_tipo_venta = isset($_POST['filtro_tipo_venta']) ? trim($_POST['filtro_tipo_venta']) : '';
     $filtro_venta_web = isset($_POST['filtro_venta_web']) ? trim($_POST['filtro_venta_web']) : '';
     $filtro_forma_pago = isset($_POST['filtro_forma_pago']) ? trim($_POST['filtro_forma_pago']) : '';
@@ -34,13 +33,6 @@ try {
     
     // Condición fija: solo ventas con estado 'vendido'
     //$whereConditions[] = "av.estado = 'vendido' ";
-    
-    // Filtro de sucursal
-    if (!empty($filtro_sucursal)) {
-        $whereConditions[] = "s.nombre_sucursal = ?";
-        $params[] = $filtro_sucursal;
-        $types .= 's';
-    }
     
     // Filtro de tipo de venta (venta a plazos)
     if (!empty($filtro_tipo_venta)) {
@@ -97,15 +89,13 @@ try {
         $whereConditions[] = "(
             av.id_venta_sucursal LIKE ? OR
             av.tipo_pago LIKE ? OR
-            s.nombre_sucursal LIKE ? OR
             u.nombre_usuario LIKE ?
         )";
         $searchParam = '%' . $searchValue . '%';
         $params[] = $searchValue;
         $params[] = $searchParam;
         $params[] = $searchParam;
-        $params[] = $searchParam;
-        $types .= 'ssss';
+        $types .= 'sss';
     }
     
     $whereClause = '';
@@ -123,7 +113,6 @@ try {
     $query_filtered = "
         SELECT COUNT(*) as total 
         FROM ventas av
-        LEFT JOIN sucursal s ON av.id_sucursal = s.id_sucursal
         LEFT JOIN usuarios u ON av.comprado_por = u.id_usuario
         $whereClause
     ";
@@ -147,17 +136,14 @@ try {
         SELECT 
             av.id AS identificador_venta,
             av.id_venta_sucursal,
-            av.id_sucursal,
             av.precio,
             av.fecha,
             av.comprado_por,
             av.venta_plazos,
             av.venta_web,
             av.tipo_pago,
-            s.nombre_sucursal,
             u.nombre_usuario
         FROM ventas av
-        LEFT JOIN sucursal s ON av.id_sucursal = s.id_sucursal
         LEFT JOIN usuarios u ON av.comprado_por = u.id_usuario
         $whereClause
         ORDER BY av.fecha DESC
@@ -229,12 +215,11 @@ try {
             htmlspecialchars($row['id_venta_sucursal']),                       // 0 - Nº venta
             number_format($row['precio'], 0, ',', '.') . ' €',                // 1 - Total venta
             !empty($row['fecha']) ? date('d/m/Y H:i', strtotime($row['fecha'])) : 'N/A', // 2 - Fecha venta
-            htmlspecialchars($row['nombre_sucursal'] ?: 'N/A'),               // 3 - Sucursal venta
-            htmlspecialchars($row['nombre_usuario'] ?: 'N/A'),                // 4 - Vendido por
-            $venta_plazos_badge,                                                // 5 - Venta plazos
-            $venta_web_badge,                                                   // 6 - Venta web
-            $forma_pago_badge,                                                  // 7 - Forma de pago
-            $row['identificador_venta']                                        // 8 - ID (hidden)
+            htmlspecialchars($row['nombre_usuario'] ?: 'N/A'),                // 3 - Vendido por
+            $venta_plazos_badge,                                                // 4 - Venta plazos
+            $venta_web_badge,                                                   // 5 - Venta web
+            $forma_pago_badge,                                                  // 6 - Forma de pago
+            $row['identificador_venta']                                        // 7 - ID (hidden)
         ];
     }
     

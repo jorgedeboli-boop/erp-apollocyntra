@@ -104,7 +104,7 @@
       </div>
       <div class="modal-body">
         <input type="hidden" id="id_autorizacion_para_insert" value="" />
-        <input type="hidden" id="id_sucursal_devolucion" value="<?php echo $sucursal_articulo; ?>" />
+        <input type="hidden" id="id_sucursal_devolucion" value="<?php echo (int) ($sucursal_articulo ?? 0); ?>" />
         <div>
           <label class="form-label" for="motivo_devolucion_modal_art">Motivo de la devolución</label>
           <textarea class="form-control" id="motivo_devolucion_modal_art" rows="4" placeholder="Describa el motivo…" required></textarea>

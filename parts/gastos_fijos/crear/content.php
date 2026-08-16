@@ -59,7 +59,7 @@
               </div>
 
               <div class="row mb-3">
-                <div class="col-md-4">
+                <div class="col-md-6">
                   <h5 class="mb-3">Empresa</h5>
                   <div class="form-floating form-floating-outline mb-4">
                     <?php generarSelectEmpresas(0, 'empresa_gasto_fijo', 'empresa_gasto_fijo', true); ?>
@@ -67,19 +67,7 @@
                   </div>
                 </div>
 
-                <div class="col-md-4">
-                  <h5 class="mb-3">Sucursal</h5>
-                  <div class="form-floating form-floating-outline mb-4" id="container_sucursal_gasto_fijo">
-                    <select class="form-select select2" id="sucursal_gasto_fijo" name="sucursal_gasto_fijo" required>
-                      <option value="">Seleccionar...</option>
-                      <option value="no_es_sucursal">No es sucursal</option>
-                      <?php obtener_select_sucursales_habilitadas(); ?>
-                    </select>
-                    <label for="sucursal_gasto_fijo">Sucursal *</label>
-                  </div>
-                </div>
-
-                <div class="col-md-4">
+                <div class="col-md-6">
                   <h5 class="mb-3">Proveedor</h5>
                   <div class="form-floating form-floating-outline mb-4">
                     <?php generarSelectProveedores(0, 'proveedor_gasto_fijo', 'proveedor_gasto_fijo', true); ?>

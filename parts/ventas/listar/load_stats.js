@@ -23,7 +23,6 @@ function cargarEstadistica(elementId, tipo) {
   loadingElement.style.display = 'block';
   
   // Obtener filtros activos
-  const filtroSucursal = document.getElementById('filtro_sucursal');
   const filtroTipoVenta = document.getElementById('filtro_tipo_venta');
   const filtroVentaWeb = document.getElementById('filtro_venta_web');
   const filtroFormaPago = document.getElementById('filtro_forma_pago');
@@ -33,7 +32,6 @@ function cargarEstadistica(elementId, tipo) {
   // Preparar datos
   const formData = new FormData();
   formData.append('tipo', tipo);
-  formData.append('filtro_sucursal', filtroSucursal ? filtroSucursal.value : '');
   formData.append('filtro_tipo_venta', filtroTipoVenta ? filtroTipoVenta.value : '');
   formData.append('filtro_venta_web', filtroVentaWeb ? filtroVentaWeb.value : '');
   formData.append('filtro_forma_pago', filtroFormaPago ? filtroFormaPago.value : '');

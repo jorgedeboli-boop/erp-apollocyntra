@@ -11,7 +11,6 @@
       $query_gasto = "
           SELECT 
               g.id_gasto,
-              g.sucursal_gasto,
               g.proveedor_gasto,
               g.fecha_gasto,
               g.fecha_pago_gasto,
@@ -34,13 +33,11 @@
               g.rel_id_gasto_fijo,
               g.gasto_tipo,
               e.nombre_empresa,
-              s.nombre_sucursal,
               p.nombre_proveedor,
               tg.nombre_tipo_gasto,
               fp.nombre_forma_de_pago
           FROM gastos g
           LEFT JOIN empresas e ON g.empresa_gasto = e.id_empresa
-          LEFT JOIN sucursal s ON g.sucursal_gasto = s.id_sucursal
           LEFT JOIN proveedores p ON g.proveedor_gasto = p.id_proveedor
           LEFT JOIN tipo_de_gasto tg ON g.tipo_de_gasto = tg.id_tipo_gasto
           LEFT JOIN formas_de_pago fp ON g.forma_pago_gasto = fp.id_forma_de_pago
@@ -71,7 +68,7 @@
     <script>
       window.idGasto = <?php echo (int) $gasto['id_gasto']; ?>;
       window.idEmpresaGasto = <?php echo (int) ($gasto['empresa_gasto'] ?? 0); ?>;
-      window.idSucursalGasto = <?php echo (int) ($gasto['sucursal_gasto'] ?? 0); ?>;
+      window.idSucursalGasto = 0;
     </script>
     <!-- Header -->
     <div class="row">
@@ -194,9 +191,6 @@
               <div class="card-body">
                 <small class="card-text text-uppercase text-body-secondary small">Información Relacionada</small>
                 <ul class="list-unstyled my-3 py-1">
-                  <li class="d-flex align-items-center mb-4">
-                    <i class="icon-base ri ri-building-2-line icon-24px"></i><span class="fw-medium mx-2">Sucursal:</span> <span><?php echo htmlspecialchars($gasto['nombre_sucursal'] ?? 'N/A'); ?></span>
-                  </li>
                   <li class="d-flex align-items-center mb-4">
                     <i class="icon-base ri ri-truck-line icon-24px"></i><span class="fw-medium mx-2">Proveedor:</span> <span><?php echo htmlspecialchars($gasto['nombre_proveedor'] ?? 'N/A'); ?></span>
                   </li>

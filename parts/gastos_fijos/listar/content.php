@@ -51,14 +51,6 @@
           </div>
 
           <div class="col-md-2">
-            <label class="form-label mb-1" for="filtro_sucursal">Sucursal</label>
-            <select class="form-select select2-custom" id="filtro_sucursal" name="filtro_sucursal">
-              <option value="">Todas</option>
-              <?php obtener_select_sucursales_habilitadas(); ?>
-            </select>
-          </div>
-
-          <div class="col-md-2">
             <label class="form-label mb-1" for="filtro_estado">Estado</label>
             <select class="form-select select2-custom" id="filtro_estado" name="filtro_estado">
               <option value="">Todos</option>
@@ -92,7 +84,6 @@
             <th>Concepto</th>
             <th>Tipo</th>
             <th>Pago</th>
-            <th>Sucursal</th>
             <th>Inicio</th>
             <th>Período</th>
             <th>Estado</th>

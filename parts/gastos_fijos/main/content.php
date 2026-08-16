@@ -71,7 +71,7 @@ $badgeEstadoTexto = ($estado === 'true') ? 'Activo' : 'Inactivo';
               </div>
 
               <div class="row mb-3">
-                <div class="col-md-3">
+                <div class="col-md-4">
                   <h5 class="mb-3">Período</h5>
                   <div class="form-floating form-floating-outline mb-4">
                     <select class="form-select select2" id="periodo_gasto_fijo" name="periodo_gasto_fijo" required>
@@ -89,7 +89,7 @@ $badgeEstadoTexto = ($estado === 'true') ? 'Activo' : 'Inactivo';
                   </div>
                 </div>
 
-                <div class="col-md-3">
+                <div class="col-md-4">
                   <h5 class="mb-3">Inicio</h5>
                   <div class="form-floating form-floating-outline mb-4">
                     <input type="date" class="form-control" id="fecha_inicio_gasto_fijo" name="fecha_inicio_gasto_fijo"
@@ -98,27 +98,12 @@ $badgeEstadoTexto = ($estado === 'true') ? 'Activo' : 'Inactivo';
                   </div>
                 </div>
 
-                <div class="col-md-3">
+                <div class="col-md-4">
                   <h5 class="mb-3">Total</h5>
                   <div class="form-floating form-floating-outline mb-4">
                     <input type="number" step="0.01" class="form-control" id="total_gasto_fijo" name="total_gasto_fijo"
                       value="<?php echo htmlspecialchars((string)$gf['total_gasto_fijo']); ?>" required>
                     <label for="total_gasto_fijo">Total *</label>
-                  </div>
-                </div>
-
-                <div class="col-md-3">
-                  <h5 class="mb-3">Sucursal</h5>
-                  <div class="form-floating form-floating-outline mb-4">
-                    <?php $sucSel = (int)$gf['sucursal_gasto_fijo']; ?>
-                    <select class="form-select select2" id="sucursal_gasto_fijo" name="sucursal_gasto_fijo" required>
-                      <option value="no_es_sucursal" <?php echo ($sucSel === 0) ? 'selected' : ''; ?>>No es sucursal</option>
-                      <?php
-                      // Opciones de sucursales habilitadas (solo options)
-                      obtener_select_sucursales_habilitadas();
-                      ?>
-                    </select>
-                    <label for="sucursal_gasto_fijo">Sucursal *</label>
                   </div>
                 </div>
               </div>

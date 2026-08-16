@@ -19,16 +19,6 @@
                 <h5 class="mb-4">Datos de vinculación</h5>
               </div>
               
-              <div class="col-md-6 mb-4">
-                <div class="form-floating form-floating-outline">
-                  <select class="form-select select2" id="sucursal_origen" name="sucursal_origen">
-                    <option value="">Seleccionar...</option>
-                    <?php obtener_select_sucursales_habilitadas(); ?>
-                  </select>
-                  <label for="sucursal_origen" class="form-label">Sucursal origen</label>
-                </div>
-              </div>
-              
               <div class="col-md-6 mb-3">
                 <div class="form-floating form-floating-outline">
                   <input type="text" class="form-control" id="lote_origen" name="lote_origen" placeholder="Lote origen" />

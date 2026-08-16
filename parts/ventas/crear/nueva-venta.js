@@ -29,15 +29,11 @@ document.addEventListener('DOMContentLoaded', function() {
     invoiceActions.classList.add('formulario-borroso');
   }
 
-  // Obtener id_sucursal del input hidden (recibido por POST)
   const inputSucursal = document.getElementById('sucursal_venta');
-  if (inputSucursal && inputSucursal.value) {
-    // Actualizar input hidden de sucursal en el formulario de INSERT
-    $('#insert_id_sucursal').val(inputSucursal.value);
-    
-    // Mostrar datos de la venta automáticamente
-    mostrarDatosVenta();
+  if (inputSucursal) {
+    $('#insert_id_sucursal').val(inputSucursal.value || '0');
   }
+  mostrarDatosVenta();
   
   // Obtener id_articulo del input hidden (recibido por POST, opcional)
   const inputArticulo = document.getElementById('articulo_venta');
@@ -766,7 +762,7 @@ document.addEventListener('DOMContentLoaded', function() {
       
       const idCliente = $('#insert_id_cliente').val();
       console.log("idCliente: " + idCliente);
-      const idSucursal = $('#insert_id_sucursal').val();
+      const idSucursal = $('#insert_id_sucursal').val() || '0';
       console.log("idSucursal: " + idSucursal);
       const tipoVenta = document.querySelector('input[name="tipo_venta"]:checked');
       console.log("tipoVenta: " + tipoVenta);
@@ -776,15 +772,6 @@ document.addEventListener('DOMContentLoaded', function() {
       console.log("observaciones: " + observaciones);
       const formaPago = document.querySelector('input[name="forma_pago"]:checked');
       console.log("formaPago: " + formaPago);
-
-      if (!idSucursal) {
-        Swal.fire({
-          icon: 'warning',
-          title: 'Atención',
-          text: 'No se ha definido la sucursal de la venta.'
-        });
-        return;
-      }
 
       if (!tipoVenta || !tipoVenta.value) {
         Swal.fire({
@@ -842,7 +829,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
       window.mostrarModalCobroVenta(formaPago.value, importeACobrar, function (cobroPayload) {
         const payload = {
-          sucursal_venta: parseInt(idSucursal, 10),
+          sucursal_venta: parseInt(idSucursal, 10) || 0,
           id_cliente: idCliente ? String(idCliente) : '',
           cliente: {
             id_cliente: idCliente ? String(idCliente) : '',
@@ -1116,30 +1103,21 @@ function mostrarDatosVenta() {
   const inputSucursal = document.getElementById('sucursal_venta');
   const divDatosVenta = document.getElementById('cuerpo_venta');
   const divInvoiceActions = document.getElementById('invoice_actions');
-  const nombreSucursal = document.getElementById('nombre_sucursal');
   
-  if (!inputSucursal || !divDatosVenta || !divInvoiceActions) {
+  if (!divDatosVenta || !divInvoiceActions) {
     return;
   }
-  
-  if (inputSucursal.value) {
-      // El nombre de la sucursal ya está en el HTML, no necesitamos actualizarlo
-      // Actualizar input hidden de sucursal
-      $('#insert_id_sucursal').val(inputSucursal.value);
 
-      // Cargar datos de la empresa
-      cargarDatosEmpresa(inputSucursal.value);
-      // Cargar datos de la sucursal
-      cargarDatosSucursal(inputSucursal.value);
+  const idSucursal = inputSucursal && inputSucursal.value ? inputSucursal.value : '0';
+  $('#insert_id_sucursal').val(idSucursal);
 
-      divDatosVenta.classList.remove('formulario-borroso');
-      divInvoiceActions.classList.remove('formulario-borroso');
-  } else {
-      $('#insert_id_sucursal').val('');
-      
-      divDatosVenta.classList.add('formulario-borroso');
-      divInvoiceActions.classList.add('formulario-borroso');
+  if (parseInt(idSucursal, 10) > 0) {
+    cargarDatosEmpresa(idSucursal);
+    cargarDatosSucursal(idSucursal);
   }
+
+  divDatosVenta.classList.remove('formulario-borroso');
+  divInvoiceActions.classList.remove('formulario-borroso');
 }
 
 /**
@@ -1312,23 +1290,10 @@ function configurarBusquedaArticulo() {
  * Buscar artículo por SKU
  */
 function buscarArticuloPorSku(sku) {
-  const idSucursal = $('#insert_id_sucursal').val();
-  
-  if (!idSucursal) {
-    Swal.fire({
-      icon: 'warning',
-      title: 'Atención',
-      text: 'Debe seleccionar una sucursal primero',
-      timer: 3000
-    });
-    return;
-  }
-  
   $.ajax({
     url: 'parts/ventas/crear/buscar_articulo.php',
     data: {
-      sku: sku,
-      id_sucursal: idSucursal
+      sku: sku
     },
     dataType: 'json',
     success: function(response) {
@@ -1976,10 +1941,6 @@ function solicitarCambioInteresesVenta() {
   }
 
   const sucursal = parseInt($('#insert_id_sucursal').val(), 10) || 0;
-  if (!sucursal) {
-    Swal.fire({ icon: 'error', title: 'Error', text: 'No se pudo determinar la sucursal.' });
-    return;
-  }
 
   const numeroPlazosRadio = document.querySelector('input[name="numero_plazos"]:checked');
   const numeroPlazosVal = numeroPlazosRadio ? numeroPlazosRadio.value : '3';
@@ -2144,11 +2105,11 @@ function solicitarAutorizacionPrecio(tr) {
         }
       }
 
-      if (!idArticulo || !sucursal) {
+      if (!idArticulo) {
         Swal.fire({
           icon: 'error',
           title: 'Error',
-          text: 'No se pudo determinar el artículo o la sucursal.'
+          text: 'No se pudo determinar el artículo.'
         });
         return;
       }

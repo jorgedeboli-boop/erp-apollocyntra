@@ -79,11 +79,9 @@ if (!$conexion) {
     exit;
 }
 
-$sql = 'SELECT a.id_adelanto_capital, a.fecha_adelanto, a.sucursal_adelanto, a.importe_adelanto, a.capital_antiguo, '
-    . 'a.importe_plazo_antiguo, a.nuevo_capital, a.nuevo_importe_plazo, a.forma_de_pago, a.nombre_foto, '
-    . 's.nombre_sucursal '
+$sql = 'SELECT a.id_adelanto_capital, a.fecha_adelanto, a.importe_adelanto, a.capital_antiguo, '
+    . 'a.importe_plazo_antiguo, a.nuevo_capital, a.nuevo_importe_plazo, a.forma_de_pago, a.nombre_foto '
     . 'FROM adelantos_capital_venta a '
-    . 'LEFT JOIN sucursal s ON a.sucursal_adelanto = s.id_sucursal '
     . 'WHERE a.id_venta_adelanto = ? '
     . 'ORDER BY a.fecha_adelanto ASC, a.id_adelanto_capital ASC';
 
@@ -105,12 +103,10 @@ $res = mysqli_stmt_get_result($stmt);
 $rows = [];
 if ($res) {
     while ($row = mysqli_fetch_assoc($res)) {
-        $nomSuc = trim((string) ($row['nombre_sucursal'] ?? ''));
         $rows[] = [
             'num' => (int) ($row['id_adelanto_capital'] ?? 0),
             'fecha_adelanto' => acvf_fmt_fecha_hora($row['fecha_adelanto'] ?? ''),
             'fecha_adelanto_raw' => (string) ($row['fecha_adelanto'] ?? ''),
-            'sucursal' => htmlspecialchars($nomSuc !== '' ? $nomSuc : ('#' . (int) ($row['sucursal_adelanto'] ?? 0)), ENT_QUOTES, 'UTF-8'),
             'importe_adelanto' => (float) ($row['importe_adelanto'] ?? 0),
             'importe_adelanto_fmt' => acvf_fmt_euro($row['importe_adelanto'] ?? 0),
             'capital_antiguo' => (float) ($row['capital_antiguo'] ?? 0),

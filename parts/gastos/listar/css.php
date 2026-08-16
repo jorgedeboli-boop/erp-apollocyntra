@@ -35,7 +35,6 @@
 
 @media (max-width: 767px) {
   .gasto_empresa,
-  .gasto_sucursal,
   .gasto_proveedor,
   .gasto_estado,
   .gasto_tipo_gasto,

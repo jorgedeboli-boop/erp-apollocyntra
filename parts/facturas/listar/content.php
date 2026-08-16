@@ -17,9 +17,6 @@
         
         <div class="collapse d-lg-block" id="collapse_filtros">
             <div class="d-flex justify-content-between align-items-center row gx-1 pt-4 gap-5 gap-md-0 select2-btn-height">
-                <div class="col-12 col-sm-6 col-md-6 col-lg-2 factura_sucursal">
-                  <!-- El filtro de sucursal se creará dinámicamente -->
-                </div>
                 <div class="col-12 col-sm-6 col-md-6 col-lg-2 factura_empresa">
                   <!-- Filtro empresa -->
                 </div>
@@ -61,7 +58,6 @@
             <th>FECHA</th>
             <th>HORA</th>
             <th>CLIENTE</th>
-            <th>SUCURSAL</th>
             <th>EMPRESA</th>
             <th>TOTAL</th>
             <th>ESTADO</th>

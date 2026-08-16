@@ -7,7 +7,6 @@ document.addEventListener('DOMContentLoaded', function () {
   const dtTable = document.querySelector('.datatables-gastos-fijos');
   if (!dtTable) return;
 
-  const $fSucursal = $('#filtro_sucursal');
   const $fProveedor = $('#filtro_proveedor');
   const $fFormaPago = $('#filtro_forma_pago');
   const $fTipoGasto = $('#filtro_tipo_gasto');
@@ -23,7 +22,7 @@ document.addEventListener('DOMContentLoaded', function () {
   });
 
   // Select2
-  [$fSucursal, $fProveedor, $fFormaPago, $fTipoGasto, $fPeriodo, $fEstado].forEach($el => {
+  [$fProveedor, $fFormaPago, $fTipoGasto, $fPeriodo, $fEstado].forEach($el => {
     if ($el && $el.length) {
       $el.select2({ dropdownParent: $el.parent() });
     }
@@ -96,7 +95,6 @@ document.addEventListener('DOMContentLoaded', function () {
       url: 'parts/gastos_fijos/listar/load_list.php',
       type: 'POST',
       data: function (d) {
-        d.filtro_sucursal = $fSucursal.val() || '';
         d.filtro_proveedor = $fProveedor.val() || '';
         d.filtro_forma_pago = $fFormaPago.val() || '';
         d.filtro_tipo_gasto = $fTipoGasto.val() || '';
@@ -115,7 +113,6 @@ document.addEventListener('DOMContentLoaded', function () {
       { data: 'descripcion' },
       { data: 'tipo_gasto' },
       { data: 'forma_pago' },
-      { data: 'sucursal' },
       { data: 'fecha_inicio' },
       { data: 'periodo' },
       { data: 'estado' }
@@ -147,7 +144,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
       },
       {
-        targets: 9,
+        targets: 8,
         render: function (data) {
           if (!data) return '-';
           const d = new Date(data);
@@ -156,7 +153,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
       },
       {
-        targets: 11,
+        targets: 10,
         render: function (data) {
           if (data === 'true') return '<span class="badge bg-label-success">Activo</span>';
           if (data === 'false') return '<span class="badge bg-label-warning">Desactivado</span>';
@@ -222,7 +219,7 @@ document.addEventListener('DOMContentLoaded', function () {
   }, 100);
 
   // Recargar al cambiar filtros
-  [$fSucursal, $fProveedor, $fFormaPago, $fTipoGasto, $fPeriodo, $fEstado].forEach($el => {
+  [$fProveedor, $fFormaPago, $fTipoGasto, $fPeriodo, $fEstado].forEach($el => {
     if ($el && $el.length) {
       $el.on('change', function () {
         dt.ajax.reload();

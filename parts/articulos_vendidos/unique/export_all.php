@@ -12,7 +12,6 @@ try {
     $conexion = conectar_bd();
 
     $searchValue = isset($_POST['search']) ? trim($_POST['search']) : '';
-    $filtro_sucursal = isset($_POST['filtro_sucursal']) ? trim($_POST['filtro_sucursal']) : '';
     $filtro_fecha_desde = isset($_POST['filtro_fecha_desde']) ? trim($_POST['filtro_fecha_desde']) : '';
     $filtro_fecha_hasta = isset($_POST['filtro_fecha_hasta']) ? trim($_POST['filtro_fecha_hasta']) : '';
     $filtro_periodo = isset($_POST['filtro_periodo']) ? trim($_POST['filtro_periodo']) : '';
@@ -23,12 +22,6 @@ try {
 
     $whereConditions[] = "(av.estado = 'vendido' OR av.estado = 'vendido_web')";
     $whereConditions[] = "av.fecha_vendido BETWEEN DATE_SUB(NOW(), INTERVAL 6 YEAR) AND NOW()";
-
-    if (!empty($filtro_sucursal)) {
-        $whereConditions[] = "av.id_sucursal_destino = ?";
-        $params[] = $filtro_sucursal;
-        $types .= 'i';
-    }
 
     if ($filtro_periodo === 'dia') {
         $hoy = date('Y-m-d');
@@ -58,7 +51,6 @@ try {
         $whereConditions[] = "(
             av.id LIKE ? OR
             av.descripcion LIKE ? OR
-            av.nombre_sucursal_venta LIKE ? OR
             av.last_id_venta LIKE ? OR
             av.id_venta_sucursal LIKE ?
         )";
@@ -67,8 +59,7 @@ try {
         $params[] = $searchParam;
         $params[] = $searchParam;
         $params[] = $searchParam;
-        $params[] = $searchParam;
-        $types .= 'sssss';
+        $types .= 'ssss';
     }
 
     $whereClause = 'WHERE ' . implode(' AND ', $whereConditions);
@@ -77,7 +68,6 @@ try {
         SELECT
             av.id as id_articulo,
             av.descripcion,
-            av.nombre_sucursal_venta,
             av.fecha_vendido,
             av.last_id_venta,
             av.id_venta_sucursal,
@@ -108,7 +98,6 @@ try {
         $data[] = [
             (string)$row['id_articulo'],
             (string)($row['descripcion'] ?? ''),
-            (string)($row['nombre_sucursal_venta'] ?: '---'),
             (!empty($row['fecha_vendido']) && $row['fecha_vendido'] !== '0000-00-00' && $row['fecha_vendido'] !== '0000-00-00 00:00:00')
                 ? date('d/m/Y', strtotime($row['fecha_vendido']))
                 : '-',

@@ -7,7 +7,6 @@ header('Content-Type: application/json');
 try {
     $conexion = conectar_bd();
 
-    $filtro_sucursal = isset($_POST['filtro_sucursal']) ? trim($_POST['filtro_sucursal']) : '';
     $filtro_tipo = isset($_POST['filtro_tipo']) ? trim($_POST['filtro_tipo']) : '';
     $filtro_origen = isset($_POST['filtro_origen']) ? trim($_POST['filtro_origen']) : '';
     $filtro_fecha_desde = isset($_POST['filtro_fecha_desde']) ? trim($_POST['filtro_fecha_desde']) : '';
@@ -20,12 +19,6 @@ try {
     $whereConditions = array("av.estado = 'enventa'");
     $params = array();
     $types = '';
-
-    if (!empty($filtro_sucursal)) {
-        $whereConditions[] = 'av.id_sucursal_destino = ?';
-        $params[] = $filtro_sucursal;
-        $types .= 'i';
-    }
 
     if (!empty($filtro_tipo)) {
         $whereConditions[] = 'av.tipo = ?';
@@ -80,7 +73,6 @@ try {
     $query = "
         SELECT COUNT(*) as total
         FROM articulos_venta av
-        LEFT JOIN sucursal s ON av.id_sucursal_destino = s.id_sucursal
         $whereClause
     ";
 

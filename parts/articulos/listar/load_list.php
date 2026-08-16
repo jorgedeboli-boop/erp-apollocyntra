@@ -19,7 +19,6 @@ try {
     $searchValue = isset($_POST['search']['value']) ? $_POST['search']['value'] : '';
     
     // Obtener filtros
-    $filtro_sucursal = isset($_POST['filtro_sucursal']) ? trim($_POST['filtro_sucursal']) : '';
     $filtro_tipo = isset($_POST['filtro_tipo']) ? trim($_POST['filtro_tipo']) : '';
     $filtro_estado = isset($_POST['filtro_estado']) ? trim($_POST['filtro_estado']) : '';
     $filtro_origen = isset($_POST['filtro_origen']) ? trim($_POST['filtro_origen']) : '';
@@ -41,13 +40,6 @@ try {
     $whereConditions = array();
     $params = array();
     $types = '';
-    
-    // Filtro de sucursal
-    if (!empty($filtro_sucursal)) {
-        $whereConditions[] = "av.id_sucursal_destino = ?";
-        $params[] = $filtro_sucursal;
-        $types .= 'i';
-    }
     
     // Filtro de tipo
     if (!empty($filtro_tipo)) {
@@ -100,15 +92,13 @@ try {
         $whereConditions[] = "(
             av.id LIKE ? OR
             av.descripcion LIKE ? OR
-            av.estado LIKE ? OR
-            s.nombre_sucursal LIKE ?
+            av.estado LIKE ?
         )";
         $searchParam = '%' . $searchValue . '%';
         $params[] = $searchValue;
         $params[] = $searchParam;
         $params[] = $searchParam;
-        $params[] = $searchParam;
-        $types .= 'ssss';
+        $types .= 'sss';
     }
     
     $whereClause = '';
@@ -126,7 +116,6 @@ try {
     $query_filtered = "
         SELECT COUNT(*) as total 
         FROM articulos_venta av
-        LEFT JOIN sucursal s ON av.id_sucursal_destino = s.id_sucursal
         $whereClause
     ";
     
@@ -148,8 +137,6 @@ try {
     $query = "
         SELECT 
             av.id as id_articulo,
-            av.id_articulo_sucursal,
-            av.id_sucursal_destino,
             av.descripcion,
             av.peso,
             av.precio,
@@ -162,12 +149,8 @@ try {
             av.fecha_vendido,
             av.fecha_retirado,
             av.origen_articulo,
-            s.nombre_sucursal,
-            s_origen.nombre_sucursal as sucursal_origen,
             u.nombre_usuario
         FROM articulos_venta av
-        LEFT JOIN sucursal s ON av.id_sucursal_destino = s.id_sucursal
-        LEFT JOIN sucursal s_origen ON av.id_sucursal_origen = s_origen.id_sucursal
         LEFT JOIN usuarios u ON av.creado_por = u.id_usuario
         $whereClause
         ORDER BY av.id DESC
@@ -257,15 +240,20 @@ try {
         $origen_badge = '';
         if ($row['origen_articulo'] === 'central') {
             $origen_badge = '<span class="badge bg-label-primary ">Central</span>';
+        } elseif ($row['origen_articulo'] === 'sucursal') {
+            $origen_badge = '<span class="badge bg-label-info ">Otro</span>';
         } else {
-            $origen_badge = '<span class="badge bg-label-info ">Sucursal</span>';
+            $origen_texto = $row['origen_articulo'] !== '' && $row['origen_articulo'] !== null
+                ? ucfirst((string) $row['origen_articulo'])
+                : '—';
+            $origen_badge = '<span class="badge bg-label-info ">' . htmlspecialchars($origen_texto) . '</span>';
         }
         // Botón Vender (solo si estado es "enventa")
         $boton_vender = '-';
         if ($row['estado'] === 'enventa') {
             // Escapar descripción para JavaScript (convertir comillas y saltos de línea)
             $descripcion_js = str_replace(['"', "'", "\n", "\r"], ['&quot;', '&#39;', ' ', ' '], $row['descripcion']);
-            $boton_vender = '<button type="button" class="btn btn-sm btn-primary waves-effect button-actions-datatable" onclick="venderArticulo(' . $row['id_articulo'] . ', &quot;' . htmlspecialchars($descripcion_js) . '&quot;, ' . $row['id_sucursal_destino'] . ')">
+            $boton_vender = '<button type="button" class="btn btn-sm btn-primary waves-effect button-actions-datatable" onclick="venderArticulo(' . $row['id_articulo'] . ', &quot;' . htmlspecialchars($descripcion_js) . '&quot;)">
                 <i class="icon-base ri ri-money-euro-circle-line me-1 icon-16px"></i>Vender
             </button>';
         }
@@ -273,22 +261,20 @@ try {
         $data[] = [
             htmlspecialchars($row['id_articulo']),                              // 0 - SKU
             htmlspecialchars($row['descripcion']),                              // 1 - Descripción
-            htmlspecialchars($row['sucursal_origen'] ?: '---'),                // 2 - Sucursal Origen
-            htmlspecialchars($row['nombre_sucursal'] ?: '---'),                // 3 - Sucursal (destino)
-            number_format($row['peso'], 2, ',', '.') . ' g',                   // 4 - Peso
-            number_format($row['precio'], 0, ',', '.') . ' €',                 // 5 - Precio (sin decimales)
-            number_format($row['precio_coste'], 0, ',', '.') . ' €',           // 6 - Precio Coste (sin decimales)
-            number_format($euro_gramo, 2, ',', '.') . ' €/g',                  // 7 - €/g
-            $tipo_badge,                                                         // 8 - Tipo
-            $estado_badge,                                                       // 9 - Estado
-            !empty($row['fecha_enviado']) && $row['fecha_enviado'] !== '0000-00-00 00:00:00' ? date('d/m/Y', strtotime($row['fecha_enviado'])) : '-',  // 10 - F. Enviado
-            !empty($row['fecha_en_venta']) && $row['fecha_en_venta'] !== '0000-00-00 00:00:00' ? date('d/m/Y', strtotime($row['fecha_en_venta'])) : '-', // 11 - F. En Venta
-            !empty($row['fecha_vendido']) && $row['fecha_vendido'] !== '0000-00-00' ? date('d/m/Y', strtotime($row['fecha_vendido'])) : '-',             // 12 - F. Vendido
-            !empty($row['fecha_retirado']) && $row['fecha_retirado'] !== '0000-00-00 00:00:00' ? date('d/m/Y', strtotime($row['fecha_retirado'])) : '-', // 13 - F. Retirado
-            htmlspecialchars($row['nombre_usuario'] ?: '---'),                 // 14 - Creado Por
-            $origen_badge,                                                       // 15 - Origen
-            $boton_vender,                                                       // 16 - Acciones
-            $row['id_articulo']                                                 // 17 - ID (hidden para click)
+            number_format($row['peso'], 2, ',', '.') . ' g',                   // 2 - Peso
+            number_format($row['precio'], 0, ',', '.') . ' €',                 // 3 - Precio (sin decimales)
+            number_format($row['precio_coste'], 0, ',', '.') . ' €',           // 4 - Precio Coste (sin decimales)
+            number_format($euro_gramo, 2, ',', '.') . ' €/g',                  // 5 - €/g
+            $tipo_badge,                                                         // 6 - Tipo
+            $estado_badge,                                                       // 7 - Estado
+            !empty($row['fecha_enviado']) && $row['fecha_enviado'] !== '0000-00-00 00:00:00' ? date('d/m/Y', strtotime($row['fecha_enviado'])) : '-',  // 8 - F. Enviado
+            !empty($row['fecha_en_venta']) && $row['fecha_en_venta'] !== '0000-00-00 00:00:00' ? date('d/m/Y', strtotime($row['fecha_en_venta'])) : '-', // 9 - F. En Venta
+            !empty($row['fecha_vendido']) && $row['fecha_vendido'] !== '0000-00-00' ? date('d/m/Y', strtotime($row['fecha_vendido'])) : '-',             // 10 - F. Vendido
+            !empty($row['fecha_retirado']) && $row['fecha_retirado'] !== '0000-00-00 00:00:00' ? date('d/m/Y', strtotime($row['fecha_retirado'])) : '-', // 11 - F. Retirado
+            htmlspecialchars($row['nombre_usuario'] ?: '---'),                 // 12 - Creado Por
+            $origen_badge,                                                       // 13 - Origen
+            $boton_vender,                                                       // 14 - Acciones
+            $row['id_articulo']                                                 // 15 - ID (hidden para click)
         ];
     }
     

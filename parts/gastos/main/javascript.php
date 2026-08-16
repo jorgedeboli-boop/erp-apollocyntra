@@ -369,16 +369,7 @@ function verificarCambiosFotosGasto() {
 }
 
 function abrirModalFotoMovilGasto() {
-    const idSucursalQr = idSucursalGasto || Number(window.usuarioSucursal || 0) || 0;
-    if (!idSucursalQr) {
-        Swal.fire({
-            title: 'Error',
-            text: 'No se puede abrir la cámara móvil: falta sucursal de sesión.',
-            icon: 'error',
-            confirmButtonText: 'Aceptar'
-        });
-        return;
-    }
+    const idSucursalQr = Number(idSucursalGasto || window.usuarioSucursal || 0) || 0;
     if (window.CameraDocPanel && typeof window.CameraDocPanel.open === 'function') {
         window.CameraDocPanel.open({
             tipo: 'gasto',

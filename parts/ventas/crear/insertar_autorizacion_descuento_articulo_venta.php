@@ -20,7 +20,7 @@ $precioOriginal = isset($_POST['precio_original']) ? (float)$_POST['precio_origi
 $usuario = $_SESSION['usuario_nombre'] ?? '';
 $usuario = is_string($usuario) ? trim($usuario) : '';
 
-if ($idArticulo <= 0 || $sucursal <= 0 || $precioOriginal === null || $precioOriginal < 0 || $usuario === '') {
+if ($idArticulo <= 0 || $precioOriginal === null || $precioOriginal < 0 || $usuario === '') {
     echo json_encode(['success' => false, 'message' => 'Faltan datos']);
     exit;
 }

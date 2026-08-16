@@ -27,11 +27,8 @@ try {
             av.descripcion,
             av.peso,
             av.precio,
-            av.estado,
-            av.id_sucursal_destino,
-            s.nombre_sucursal
+            av.estado
         FROM articulos_venta av
-        LEFT JOIN sucursal s ON av.id_sucursal_destino = s.id_sucursal
         WHERE av.estado IN ('vendido', 'vendido_web')
         AND (CAST(av.id AS CHAR) LIKE ? OR av.descripcion LIKE ?)
         ORDER BY av.id DESC
@@ -54,7 +51,6 @@ try {
             'peso' => $row['peso'],
             'precio' => $row['precio'],
             'estado' => $row['estado'],
-            'sucursal' => $row['nombre_sucursal'] ?: '',
         ];
     }
     mysqli_stmt_close($stmt);

@@ -27,20 +27,17 @@
                       g.total_gasto,
                       g.estado_gasto,
                       g.empresa_gasto,
-                      g.sucursal_gasto,
                       g.proveedor_gasto,
                       g.tipo_de_gasto,
                       g.forma_pago_gasto,
                       g.numero_factura_proveedor,
                       g.observaciones_gasto,
                       e.nombre_empresa,
-                      s.nombre_sucursal,
                       p.nombre_proveedor,
                       tg.nombre_tipo_gasto,
                       fp.nombre_forma_de_pago
                   FROM gastos g
                   LEFT JOIN empresas e ON g.empresa_gasto = e.id_empresa
-                  LEFT JOIN sucursal s ON g.sucursal_gasto = s.id_sucursal
                   LEFT JOIN proveedores p ON g.proveedor_gasto = p.id_proveedor
                   LEFT JOIN tipo_de_gasto tg ON g.tipo_de_gasto = tg.id_tipo_gasto
                   LEFT JOIN formas_de_pago fp ON g.forma_pago_gasto = fp.id_forma_de_pago
@@ -113,26 +110,6 @@
                         while ($empresa = mysqli_fetch_assoc($result_empresas)) {
                             $selected = ($empresa['id_empresa'] == $gasto['empresa_gasto']) ? 'selected' : '';
                             echo '<option value="' . $empresa['id_empresa'] . '" ' . $selected . '>' . htmlspecialchars($empresa['nombre_empresa']) . '</option>';
-                        }
-                        mysqli_close($conexion);
-                    }
-                    ?>
-                  </select>
-                </div>
-                
-                <div class="mb-4">
-                  <label for="sucursal_gasto" class="form-label">Sucursal *</label>
-                  <select id="sucursal_gasto" name="sucursal_gasto" class="form-select" required>
-                    <option value="">Seleccione sucursal</option>
-                    <?php
-                    if ($gasto) {
-                        $conexion = conectar_bd();
-                        $query_sucursales = "SELECT id_sucursal, nombre_sucursal FROM sucursal ORDER BY nombre_sucursal ASC";
-                        $result_sucursales = mysqli_query($conexion, $query_sucursales);
-                        
-                        while ($sucursal = mysqli_fetch_assoc($result_sucursales)) {
-                            $selected = ($sucursal['id_sucursal'] == $gasto['sucursal_gasto']) ? 'selected' : '';
-                            echo '<option value="' . $sucursal['id_sucursal'] . '" ' . $selected . '>' . htmlspecialchars($sucursal['nombre_sucursal']) . '</option>';
                         }
                         mysqli_close($conexion);
                     }

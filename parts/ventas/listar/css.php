@@ -8,7 +8,6 @@
 <style>
 /* Responsive adjustments for filters */
 @media (max-width: 767px) {
-    .venta_sucursal,
     .venta_tipo,
     .venta_web,
     .venta_forma_pago {

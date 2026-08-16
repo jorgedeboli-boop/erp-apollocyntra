@@ -8,7 +8,6 @@ try {
     $conexion = conectar_bd();
     
     // Obtener filtros
-    $filtro_sucursal = isset($_POST['filtro_sucursal']) ? trim($_POST['filtro_sucursal']) : '';
     $filtro_tipo = isset($_POST['filtro_tipo']) ? trim($_POST['filtro_tipo']) : '';
     $filtro_estado = isset($_POST['filtro_estado']) ? trim($_POST['filtro_estado']) : '';
     $filtro_origen = isset($_POST['filtro_origen']) ? trim($_POST['filtro_origen']) : '';
@@ -30,13 +29,6 @@ try {
     $whereConditions = array();
     $params = array();
     $types = '';
-    
-    // Filtro de sucursal (el select envía id_sucursal)
-    if (!empty($filtro_sucursal)) {
-        $whereConditions[] = "av.id_sucursal_destino = ?";
-        $params[] = $filtro_sucursal;
-        $types .= 'i';
-    }
     
     // Filtro de tipo
     if (!empty($filtro_tipo)) {
@@ -106,7 +98,6 @@ try {
     $query = "
         SELECT COUNT(*) as total
         FROM articulos_venta av
-        LEFT JOIN sucursal s ON av.id_sucursal_destino = s.id_sucursal
         $whereClause
     ";
     

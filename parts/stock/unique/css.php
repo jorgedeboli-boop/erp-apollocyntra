@@ -4,7 +4,6 @@
     opacity: 0;
 }
 
-#stock_filtros_container:not(.stock-filtros-ready) .articulo_sucursal,
 #stock_filtros_container:not(.stock-filtros-ready) .articulo_tipo,
 #stock_filtros_container:not(.stock-filtros-ready) .articulo_origen {
     min-height: 38px;
@@ -41,7 +40,6 @@
     font-size: 1rem;
 }
 @media (max-width: 767px) {
-    .articulo_sucursal,
     .articulo_tipo,
     .articulo_origen {
         width: 100% !important;

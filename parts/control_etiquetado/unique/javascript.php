@@ -5,11 +5,10 @@ $vFlatpickrDatatable = filemtime(__DIR__ . '/../../universal/flatpickr-datatable
 ?>
 <script>
 window.ListarFiltrosConfig = {
-  filterIds: ['filtro_sucursal_control_etiquetado', 'filtro_tipo_control_etiquetado'],
+  filterIds: ['filtro_tipo_control_etiquetado'],
   containerId: 'control_etiquetado_filtros_container',
   readyClass: 'control-etiquetado-filtros-ready',
-  sucursalSelectId: 'filtro_sucursal_control_etiquetado',
-  initMarkerId: 'filtro_sucursal_control_etiquetado'
+  initMarkerId: 'filtro_tipo_control_etiquetado'
 };
 </script>
 <script src="parts/universal/filtros-listar.js?v=<?php echo $vFiltrosListar; ?>"></script>

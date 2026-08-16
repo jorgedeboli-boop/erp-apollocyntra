@@ -24,7 +24,7 @@ try {
     $total_gasto = $_POST['total_gasto'] ?? 0;
     $estado_gasto = $_POST['estado_gasto'] ?? '';
     $empresa_gasto = isset($_POST['empresa_gasto']) ? (int)$_POST['empresa_gasto'] : 0;
-    $sucursal_gasto = isset($_POST['sucursal_gasto']) ? (int)$_POST['sucursal_gasto'] : 0;
+    $sucursal_gasto = 0;
     $proveedor_gasto = isset($_POST['proveedor_gasto']) ? (int)$_POST['proveedor_gasto'] : 0;
     $tipo_de_gasto = isset($_POST['tipo_de_gasto']) ? (int)$_POST['tipo_de_gasto'] : 0;
     $forma_pago_gasto = isset($_POST['forma_pago_gasto']) ? (int)$_POST['forma_pago_gasto'] : 0;
@@ -50,10 +50,6 @@ try {
     
     if (!$empresa_gasto) {
         throw new Exception('Debe seleccionar una empresa');
-    }
-    
-    if (!$sucursal_gasto) {
-        throw new Exception('Debe seleccionar una sucursal');
     }
     
     if (!$proveedor_gasto) {

@@ -24,7 +24,6 @@ try {
     if ($length < 1 || $length > 100) $length = 25;
 
     // Filtros
-    $filtroSucursal = isset($_POST['filtro_sucursal']) ? (int)$_POST['filtro_sucursal'] : 0;
     $filtroProveedor = isset($_POST['filtro_proveedor']) ? (int)$_POST['filtro_proveedor'] : 0;
     $filtroFormaPago = isset($_POST['filtro_forma_pago']) ? (int)$_POST['filtro_forma_pago'] : 0;
     $filtroTipoGasto = isset($_POST['filtro_tipo_gasto']) ? (int)$_POST['filtro_tipo_gasto'] : 0;
@@ -38,20 +37,14 @@ try {
     $types = '';
 
     if ($searchValue !== '') {
-        $where[] = "(gf.id_gasto_fijo = ? OR gf.descripcion_gasto_fijo LIKE ? OR p.nombre_proveedor LIKE ? OR s.nombre_sucursal LIKE ?)";
-        $types .= 'isss';
+        $where[] = "(gf.id_gasto_fijo = ? OR gf.descripcion_gasto_fijo LIKE ? OR p.nombre_proveedor LIKE ?)";
+        $types .= 'iss';
         $params[] = (int)$searchValue;
         $like = '%' . $searchValue . '%';
         $params[] = $like;
         $params[] = $like;
-        $params[] = $like;
     }
 
-    if ($filtroSucursal > 0) {
-        $where[] = "gf.sucursal_gasto_fijo = ?";
-        $types .= 'i';
-        $params[] = $filtroSucursal;
-    }
     if ($filtroProveedor > 0) {
         $where[] = "gf.proveedor_gasto_fijo = ?";
         $types .= 'i';
@@ -91,7 +84,6 @@ try {
         LEFT JOIN tipo_de_gasto tg ON gf.tipo_de_gasto_fijo = tg.id_tipo_gasto
         LEFT JOIN formas_de_pago fp ON gf.forma_pago_gasto_fijo = fp.id_forma_de_pago
         LEFT JOIN proveedores p ON gf.proveedor_gasto_fijo = p.id_proveedor
-        LEFT JOIN sucursal s ON gf.sucursal_gasto_fijo = s.id_sucursal
     ";
 
     // Total sin filtros
@@ -126,8 +118,7 @@ try {
             p.nombre_proveedor,
             p.cif_proveedor,
             tg.nombre_tipo_gasto,
-            fp.nombre_forma_de_pago,
-            s.nombre_sucursal
+            fp.nombre_forma_de_pago
         {$baseFrom}
         {$whereSql}
         ORDER BY gf.id_gasto_fijo DESC
@@ -161,7 +152,6 @@ try {
             'descripcion' => $row['descripcion_gasto_fijo'],
             'tipo_gasto' => $row['nombre_tipo_gasto'],
             'forma_pago' => $row['nombre_forma_de_pago'],
-            'sucursal' => $row['nombre_sucursal'],
             'fecha_inicio' => $row['fecha_inicio_gasto_fijo'],
             'periodo' => $row['periodo_gasto_fijo'],
             'estado' => $row['estado_gasto_fijo'],

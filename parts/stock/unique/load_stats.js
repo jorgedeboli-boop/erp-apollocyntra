@@ -21,7 +21,6 @@ function cargarEstadistica(elementId, tipo) {
   elemento.style.display = 'none';
   loadingElement.style.display = 'block';
 
-  const filtroSucursal = document.getElementById('filtro_sucursal_articulo');
   const filtroTipo = document.getElementById('filtro_tipo');
   const filtroOrigen = document.getElementById('filtro_origen');
   const filtroFechaDesde = document.getElementById('filtro_fecha_desde');
@@ -29,7 +28,6 @@ function cargarEstadistica(elementId, tipo) {
 
   const formData = new FormData();
   formData.append('tipo', tipo);
-  formData.append('filtro_sucursal', filtroSucursal ? filtroSucursal.value : '');
   formData.append('filtro_tipo', filtroTipo ? filtroTipo.value : '');
   formData.append('filtro_origen', filtroOrigen ? filtroOrigen.value : '');
   formData.append('filtro_fecha_desde', filtroFechaDesde ? filtroFechaDesde.value : '');

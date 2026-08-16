@@ -18,7 +18,7 @@ $interesesOriginales = isset($_POST['intereses_originales']) ? (float) $_POST['i
 $precioOriginal = isset($_POST['precio_original']) ? (float) $_POST['precio_original'] : 0.0;
 $usuarioId = isset($_SESSION['usuario_id']) ? (int) $_SESSION['usuario_id'] : 0;
 
-if ($sucursal <= 0 || $idsArticulos === '' || $usuarioId <= 0) {
+if ($idsArticulos === '' || $usuarioId <= 0) {
     echo json_encode(['success' => false, 'message' => 'Faltan datos']);
     exit;
 }

@@ -15,7 +15,6 @@ try {
     $start = isset($_POST['start']) ? (int)$_POST['start'] : 0;
     $length = isset($_POST['length']) ? (int)$_POST['length'] : 10;
     $searchValue = isset($_POST['search']['value']) ? trim($_POST['search']['value']) : '';
-    $filtro_sucursal = isset($_POST['filtro_sucursal']) ? trim($_POST['filtro_sucursal']) : '';
     $filtro_empresa = isset($_POST['filtro_empresa']) ? (int)$_POST['filtro_empresa'] : 0;
     $filtro_tipo_pago = isset($_POST['filtro_tipo_pago']) ? trim($_POST['filtro_tipo_pago']) : '';
     $filtro_estado_factura = isset($_POST['filtro_estado_factura']) ? trim($_POST['filtro_estado_factura']) : '';
@@ -30,12 +29,6 @@ try {
     // Listado de facturas completas: excluir simplificadas unificadas
     $whereConditions[] = "(f.factura_simplificada = 'false' OR f.factura_simplificada IS NULL OR f.factura_simplificada = '')";
 
-    if (!empty($filtro_sucursal)) {
-        $whereConditions[] = "s.nombre_sucursal = ?";
-        $params[] = $filtro_sucursal;
-        $types .= 's';
-    }
-    
     if ($filtro_empresa > 0) {
         $whereConditions[] = "f.rel_id_empresa = ?";
         $params[] = $filtro_empresa;
@@ -91,22 +84,20 @@ try {
             f.estado_factura LIKE ? OR
             f.tipo_pago_factura LIKE ? OR
             f.tipo_factura LIKE ? OR
-            s.nombre_sucursal LIKE ? OR
             IFNULL(empr.nombre_empresa, '') LIKE ? OR
             CONCAT(c.nombre, ' ', c.apellido) LIKE ?
         )";
         $searchParam = '%' . $searchValue . '%';
-        for ($i = 0; $i < 11; $i++) {
+        for ($i = 0; $i < 10; $i++) {
             $params[] = $searchParam;
         }
-        $types .= str_repeat('s', 11);
+        $types .= str_repeat('s', 10);
     }
     
     $whereClause = count($whereConditions) > 0 ? 'WHERE ' . implode(' AND ', $whereConditions) : '';
     
     $queryBase = "
         FROM facturas f
-        LEFT JOIN sucursal s ON f.id_sucursal = s.id_sucursal
         LEFT JOIN clientes c ON f.cliente_factura = c.id_cliente
         LEFT JOIN empresas empr ON f.rel_id_empresa = empr.id_empresa
         LEFT JOIN usuarios u ON f.facturado_por = u.id_usuario
@@ -141,13 +132,12 @@ try {
         2 => 'f.fecha_factura',
         3 => 'f.hora_factura',
         4 => 'CLIENTEDATA',
-        5 => 's.nombre_sucursal',
-        6 => 'empr.nombre_empresa',
-        7 => 'f.total_factura',
-        8 => 'f.estado_factura',
-        9 => 'f.tipo_pago_factura',
-        10 => 'f.tipo_factura',
-        11 => 'f.factura_regimen'
+        5 => 'empr.nombre_empresa',
+        6 => 'f.total_factura',
+        7 => 'f.estado_factura',
+        8 => 'f.tipo_pago_factura',
+        9 => 'f.tipo_factura',
+        10 => 'f.factura_regimen'
     ];
     $allowedColumns = array_values($columnMap);
     $orderBy = isset($columnMap[$orderColumn]) && in_array($columnMap[$orderColumn], $allowedColumns) ? $columnMap[$orderColumn] : 'f.fecha_factura';
@@ -166,7 +156,6 @@ try {
                 f.tipo_factura,
                 f.factura_regimen,
                 f.id_rel_factura_fiskaly,
-                s.nombre_sucursal,
                 empr.nombre_empresa AS nombre_empresa,
                 CONCAT(c.nombre, ' ', c.apellido) AS CLIENTEDATA
               " . $queryBase . "
@@ -216,7 +205,6 @@ try {
             $row['fecha_factura'] ?: '-',
             (trim((string) ($row['hora_factura'] ?? '')) !== '' ? substr(trim((string) $row['hora_factura']), 0, 8) : '-'),
             $row['CLIENTEDATA'] ?: '-',
-            $row['nombre_sucursal'] ?: '-',
             $row['nombre_empresa'] ?: '-',
             number_format($row['total_factura'], 2, ',', '.') . ' €',
             $row['estado_factura'],

@@ -30,10 +30,9 @@ if ($id_venta > 0) {
     $conexion = conectar_bd();
     $stmt = mysqli_prepare(
         $conexion,
-        'SELECT v.*, s.nombre_sucursal, u.usuario AS comprado_por_usuario, u.nombre_usuario, u.apellido_usuario,
+        'SELECT v.*, u.usuario AS comprado_por_usuario, u.nombre_usuario, u.apellido_usuario,
                 ua.usuario AS anulado_por_usuario, ua.nombre_usuario AS anulado_nombre_usuario, ua.apellido_usuario AS anulado_apellido_usuario
          FROM ventas v
-         LEFT JOIN sucursal s ON v.id_sucursal = s.id_sucursal
          LEFT JOIN usuarios u ON v.comprado_por = u.id_usuario
          LEFT JOIN usuarios ua ON v.anulado_por = ua.id_usuario
          WHERE v.id = ?
@@ -119,12 +118,10 @@ if ($id_venta > 0) {
                             dc.sexo AS cliente_sexo,
                             d.direccion AS cliente_direccion, d.c_poblacion AS cliente_poblacion, d.c_provincia AS cliente_provincia,
                             d.c_pais AS cliente_pais,
-                            d.codigo_postal AS cliente_cp,
-                            s_cli.nombre_sucursal AS nombre_sucursal_alta_cliente
+                            d.codigo_postal AS cliente_cp
                      FROM clientes c
                      LEFT JOIN datos_clientes dc ON c.id_cliente = dc.rel_id_cliente
                      LEFT JOIN direcciones d ON c.id_cliente = d.rel_id_item AND d.type_direccion = 'clientes'
-                     LEFT JOIN sucursal s_cli ON c.sucursal = s_cli.id_sucursal
                      WHERE c.id_cliente = ?
                      LIMIT 1"
                 );
@@ -250,9 +247,6 @@ $labels_tipo_pago = [
                   <li class="list-inline-item">
                     <i class="icon-base ri ri-calendar-line me-2 icon-24px"></i><span class="fw-medium"><?php echo !empty($venta_principal['fecha']) ? date('d/m/Y H:i', strtotime($venta_principal['fecha'])) : '—'; ?></span>
                   </li>
-                    <li class="list-inline-item">
-                      <i class="icon-base ri ri-building-line me-2 icon-24px"></i><span class="fw-medium">Sucursal <?php echo htmlspecialchars((string) ($venta_principal['nombre_sucursal'] ?? '')); ?></span>
-                  </li>
                 </ul>
                 <div class="d-flex gap-2 flex-wrap justify-content-sm-start justify-content-center mt-3">
                   <div id="badge_estado_venta_ficha" class="badge bg-label-<?php echo htmlspecialchars($estado_class); ?> rounded-pill lh-xs badget-estados">Estado: <?php echo htmlspecialchars($estado_texto); ?></div>
@@ -365,10 +359,6 @@ $labels_tipo_pago = [
             <div class="card-body">
               <small class="card-text text-uppercase text-body-secondary small">Resumen</small>
               <ul class="list-unstyled my-3 py-1">
-                <li class="d-flex align-items-center mb-4">
-                  <i class="icon-base ri ri-store-2-line icon-24px"></i><span class="fw-medium mx-2">Sucursal:</span>
-                  <span><?php echo htmlspecialchars((string) ($venta_principal['nombre_sucursal'] ?? '—')); ?></span>
-                </li>
                 <li class="d-flex align-items-center mb-4">
                   <i class="icon-base ri ri-price-tag-3-line icon-24px"></i><span class="fw-medium mx-2">Tipo de pago:</span>
                   <span><?php
@@ -744,11 +734,6 @@ $labels_tipo_pago = [
                     <span class="fw-medium mx-2">Fecha de nacimiento:</span>
                     <span><?php echo htmlspecialchars(venta_fmt_fecha_cliente($cliente_ficha['cliente_f_nacimiento'] ?? '')); ?></span>
                   </li>
-                  <li class="d-flex align-items-center mb-4">
-                    <i class="icon-base ri ri-store-2-line icon-24px"></i>
-                    <span class="fw-medium mx-2">Alta en sucursal:</span>
-                    <span><?php echo htmlspecialchars(trim((string) ($cliente_ficha['nombre_sucursal_alta_cliente'] ?? '')) !== '' ? (string) $cliente_ficha['nombre_sucursal_alta_cliente'] : '—'); ?></span>
-                  </li>
                   <li class="d-flex align-items-center mb-0">
                     <i class="icon-base ri ri-calendar-check-line icon-24px"></i>
                     <span class="fw-medium mx-2">Fecha de alta:</span>
@@ -911,7 +896,6 @@ $labels_tipo_pago = [
                 <tr>
                   <th>Adelanto Nº</th>
                   <th>Fecha de adelanto</th>
-                  <th>Sucursal adelanto</th>
                   <th>Importe de adelanto</th>
                   <th>Capital anterior</th>
                   <th>Importe plazo antiguo</th>

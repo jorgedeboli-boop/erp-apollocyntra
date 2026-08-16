@@ -28,7 +28,6 @@ try {
     $length = isset($_POST['length']) ? (int) $_POST['length'] : 10;
     $searchValue = isset($_POST['search']['value']) ? trim((string) $_POST['search']['value']) : '';
 
-    $filtro_sucursal = isset($_POST['filtro_sucursal']) ? trim((string) $_POST['filtro_sucursal']) : '';
     $filtro_tipo = isset($_POST['filtro_tipo']) ? trim((string) $_POST['filtro_tipo']) : '';
     $filtro_fecha_desde = isset($_POST['filtro_fecha_desde']) ? trim((string) $_POST['filtro_fecha_desde']) : '';
     $filtro_fecha_hasta = isset($_POST['filtro_fecha_hasta']) ? trim((string) $_POST['filtro_fecha_hasta']) : '';
@@ -41,12 +40,6 @@ try {
     $whereConditions = array();
     $params = array();
     $types = '';
-
-    if ($filtro_sucursal !== '') {
-        $whereConditions[] = 'ce.sucursal_etiquetado = ?';
-        $params[] = (int) $filtro_sucursal;
-        $types .= 'i';
-    }
 
     if ($filtro_tipo !== '') {
         $whereConditions[] = 'ce.tipo_control_etiquetado = ?';
@@ -84,8 +77,7 @@ try {
             ce.envio_etiquetado LIKE ? OR
             ce.tipo_control_etiquetado LIKE ? OR
             u.nombre_usuario LIKE ? OR
-            u.usuario LIKE ? OR
-            s.nombre_sucursal LIKE ?
+            u.usuario LIKE ?
         )';
         $searchParam = '%' . $searchValue . '%';
         $params[] = $searchParam;
@@ -93,8 +85,7 @@ try {
         $params[] = $searchParam;
         $params[] = $searchParam;
         $params[] = $searchParam;
-        $params[] = $searchParam;
-        $types .= 'ssssss';
+        $types .= 'sssss';
     }
 
     $whereClause = '';
@@ -105,7 +96,6 @@ try {
     $fromJoin = '
         FROM control_etiquetado ce
         LEFT JOIN usuarios u ON ce.usuario_etiquetado = u.id_usuario
-        LEFT JOIN sucursal s ON ce.sucursal_etiquetado = s.id_sucursal
     ';
 
     $result_total = mysqli_query($conexion, 'SELECT COUNT(*) AS total FROM control_etiquetado');
@@ -132,13 +122,11 @@ try {
             ce.fecha_etiquetado,
             ce.hora_etiquetado,
             ce.usuario_etiquetado,
-            ce.sucursal_etiquetado,
             ce.envio_etiquetado,
             ce.total_etiquetas,
             ce.tipo_control_etiquetado,
             u.nombre_usuario,
-            u.usuario,
-            s.nombre_sucursal
+            u.usuario
         $fromJoin
         $whereClause
         ORDER BY ce.id_control_etiquetado DESC
@@ -193,7 +181,7 @@ try {
                 break;
             case 'sucursal':
                 $tipoCls = 'warning';
-                $tipoLabel = 'Sucursal';
+                $tipoLabel = 'Tienda';
                 break;
             case 'articulo':
                 $tipoCls = 'success';
@@ -213,7 +201,6 @@ try {
             htmlspecialchars($fechaFmt),
             htmlspecialchars($horaFmt),
             htmlspecialchars($usuarioTxt),
-            htmlspecialchars($row['nombre_sucursal'] ?: ('#' . (int) ($row['sucursal_etiquetado'] ?? 0))),
             htmlspecialchars($envioHtml),
             '<span class="fw-semibold">' . $totalEtiquetas . '</span>',
             $tipoBadge,

@@ -43,11 +43,8 @@ try {
         $descripcion = trim($_POST['descripcion']);
         $system_codigo_regimen = trim($_POST['system_codigo_regimen']);
         
-        // Obtener datos de la sucursal de origen
-        $sucursal_origen = isset($_POST['sucursal_origen']) ? (int)$_POST['sucursal_origen'] : 0;
         $lote_origen = isset($_POST['lote_origen']) ? trim($_POST['lote_origen']) : '';
         $id_lote_origen = !empty($lote_origen) ? (int)$lote_origen : 0;
-        $id_sucursal_origen = !empty($sucursal_origen) ? (int)$sucursal_origen : 0;
         
         $precio_coste = isset($_POST['precio_coste']) ? (float)$_POST['precio_coste'] : 0;
         if(empty($precio_coste)){
@@ -66,7 +63,7 @@ try {
         $observaciones = isset($_POST['observaciones']) ? trim($_POST['observaciones']) : '';
         
         // Verificar que el artículo existe y obtener datos necesarios
-        $query_check = "SELECT id, id_sucursal_destino, estado, precio FROM articulos_venta WHERE id = ? LIMIT 1";
+        $query_check = "SELECT id, id_sucursal_destino, id_sucursal_origen, estado, precio FROM articulos_venta WHERE id = ? LIMIT 1";
         $stmt_check = mysqli_prepare($conexion, $query_check);
         mysqli_stmt_bind_param($stmt_check, 'i', $id_articulo);
         mysqli_stmt_execute($stmt_check);
@@ -79,19 +76,10 @@ try {
         
         $articulo_actual = mysqli_fetch_assoc($result_check);
         $id_sucursal_destino = (int)$articulo_actual['id_sucursal_destino'];
+        $id_sucursal_origen = (int)($articulo_actual['id_sucursal_origen'] ?? 0);
         $estado_articulo = $articulo_actual['estado'];
         $precio_anterior = (float)$articulo_actual['precio'];
         mysqli_stmt_close($stmt_check);
-        
-        // Obtener empresa_id de la sucursal destino
-        $query_empresa = "SELECT empresa_id FROM sucursal WHERE id_sucursal = ? LIMIT 1";
-        $stmt_empresa = mysqli_prepare($conexion, $query_empresa);
-        mysqli_stmt_bind_param($stmt_empresa, 'i', $id_sucursal_destino);
-        mysqli_stmt_execute($stmt_empresa);
-        $result_empresa = mysqli_stmt_get_result($stmt_empresa);
-        $row_empresa = mysqli_fetch_assoc($result_empresa);
-        $rel_id_empresa = $row_empresa['empresa_id'] ?? 0;
-        mysqli_stmt_close($stmt_empresa);
         
         // Obtener número de semana actual
         $query_semana = "SELECT numero_semana FROM listado_numero_semanas WHERE CURDATE() BETWEEN fecha_semana_desde AND fecha_semana_hasta AND anyo_listado = YEAR(CURDATE()) LIMIT 1";
@@ -207,7 +195,7 @@ try {
 
          // INSERT 3: Trazabilidad
          $accion_trazabilidad_venta = 'editado';
-         $comentarios_trazabilidad_venta = "Artículo editado en la sucursal " . $id_sucursal_destino . " por el usuario " . $_SESSION['usuario_id'];
+         $comentarios_trazabilidad_venta = "Artículo editado por el usuario " . $_SESSION['usuario_id'];
          
          try {
              trazabilidad_articulos_venta( 0, $_SESSION['usuario_id'], $accion_trazabilidad_venta, $comentarios_trazabilidad_venta, $id_sucursal_destino, $id_articulo, 0);
@@ -264,7 +252,7 @@ try {
             mysqli_stmt_close($stmt_update_estado_rel);
 
              $accion_trazabilidad_cambio_precio = 'cambio_precio';
-             $comentarios_trazabilidad_cambio_precio = "Cambio de precio: de " . number_format($precio_anterior, 2, ',', '.') . " € a " . number_format($precio_venta, 2, ',', '.') . " € en la sucursal " . $id_sucursal_destino . " por el usuario " . $_SESSION['usuario_id'];
+             $comentarios_trazabilidad_cambio_precio = "Cambio de precio: de " . number_format($precio_anterior, 2, ',', '.') . " € a " . number_format($precio_venta, 2, ',', '.') . " € por el usuario " . $_SESSION['usuario_id'];
              
              try {
                  trazabilidad_articulos_venta( 0, $_SESSION['usuario_id'], $accion_trazabilidad_cambio_precio, $comentarios_trazabilidad_cambio_precio, $id_sucursal_destino, $id_articulo, 0);

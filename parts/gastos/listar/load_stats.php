@@ -24,7 +24,6 @@ try {
     
     // Obtener filtros adicionales (igual que en load_list.php)
     $filtro_empresa = isset($_POST['filtro_empresa']) ? trim($_POST['filtro_empresa']) : '';
-    $filtro_sucursal = isset($_POST['filtro_sucursal']) ? trim($_POST['filtro_sucursal']) : '';
     $filtro_proveedor = isset($_POST['filtro_proveedor']) ? trim($_POST['filtro_proveedor']) : '';
     $filtro_estado = isset($_POST['filtro_estado']) ? trim($_POST['filtro_estado']) : '';
     $filtro_tipo_gasto = isset($_POST['filtro_tipo_gasto']) ? trim($_POST['filtro_tipo_gasto']) : '';
@@ -40,12 +39,6 @@ try {
     if (!empty($filtro_empresa)) {
         $where_conditions[] = "empresa_gasto = ?";
         $params[] = $filtro_empresa;
-        $types .= 'i';
-    }
-    
-    if (!empty($filtro_sucursal)) {
-        $where_conditions[] = "sucursal_gasto = ?";
-        $params[] = $filtro_sucursal;
         $types .= 'i';
     }
     

@@ -43,10 +43,8 @@ try {
         exit;
     }
     $suc_dest_art = isset($rowSucArt['id_sucursal_destino']) ? (int) $rowSucArt['id_sucursal_destino'] : 0;
-    if ($sucursal_devolucion <= 0 || $suc_dest_art !== $sucursal_devolucion) {
-        mysqli_close($conexion);
-        echo json_encode(['success' => false, 'message' => 'El artículo no está en su sucursal.']);
-        exit;
+    if ($sucursal_devolucion <= 0) {
+        $sucursal_devolucion = $suc_dest_art;
     }
 
     if ($id_autorizacion_req > 0) {
