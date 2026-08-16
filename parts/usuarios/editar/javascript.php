@@ -3,7 +3,7 @@
 document.addEventListener('DOMContentLoaded', function() {
     // Inicializar Select2 para los campos de selección
     if (typeof $ !== 'undefined') {
-        $('#sucursal_usuario, #privilegio_usuario').select2({
+        $('#privilegio_usuario').select2({
             dropdownParent: $('body')
         });
     }
@@ -75,7 +75,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     // Validación en tiempo real para campos requeridos
-    const camposRequeridos = ['usuario', 'nombre_usuario', 'apellido_usuario', 'estado_usuario', 'sucursal_usuario', 'privilegio_usuario'];
+    const camposRequeridos = ['usuario', 'nombre_usuario', 'apellido_usuario', 'estado_usuario', 'privilegio_usuario'];
     
     camposRequeridos.forEach(campo => {
         const elemento = document.getElementById(campo);

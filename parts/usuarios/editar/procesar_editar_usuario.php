@@ -28,7 +28,6 @@ try {
     $email = isset($_POST['email']) ? trim($_POST['email']) : '';
     $estado_usuario = isset($_POST['estado_usuario']) ? $_POST['estado_usuario'] : '';
     $telefono_usuario = isset($_POST['telefono_usuario']) ? trim($_POST['telefono_usuario']) : '';
-    $sucursal_usuario = isset($_POST['sucursal_usuario']) ? (int)$_POST['sucursal_usuario'] : 0;
     $privilegio_usuario = isset($_POST['privilegio_usuario']) ? (int)$_POST['privilegio_usuario'] : 0;
     $observaciones_usuario = isset($_POST['observaciones_usuario']) ? trim($_POST['observaciones_usuario']) : '';
     
@@ -57,10 +56,6 @@ try {
     
     if (empty($estado_usuario)) {
         throw new Exception("El estado de usuario es obligatorio");
-    }
-    
-    if (!$sucursal_usuario) {
-        throw new Exception("La sucursal es obligatoria");
     }
     
     if (!$privilegio_usuario) {
@@ -130,16 +125,15 @@ try {
                 email = ?, 
                 estado_usuario = ?, 
                 telefono_usuario = ?, 
-                sucursal_usuario = ?, 
                 privilegio_usuario = ?, 
                 observaciones_usuario = ?,
                 usuario_root = ?
             WHERE id_usuario = ?
         ";
         $stmt_update = mysqli_prepare($conexion, $query_update);
-        mysqli_stmt_bind_param($stmt_update, 'ssssssiissi',
+        mysqli_stmt_bind_param($stmt_update, 'ssssssissi',
             $usuario, $nombre_usuario, $apellido_usuario, $email, $estado_usuario,
-            $telefono_usuario, $sucursal_usuario, $privilegio_usuario, $observaciones_usuario,
+            $telefono_usuario, $privilegio_usuario, $observaciones_usuario,
             $usuario_root_valor,
             $id_usuario
         );
@@ -152,15 +146,14 @@ try {
                 email = ?, 
                 estado_usuario = ?, 
                 telefono_usuario = ?, 
-                sucursal_usuario = ?, 
                 privilegio_usuario = ?, 
                 observaciones_usuario = ?
             WHERE id_usuario = ?
         ";
         $stmt_update = mysqli_prepare($conexion, $query_update);
-        mysqli_stmt_bind_param($stmt_update, 'ssssssiisi',
+        mysqli_stmt_bind_param($stmt_update, 'ssssssisi',
             $usuario, $nombre_usuario, $apellido_usuario, $email, $estado_usuario,
-            $telefono_usuario, $sucursal_usuario, $privilegio_usuario, $observaciones_usuario,
+            $telefono_usuario, $privilegio_usuario, $observaciones_usuario,
             $id_usuario
         );
     }

@@ -39,7 +39,6 @@
                       u.email,
                       u.estado_usuario,
                       u.telefono_usuario,
-                      u.sucursal_usuario,
                       u.privilegio_usuario,
                       u.observaciones_usuario,
                       u.usuario_root,
@@ -49,19 +48,25 @@
               ";
               
               $stmt_usuario = mysqli_prepare($conexion, $query_usuario);
-              mysqli_stmt_bind_param($stmt_usuario, 'i', $id_usuario);
-              mysqli_stmt_execute($stmt_usuario);
-              $result_usuario = mysqli_stmt_get_result($stmt_usuario);
-              
-              if ($result_usuario && mysqli_num_rows($result_usuario) > 0) {
-                  $usuario = mysqli_fetch_assoc($result_usuario);
-                  mysqli_stmt_close($stmt_usuario);
+              if ($stmt_usuario) {
+                  mysqli_stmt_bind_param($stmt_usuario, 'i', $id_usuario);
+                  mysqli_stmt_execute($stmt_usuario);
+                  $result_usuario = mysqli_stmt_get_result($stmt_usuario);
+                  
+                  if ($result_usuario && mysqli_num_rows($result_usuario) > 0) {
+                      $usuario = mysqli_fetch_assoc($result_usuario);
+                      mysqli_stmt_close($stmt_usuario);
 
-                  if (!$es_usuario_root && ($usuario['usuario_root'] ?? 'false') === 'true') {
-                      $acceso_denegado = true;
-                  }
-                  if (!$es_usuario_root && !$es_usuario_super_administrador && ($usuario['super_admin'] ?? 'false') === 'true') {
-                      $acceso_denegado = true;
+                      if (!$es_usuario_root && ($usuario['usuario_root'] ?? 'false') === 'true') {
+                          $acceso_denegado = true;
+                      }
+                      if (!$es_usuario_root && !$es_usuario_super_administrador && ($usuario['super_admin'] ?? 'false') === 'true') {
+                          $acceso_denegado = true;
+                      }
+                  } else {
+                      echo '<div class="alert alert-danger">Usuario no encontrado</div>';
+                      $usuario = null;
+                      mysqli_stmt_close($stmt_usuario);
                   }
               } else {
                   echo '<div class="alert alert-danger">Usuario no encontrado</div>';
@@ -128,26 +133,6 @@
                 <div class="form-floating form-floating-outline mb-6">
                   <input type="tel" class="form-control" id="telefono_usuario" name="telefono_usuario" placeholder="+34 600 000 000" value="<?php echo isset($usuario['telefono_usuario']) ? htmlspecialchars($usuario['telefono_usuario']) : ''; ?>" />
                   <label for="telefono_usuario">Teléfono</label>
-                </div>
-                
-                <div class="form-floating form-floating-outline mb-6">
-                  <select class="form-select select2" id="sucursal_usuario" name="sucursal_usuario" required>
-                    <option value="">Seleccionar sucursal</option>
-                    <?php
-                    try {
-                        $sucursales = obtener_sucursales();
-                        if ($sucursales && is_array($sucursales)) {
-                            foreach ($sucursales as $sucursal) {
-                                $selected = (isset($usuario['sucursal_usuario']) && $usuario['sucursal_usuario'] == $sucursal['id_sucursal']) ? 'selected' : '';
-                                echo '<option value="' . $sucursal['id_sucursal'] . '" ' . $selected . '>' . htmlspecialchars($sucursal['nombre_sucursal']) . '</option>';
-                            }
-                        }
-                    } catch (Exception $e) {
-                        echo '<option value="">Error al cargar sucursales</option>';
-                    }
-                    ?>
-                  </select>
-                  <label for="sucursal_usuario" class="select_label">Sucursal *</label>
                 </div>
                 
                 <div class="form-floating form-floating-outline mb-6">
