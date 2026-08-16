@@ -317,10 +317,11 @@ function camera_catalog_imagenes_articulo(int $id_articulo): array
         throw new RuntimeException('Error al conectar a la base de datos');
     }
 
-    $stArt = mysqli_prepare($conexion, 'SELECT id FROM articulos_venta WHERE id = ? LIMIT 1');
+    $stArt = mysqli_prepare($conexion, 'SELECT sku FROM articulos WHERE sku = ? LIMIT 1');
     if (!$stArt) {
+        $err = mysqli_error($conexion);
         mysqli_close($conexion);
-        throw new RuntimeException(mysqli_error($conexion));
+        throw new RuntimeException($err);
     }
     mysqli_stmt_bind_param($stArt, 'i', $id_articulo);
     mysqli_stmt_execute($stArt);
@@ -328,11 +329,11 @@ function camera_catalog_imagenes_articulo(int $id_articulo): array
     if (!$rArt || !mysqli_fetch_assoc($rArt)) {
         mysqli_stmt_close($stArt);
         mysqli_close($conexion);
-        throw new RuntimeException('Art?culo no encontrado');
+        throw new RuntimeException('Artículo no encontrado');
     }
     mysqli_stmt_close($stArt);
 
-    $stmt = mysqli_prepare($conexion, 'SELECT id, src FROM articulos_venta_imagenes WHERE id_articulo_venta = ? ORDER BY id DESC');
+    $stmt = mysqli_prepare($conexion, 'SELECT id, src FROM articulos_venta_imagenes WHERE rel_sku_articulo = ? ORDER BY id DESC');
     if (!$stmt) {
         mysqli_close($conexion);
         throw new RuntimeException(mysqli_error($conexion));

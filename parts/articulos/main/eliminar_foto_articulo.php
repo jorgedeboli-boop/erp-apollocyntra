@@ -32,7 +32,7 @@ try {
 
     $st = mysqli_prepare(
         $conexion,
-        'SELECT id, id_articulo_venta, src FROM articulos_venta_imagenes WHERE id = ? LIMIT 1'
+        'SELECT id, rel_sku_articulo, src FROM articulos_venta_imagenes WHERE id = ? LIMIT 1'
     );
     if (!$st) {
         throw new Exception(mysqli_error($conexion));
@@ -47,7 +47,7 @@ try {
         mysqli_close($conexion);
         throw new Exception('Documento no encontrado');
     }
-    if ((int) $row['id_articulo_venta'] !== $id_articulo) {
+    if ((int) $row['rel_sku_articulo'] !== $id_articulo) {
         mysqli_close($conexion);
         throw new Exception('El documento no pertenece a este artículo');
     }

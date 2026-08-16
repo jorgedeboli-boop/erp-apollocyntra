@@ -365,11 +365,22 @@ try {
 
         case 'articulo':
             $id_articulo = isset($_POST['id_articulo']) ? (int) $_POST['id_articulo'] : 0;
-            $id_sucursal = isset($_POST['id_sucursal']) ? (int) $_POST['id_sucursal'] : 0;
-            if ($id_articulo <= 0 || $id_sucursal <= 0) {
-                throw new Exception('ID de artículo o sucursal no válido');
+            if ($id_articulo <= 0) {
+                throw new Exception('ID de artículo no válido');
             }
-            $query = 'INSERT INTO articulos_venta_imagenes (id_articulo_venta, src) VALUES (?, ?)';
+            $stArt = mysqli_prepare($conexion, 'SELECT sku FROM articulos WHERE sku = ? LIMIT 1');
+            if (!$stArt) {
+                throw new Exception(mysqli_error($conexion));
+            }
+            mysqli_stmt_bind_param($stArt, 'i', $id_articulo);
+            mysqli_stmt_execute($stArt);
+            $rArt = mysqli_stmt_get_result($stArt);
+            if (!$rArt || !mysqli_fetch_assoc($rArt)) {
+                mysqli_stmt_close($stArt);
+                throw new Exception('Artículo no encontrado');
+            }
+            mysqli_stmt_close($stArt);
+            $query = 'INSERT INTO articulos_venta_imagenes (rel_sku_articulo, src) VALUES (?, ?)';
             $stmt = mysqli_prepare($conexion, $query);
             mysqli_stmt_bind_param($stmt, 'is', $id_articulo, $nombre_archivo);
             if (!mysqli_stmt_execute($stmt)) {
