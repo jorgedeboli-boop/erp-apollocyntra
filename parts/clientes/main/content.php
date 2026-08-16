@@ -188,30 +188,6 @@
                       <li class="nav-item">
                         <button
                           class="nav-link waves-effect waves-light"
-                          id="tab-lotes"
-                          data-bs-toggle="tab"
-                          data-bs-target="#pane-lotes"
-                          type="button"
-                          role="tab"
-                          aria-controls="pane-lotes"
-                          aria-selected="false"
-                        ><i class="icon-base ri ri-team-line icon-sm me-2"></i>Lotes</button>
-                      </li>
-                      <li class="nav-item">
-                        <button
-                          class="nav-link waves-effect waves-light"
-                          id="tab-empenos"
-                          data-bs-toggle="tab"
-                          data-bs-target="#pane-empenos"
-                          type="button"
-                          role="tab"
-                          aria-controls="pane-empenos"
-                          aria-selected="false"
-                        ><i class="icon-base ri ri-computer-line icon-sm me-2"></i>Empeños</button>
-                      </li>
-                      <li class="nav-item">
-                        <button
-                          class="nav-link waves-effect waves-light"
                           id="tab-ventas"
                           data-bs-toggle="tab"
                           data-bs-target="#pane-ventas"
@@ -459,54 +435,6 @@
               </div>
                 </div>
               <!--/ pane-perfil -->
-
-                <div class="tab-pane fade" id="pane-lotes" role="tabpanel" aria-labelledby="tab-lotes">
-                  <div class="card mb-6">
-                    <div class="card-header border-bottom card-header-forms">
-                      <h5 class="card-title mb-0"><i class="icon-base ri ri-team-line icon-20px me-2"></i>Lotes del cliente</h5>
-                    </div>
-                    <div class="card-body pb-0"></div>
-                    <div class="card-datatable table-responsive">
-                      <table class="datatables-lotes-cliente table border-top" id="tabla_lotes_cliente" style="width: 100%;">
-                        <thead>
-                          <tr>
-                            <th>ID Lote</th>
-                            <th>Identificador</th>
-                            <th>Tipo</th>
-                            <th>Peso</th>
-                            <th>Compra</th>
-                            <th>Fecha</th>
-                            <th>Estado</th>
-                          </tr>
-                        </thead>
-                      </table>
-                    </div>
-                  </div>
-                </div>
-
-                <div class="tab-pane fade" id="pane-empenos" role="tabpanel" aria-labelledby="tab-empenos">
-                  <div class="card mb-6">
-                    <div class="card-header border-bottom card-header-forms">
-                      <h5 class="card-title mb-0"><i class="icon-base ri ri-computer-line icon-20px me-2"></i>Empeños del cliente</h5>
-                    </div>
-                    <div class="card-body pb-0"></div>
-                    <div class="card-datatable table-responsive">
-                      <table class="datatables-empenos-cliente table border-top" id="tabla_empenos_cliente" style="width: 100%;">
-                        <thead>
-                          <tr>
-                            <th>ID Lote</th>
-                            <th>Identificador</th>
-                            <th>Tipo</th>
-                            <th>Importe</th>
-                            <th>Fecha</th>
-                            <th>Vencimiento</th>
-                            <th>Estado</th>
-                          </tr>
-                        </thead>
-                      </table>
-                    </div>
-                  </div>
-                </div>
 
                 <div class="tab-pane fade" id="pane-ventas" role="tabpanel" aria-labelledby="tab-ventas">
                   <div class="card mb-6">

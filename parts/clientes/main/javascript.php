@@ -267,8 +267,6 @@ function initTablasCliente(idCliente) {
     if (!idCliente || idCliente <= 0) return;
 
     const state = {
-        lotes: null,
-        empenos: null,
         ventas: null
     };
 
@@ -290,72 +288,6 @@ function initTablasCliente(idCliente) {
             features: ['info']
         },
         bottomEnd: 'paging'
-    };
-
-    const initLotes = () => {
-        const el = document.getElementById('tabla_lotes_cliente');
-        if (!el || state.lotes) return;
-
-        state.lotes = new DataTable(el, {
-            processing: true,
-            serverSide: true,
-            deferRender: true,
-            searchDelay: 400,
-            lengthChange: false,
-            language: DATATABLES_SPANISH,
-            layout: DT_LAYOUT_RIGHT_SEARCH_RIGHT_PAGING,
-            ajax: {
-                url: 'parts/clientes/main/datatable_lotes_cliente.php',
-                type: 'POST',
-                data: function (d) {
-                    d.id_cliente = idCliente;
-                    return d;
-                }
-            },
-            columns: [
-                { data: 0 }, // id_lote
-                { data: 1 }, // identificador
-                { data: 2 }, // tipo
-                { data: 3 }, // peso
-                { data: 4 }, // compra
-                { data: 5 }, // fecha
-                { data: 6 }  // estado
-            ],
-            order: [[5, 'desc']]
-        });
-    };
-
-    const initEmpenos = () => {
-        const el = document.getElementById('tabla_empenos_cliente');
-        if (!el || state.empenos) return;
-
-        state.empenos = new DataTable(el, {
-            processing: true,
-            serverSide: true,
-            deferRender: true,
-            searchDelay: 400,
-            lengthChange: false,
-            language: DATATABLES_SPANISH,
-            layout: DT_LAYOUT_RIGHT_SEARCH_RIGHT_PAGING,
-            ajax: {
-                url: 'parts/clientes/main/datatable_empenos_cliente.php',
-                type: 'POST',
-                data: function (d) {
-                    d.id_cliente = idCliente;
-                    return d;
-                }
-            },
-            columns: [
-                { data: 0 }, // id_lote
-                { data: 1 }, // identificador
-                { data: 2 }, // tipo
-                { data: 3 }, // importe
-                { data: 4 }, // fecha
-                { data: 5 }, // vencimiento
-                { data: 6 }  // estado
-            ],
-            order: [[4, 'desc']]
-        });
     };
 
     const initVentas = () => {
@@ -394,15 +326,10 @@ function initTablasCliente(idCliente) {
     // Si entran directo con hash o ya se abrió una pestaña, init en shown.
     document.addEventListener('shown.bs.tab', function (event) {
         const target = event.target && event.target.id ? event.target.id : '';
-        if (target === 'tab-lotes') initLotes();
-        if (target === 'tab-empenos') initEmpenos();
         if (target === 'tab-ventas') initVentas();
     });
 
-    // Inicializar la tabla activa si no es Perfil por alguna razón
     const active = document.querySelector('.nav.nav-pills [data-bs-toggle=\"tab\"].active');
-    if (active && active.id === 'tab-lotes') initLotes();
-    if (active && active.id === 'tab-empenos') initEmpenos();
     if (active && active.id === 'tab-ventas') initVentas();
 }
 
