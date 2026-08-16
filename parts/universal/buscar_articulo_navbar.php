@@ -54,52 +54,6 @@ function buscar_articulo_navbar_parsear_busqueda($busqueda)
     ];
 }
 
-/**
- * @return list<string>
- */
-function buscar_articulo_navbar_tablas(mysqli $conexion)
-{
-    $tablas = [];
-    $res = mysqli_query($conexion, "SHOW TABLES LIKE 'articulos_venta'");
-    if ($res && mysqli_fetch_row($res)) {
-        $tablas[] = 'articulos_venta';
-    }
-    if (empty($tablas)) {
-        $res = mysqli_query($conexion, "SHOW TABLES LIKE 'articulos'");
-        if ($res && mysqli_fetch_row($res)) {
-            $tablas[] = 'articulos';
-        }
-    }
-    if (empty($tablas)) {
-        $res = mysqli_query($conexion, "SHOW TABLES LIKE 'articulos\\_%'");
-        if ($res) {
-            while ($row = mysqli_fetch_row($res)) {
-                $nombre = (string) ($row[0] ?? '');
-                if (preg_match('/^articulos_\\d+$/', $nombre)) {
-                    $tablas[] = $nombre;
-                }
-            }
-        }
-    }
-    return $tablas;
-}
-
-/**
- * @return array<string,bool>
- */
-function buscar_articulo_navbar_columnas(mysqli $conexion, $tabla)
-{
-    $columnas = [];
-    $res = mysqli_query($conexion, 'SHOW COLUMNS FROM `' . str_replace('`', '', $tabla) . '`');
-    if (!$res) {
-        return $columnas;
-    }
-    while ($col = mysqli_fetch_assoc($res)) {
-        $columnas[$col['Field']] = true;
-    }
-    return $columnas;
-}
-
 $busquedaRaw = isset($_GET['busqueda']) ? (string) $_GET['busqueda'] : '';
 if ($busquedaRaw === '' && isset($_POST['busqueda'])) {
     $busquedaRaw = (string) $_POST['busqueda'];
@@ -136,65 +90,47 @@ try {
         exit;
     }
 
-    $articulos = [];
-    foreach (buscar_articulo_navbar_tablas($conexion) as $tabla) {
-        $cols = buscar_articulo_navbar_columnas($conexion, $tabla);
-        if (empty($cols)) {
-            continue;
-        }
+    $sql = 'SELECT
+                a.sku AS id,
+                a.descripcion,
+                a.estado,
+                a.precio,
+                a.fecha_en_venta
+            FROM articulos a
+            WHERE a.sku = ?
+            LIMIT 20';
 
-        $idCampo = isset($cols['id']) ? 'id' : (isset($cols['id_articulo']) ? 'id_articulo' : '');
-        if ($idCampo === '') {
-            continue;
-        }
-
-        $select = ['`' . $idCampo . '` AS id'];
-        $select[] = isset($cols['descripcion']) ? 'descripcion' : "'' AS descripcion";
-        $select[] = isset($cols['estado']) ? 'estado' : "'' AS estado";
-        $select[] = isset($cols['precio']) ? 'precio' : '0 AS precio';
-        $select[] = isset($cols['last_id_venta']) ? 'last_id_venta' : (isset($cols['id_venta']) ? 'id_venta AS last_id_venta' : '0 AS last_id_venta');
-        $select[] = isset($cols['fecha_en_venta']) ? 'fecha_en_venta' : "NULL AS fecha_en_venta";
-        $select[] = isset($cols['fecha_vendido']) ? 'fecha_vendido' : "NULL AS fecha_vendido";
-
-        $sql = 'SELECT ' . implode(', ', $select) . '
-                FROM `' . str_replace('`', '', $tabla) . '`
-                WHERE `' . $idCampo . '` = ?
-                LIMIT 20';
-
-        $stmt = mysqli_prepare($conexion, $sql);
-        if (!$stmt) {
-            continue;
-        }
-        mysqli_stmt_bind_param($stmt, 'i', $idArticulo);
-        if (!mysqli_stmt_execute($stmt)) {
-            mysqli_stmt_close($stmt);
-            continue;
-        }
-        $resultado = mysqli_stmt_get_result($stmt);
-        if ($resultado) {
-            while ($row = mysqli_fetch_assoc($resultado)) {
-                $lastVenta = (int) ($row['last_id_venta'] ?? 0);
-                $articulos[] = [
-                    'id' => (int) ($row['id'] ?? 0),
-                    'descripcion' => trim((string) ($row['descripcion'] ?? '')) !== ''
-                        ? (string) $row['descripcion']
-                        : '—',
-                    'estado' => trim((string) ($row['estado'] ?? '')) !== ''
-                        ? (string) $row['estado']
-                        : '—',
-                    'precio' => buscar_articulo_navbar_formatear_precio($row['precio'] ?? 0),
-                    'numero_venta' => $lastVenta > 0 ? (string) $lastVenta : '—',
-                    'fecha_en_venta' => buscar_articulo_navbar_formatear_fecha($row['fecha_en_venta'] ?? ''),
-                    'fecha_vendido' => buscar_articulo_navbar_formatear_fecha($row['fecha_vendido'] ?? ''),
-                ];
-            }
-        }
-        mysqli_stmt_close($stmt);
-        if (count($articulos) >= 50) {
-            break;
-        }
+    $stmt = mysqli_prepare($conexion, $sql);
+    if (!$stmt) {
+        throw new Exception('Error al preparar la búsqueda');
     }
 
+    mysqli_stmt_bind_param($stmt, 'i', $idArticulo);
+    if (!mysqli_stmt_execute($stmt)) {
+        mysqli_stmt_close($stmt);
+        throw new Exception('Error al ejecutar la búsqueda');
+    }
+
+    $resultado = mysqli_stmt_get_result($stmt);
+    $articulos = [];
+    if ($resultado) {
+        while ($row = mysqli_fetch_assoc($resultado)) {
+            $articulos[] = [
+                'id' => (int) ($row['id'] ?? 0),
+                'descripcion' => trim((string) ($row['descripcion'] ?? '')) !== ''
+                    ? (string) $row['descripcion']
+                    : '—',
+                'estado' => trim((string) ($row['estado'] ?? '')) !== ''
+                    ? (string) $row['estado']
+                    : '—',
+                'precio' => buscar_articulo_navbar_formatear_precio($row['precio'] ?? 0),
+                'numero_venta' => '—',
+                'fecha_en_venta' => buscar_articulo_navbar_formatear_fecha($row['fecha_en_venta'] ?? ''),
+                'fecha_vendido' => '—',
+            ];
+        }
+    }
+    mysqli_stmt_close($stmt);
     mysqli_close($conexion);
 
     echo json_encode([
