@@ -7,36 +7,26 @@
 const COLUMNAS_EXPORTABLES_ARTICULOS = [
   { index: 0, label: 'SKU' },
   { index: 1, label: 'Descripción' },
-  { index: 2, label: 'Peso' },
-  { index: 3, label: 'Precio' },
-  { index: 4, label: 'Precio Coste' },
-  { index: 5, label: '€/g' },
-  { index: 6, label: 'Tipo' },
-  { index: 7, label: 'Estado' },
-  { index: 8, label: 'F. Enviado' },
-  { index: 9, label: 'F. En Venta' },
-  { index: 10, label: 'F. Vendido' },
-  { index: 11, label: 'F. Retirado' },
-  { index: 12, label: 'Creado Por' },
-  { index: 13, label: 'Origen' }
+  { index: 2, label: 'Precio' },
+  { index: 3, label: 'Precio Coste' },
+  { index: 4, label: 'F. Enviado' },
+  { index: 5, label: 'F. En Venta' },
+  { index: 6, label: 'F. Vendido' },
+  { index: 7, label: 'Creado Por' },
+  { index: 8, label: 'Origen' }
 ];
 
 /** Columnas que no se pueden ocultar desde el selector de la página */
-const COLUMNAS_FIJAS_ARTICULOS = [0, 1, 3]; // SKU, Descripción, Precio
+const COLUMNAS_FIJAS_ARTICULOS = [0, 1, 2]; // SKU, Descripción, Precio
 
 const COLUMNAS_TOGGLEABLES_ARTICULOS = [
-  { index: 2, label: 'Peso' },
-  { index: 4, label: 'Precio Coste' },
-  { index: 5, label: '€/g' },
-  { index: 6, label: 'Tipo' },
-  { index: 7, label: 'Estado' },
-  { index: 8, label: 'F. Enviado' },
-  { index: 9, label: 'F. En Venta' },
-  { index: 10, label: 'F. Vendido' },
-  { index: 11, label: 'F. Retirado' },
-  { index: 12, label: 'Creado Por' },
-  { index: 13, label: 'Origen' },
-  { index: 14, label: 'Venta' }
+  { index: 3, label: 'Precio Coste' },
+  { index: 4, label: 'F. Enviado' },
+  { index: 5, label: 'F. En Venta' },
+  { index: 6, label: 'F. Vendido' },
+  { index: 7, label: 'Creado Por' },
+  { index: 8, label: 'Origen' },
+  { index: 9, label: 'Venta' }
 ];
 
 function crearHtmlSelectorColumnasArticulos() {
@@ -270,14 +260,10 @@ document.addEventListener('DOMContentLoaded', function (e) {
         url: 'parts/articulos/listar/load_list.php',
         type: 'POST',
         data: function(d) {
-          const tipoFilter = document.getElementById('filtro_tipo');
-          const estadoFilter = document.getElementById('filtro_estado');
           const origenFilter = document.getElementById('filtro_origen');
           const fechaDesdeFilter = document.getElementById('filtro_fecha_desde');
           const fechaHastaFilter = document.getElementById('filtro_fecha_hasta');
           
-          d.filtro_tipo = tipoFilter ? tipoFilter.value : '';
-          d.filtro_estado = estadoFilter ? estadoFilter.value : '';
           d.filtro_origen = origenFilter ? origenFilter.value : '';
           d.filtro_fecha_desde = fechaDesdeFilter ? fechaDesdeFilter.value : '';
           d.filtro_fecha_hasta = fechaHastaFilter ? fechaHastaFilter.value : '';
@@ -298,20 +284,15 @@ document.addEventListener('DOMContentLoaded', function (e) {
       columns: [
         { data: 0 },  // SKU
         { data: 1 },  // Descripción
-        { data: 2 },  // Peso
-        { data: 3 },  // Precio
-        { data: 4 },  // Precio Coste
-        { data: 5 },  // € gramo
-        { data: 6 },  // Tipo
-        { data: 7 },  // Estado
-        { data: 8 },  // F. Enviado
-        { data: 9 },  // F. En Venta
-        { data: 10 }, // F. Vendido
-        { data: 11 }, // F. Retirado
-        { data: 12 }, // Creado Por
-        { data: 13 }, // Origen
-        { data: 14 }, // Acciones
-        { data: 15, visible: false } // ID (hidden para click)
+        { data: 2 },  // Precio
+        { data: 3 },  // Precio Coste
+        { data: 4 },  // F. Enviado
+        { data: 5 },  // F. En Venta
+        { data: 6 },  // F. Vendido
+        { data: 7 },  // Creado Por
+        { data: 8 },  // Origen
+        { data: 9 },  // Venta
+        { data: 10, visible: false } // ID (hidden para click)
       ],
       
       columnDefs: [
@@ -466,8 +447,8 @@ document.addEventListener('DOMContentLoaded', function (e) {
           if ($(e.target).closest('button, a, .select2').length > 0) {
             return;
           }
-          // Obtener el ID del artículo (columna 15)
-          const idArticulo = data[15];
+          // Obtener el ID del artículo (columna 10)
+          const idArticulo = data[10];
           if (idArticulo) {
             window.location.href = 'articulo.php?id=' + idArticulo;
           }
@@ -629,21 +610,7 @@ document.addEventListener('DOMContentLoaded', function (e) {
       }
     }
     
-    // 2. Agregar tipo si está seleccionado
-    const filtroTipo = document.getElementById('filtro_tipo');
-    if (filtroTipo && filtroTipo.value && filtroTipo.value !== '') {
-      let textoTipo = filtroTipo.options[filtroTipo.selectedIndex].text;
-      partes.push(textoTipo);
-    }
-    
-    // 3. Agregar estado si está seleccionado
-    const filtroEstado = document.getElementById('filtro_estado');
-    if (filtroEstado && filtroEstado.value && filtroEstado.value !== '') {
-      let textoEstado = filtroEstado.options[filtroEstado.selectedIndex].text;
-      partes.push(textoEstado);
-    }
-    
-    // 4. Agregar origen si está seleccionado
+    // 2. Agregar origen si está seleccionado
     const filtroOrigen = document.getElementById('filtro_origen');
     if (filtroOrigen && filtroOrigen.value && filtroOrigen.value !== '') {
       let textoOrigen = filtroOrigen.options[filtroOrigen.selectedIndex].text;
@@ -723,8 +690,6 @@ document.addEventListener('DOMContentLoaded', function (e) {
 
   function ejecutarExportacionArticulos(tipo, dt, columnasSeleccionadas) {
     const searchValue = dt.search();
-    const filtroTipo = document.getElementById('filtro_tipo');
-    const filtroEstado = document.getElementById('filtro_estado');
     const filtroOrigen = document.getElementById('filtro_origen');
     const filtroFechaDesde = document.getElementById('filtro_fecha_desde');
     const filtroFechaHasta = document.getElementById('filtro_fecha_hasta');
@@ -740,8 +705,6 @@ document.addEventListener('DOMContentLoaded', function (e) {
 
     const formData = new FormData();
     formData.append('search', searchValue);
-    formData.append('filtro_tipo', filtroTipo ? filtroTipo.value : '');
-    formData.append('filtro_estado', filtroEstado ? filtroEstado.value : '');
     formData.append('filtro_origen', filtroOrigen ? filtroOrigen.value : '');
     formData.append('filtro_fecha_desde', filtroFechaDesde ? filtroFechaDesde.value : '');
     formData.append('filtro_fecha_hasta', filtroFechaHasta ? filtroFechaHasta.value : '');

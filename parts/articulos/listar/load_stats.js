@@ -23,8 +23,6 @@ function cargarEstadistica(elementId, tipo) {
   loadingElement.style.display = 'block';
   
   // Obtener filtros activos
-  const filtroTipo = document.getElementById('filtro_tipo');
-  const filtroEstado = document.getElementById('filtro_estado');
   const filtroOrigen = document.getElementById('filtro_origen');
   const filtroFechaDesde = document.getElementById('filtro_fecha_desde');
   const filtroFechaHasta = document.getElementById('filtro_fecha_hasta');
@@ -32,8 +30,6 @@ function cargarEstadistica(elementId, tipo) {
   // Preparar datos
   const formData = new FormData();
   formData.append('tipo', tipo);
-  formData.append('filtro_tipo', filtroTipo ? filtroTipo.value : '');
-  formData.append('filtro_estado', filtroEstado ? filtroEstado.value : '');
   formData.append('filtro_origen', filtroOrigen ? filtroOrigen.value : '');
   formData.append('filtro_fecha_desde', filtroFechaDesde ? filtroFechaDesde.value : '');
   formData.append('filtro_fecha_hasta', filtroFechaHasta ? filtroFechaHasta.value : '');

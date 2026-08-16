@@ -21,19 +21,11 @@
 
         <div class="d-flex row gx-5 pt-4 gap-2" id="articulos_filtros_container">
 
-          <div class="col-md-2 flex-fill articulo_tipo select2-btn-height">
-            <select id="filtro_tipo" class="form-select select2-filter text-capitalize select2-custom">
-              <?php articulos_filtro_imprimir_opciones_tipo_venta(); ?>
-            </select>
-          </div>
-          <div class="col-md-2 flex-fill articulo_estado select2-btn-height">
-            <select id="filtro_estado" class="form-select select2-filter text-capitalize select2-custom">
-              <?php articulos_filtro_imprimir_opciones_estado_venta(); ?>
-            </select>
-          </div>
           <div class="col-md-2 flex-fill articulo_origen select2-btn-height">
             <select id="filtro_origen" class="form-select select2-filter text-capitalize select2-custom">
-              <?php articulos_filtro_imprimir_opciones_origen(); ?>
+              <option value="">Origen</option>
+              <option value="central">Central</option>
+              <option value="sucursal">Otro</option>
             </select>
           </div>
           <div class="col-md-3 flex-fill">
@@ -67,16 +59,11 @@
           <tr>
             <th width="50">SKU</th>
             <th width="250">Descripción</th>
-            <th width="90">Peso</th>
             <th width="50">Precio</th>
             <th width="50">Precio Coste</th>
-            <th width="70">€/g</th>
-            <th width="50">Tipo</th>
-            <th width="100">Estado</th>
             <th width="90">F. Enviado</th>
             <th width="90">F. En Venta</th>
             <th width="90">F. Vendido</th>
-            <th width="90">F. Retirado</th>
             <th width="100">Creado Por</th>
             <th width="80">Origen</th>
             <th width="80">Venta</th>

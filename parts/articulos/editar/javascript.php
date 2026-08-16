@@ -1,26 +1,6 @@
 <!-- JAVASCRIPT CUSTOM editar_articulo - editar  -->
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-  // Inicializar Select2 para ley oro
-  if ($('#leyoro').length) {
-    $('#leyoro').select2({
-      dropdownParent: $('#leyoro').closest('.form-floating'),
-      placeholder: 'Seleccionar...',
-      allowClear: false,
-      width: '100%'
-    });
-  }
-  
-  // Inicializar Select2 para ley plata
-  if ($('#leyplata').length) {
-    $('#leyplata').select2({
-      dropdownParent: $('#leyplata').closest('.form-floating'),
-      placeholder: 'Seleccionar...',
-      allowClear: false,
-      width: '100%'
-    });
-  }
-  
   // Event listener para inscripciones (manejar el estilo visual)
   document.querySelectorAll('input[name="inscripciones"]').forEach(radio => {
     radio.addEventListener('change', function() {
@@ -76,75 +56,6 @@ document.addEventListener('DOMContentLoaded', function() {
         parentOption.classList.add('checked');
       }
     });
-  });
-  
-  // Event listener para tipo de artículo (manejar el estilo visual y mostrar/ocultar selects de ley)
-  document.querySelectorAll('input[name="tipo_articulo"]').forEach(radio => {
-    radio.addEventListener('change', function() {
-      // Quitar clase 'checked' de todos los radio buttons de tipo de artículo
-      document.querySelectorAll('input[name="tipo_articulo"]').forEach(r => {
-        const parentOption = r.closest('.custom-option-basic');
-        if (parentOption) {
-          parentOption.classList.remove('checked');
-        }
-      });
-      
-      // Agregar clase 'checked' al seleccionado
-      const parentOption = this.closest('.custom-option-basic');
-      if (parentOption) {
-        parentOption.classList.add('checked');
-      }
-      
-      // Mostrar/ocultar selects de ley según el tipo seleccionado
-      const tipoSeleccionado = this.value;
-      const containerLeyOro = document.getElementById('container_ley_oro');
-      const containerLeyPlata = document.getElementById('container_ley_plata');
-      const selectLeyOro = document.getElementById('leyoro');
-      const selectLeyPlata = document.getElementById('leyplata');
-      
-      if (tipoSeleccionado === 'oro') {
-        // Mostrar ley oro, ocultar ley plata
-        if (containerLeyOro) containerLeyOro.style.display = 'block';
-        if (containerLeyPlata) containerLeyPlata.style.display = 'none';
-        if (selectLeyOro) {
-          selectLeyOro.setAttribute('required', 'required');
-          selectLeyOro.setAttribute('name', 'ley');
-        }
-        if (selectLeyPlata) {
-          selectLeyPlata.removeAttribute('required');
-          selectLeyPlata.removeAttribute('name');
-        }
-      } else if (tipoSeleccionado === 'plata') {
-        // Mostrar ley plata, ocultar ley oro
-        if (containerLeyOro) containerLeyOro.style.display = 'none';
-        if (containerLeyPlata) containerLeyPlata.style.display = 'block';
-        if (selectLeyOro) {
-          selectLeyOro.removeAttribute('required');
-          selectLeyOro.removeAttribute('name');
-        }
-        if (selectLeyPlata) {
-          selectLeyPlata.setAttribute('required', 'required');
-          selectLeyPlata.setAttribute('name', 'ley');
-        }
-      } else if (tipoSeleccionado === 'acero') {
-        // Para acero, ocultar ambos
-        if (containerLeyOro) containerLeyOro.style.display = 'none';
-        if (containerLeyPlata) containerLeyPlata.style.display = 'none';
-        if (selectLeyOro) {
-          selectLeyOro.removeAttribute('required');
-          selectLeyOro.removeAttribute('name');
-        }
-        if (selectLeyPlata) {
-          selectLeyPlata.removeAttribute('required');
-          selectLeyPlata.removeAttribute('name');
-        }
-      }
-    });
-    
-    // Ejecutar al cargar la página para establecer el estado inicial
-    if (radio.checked) {
-      radio.dispatchEvent(new Event('change'));
-    }
   });
   
   // Event listener para cancelar artículo

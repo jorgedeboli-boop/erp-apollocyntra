@@ -27,7 +27,7 @@ try {
         
         // Validar campos obligatorios
         $campos_obligatorios = array(
-            'precio_venta', 'peso', 'descripcion', 'system_codigo_regimen', 'tipo_articulo'
+            'precio_venta', 'descripcion', 'system_codigo_regimen'
         );
         
         foreach ($campos_obligatorios as $campo) {
@@ -38,13 +38,8 @@ try {
         
         // Obtener datos del formulario
         $precio_venta = (float)$_POST['precio_venta'];
-        $peso = (float)$_POST['peso'];
-        $tipo_articulo = trim($_POST['tipo_articulo']);
         $descripcion = trim($_POST['descripcion']);
         $system_codigo_regimen = trim($_POST['system_codigo_regimen']);
-        
-        $lote_origen = isset($_POST['lote_origen']) ? trim($_POST['lote_origen']) : '';
-        $id_lote_origen = !empty($lote_origen) ? (int)$lote_origen : 0;
         
         $precio_coste = isset($_POST['precio_coste']) ? (float)$_POST['precio_coste'] : 0;
         if(empty($precio_coste)){
@@ -54,16 +49,12 @@ try {
             $precio_coste = number_format($precio_coste, 2, '.', '');
         }
         
-        // Calcular precio por gramo
-        $precio_gramo = number_format($precio_venta / $peso, 2, '.', '');
-
-        $ley = isset($_POST['ley']) ? trim($_POST['ley']) : '';
         $inscripciones = isset($_POST['inscripciones']) ? trim($_POST['inscripciones']) : 'no';
         $piedras = isset($_POST['piedras']) ? trim($_POST['piedras']) : 'no';
         $observaciones = isset($_POST['observaciones']) ? trim($_POST['observaciones']) : '';
         
         // Verificar que el artículo existe y obtener datos necesarios
-        $query_check = "SELECT id, id_sucursal_destino, id_sucursal_origen, estado, precio FROM articulos_venta WHERE id = ? LIMIT 1";
+        $query_check = "SELECT id, id_sucursal_destino, id_sucursal_origen, estado, precio, peso, tipo, id_lote_origen, ley FROM articulos_venta WHERE id = ? LIMIT 1";
         $stmt_check = mysqli_prepare($conexion, $query_check);
         mysqli_stmt_bind_param($stmt_check, 'i', $id_articulo);
         mysqli_stmt_execute($stmt_check);
@@ -78,6 +69,11 @@ try {
         $id_sucursal_destino = (int)$articulo_actual['id_sucursal_destino'];
         $id_sucursal_origen = (int)($articulo_actual['id_sucursal_origen'] ?? 0);
         $estado_articulo = $articulo_actual['estado'];
+        $peso = (float) ($articulo_actual['peso'] ?? 0);
+        $tipo_articulo = (string) ($articulo_actual['tipo'] ?? '');
+        $id_lote_origen = (int) ($articulo_actual['id_lote_origen'] ?? 0);
+        $ley = (string) ($articulo_actual['ley'] ?? '');
+        $precio_gramo = ($peso > 0) ? number_format($precio_venta / $peso, 2, '.', '') : 0;
         $precio_anterior = (float)$articulo_actual['precio'];
         mysqli_stmt_close($stmt_check);
         

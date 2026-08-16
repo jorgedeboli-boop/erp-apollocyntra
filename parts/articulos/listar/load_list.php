@@ -19,8 +19,6 @@ try {
     $searchValue = isset($_POST['search']['value']) ? $_POST['search']['value'] : '';
     
     // Obtener filtros
-    $filtro_tipo = isset($_POST['filtro_tipo']) ? trim($_POST['filtro_tipo']) : '';
-    $filtro_estado = isset($_POST['filtro_estado']) ? trim($_POST['filtro_estado']) : '';
     $filtro_origen = isset($_POST['filtro_origen']) ? trim($_POST['filtro_origen']) : '';
     $filtro_fecha_desde = isset($_POST['filtro_fecha_desde']) ? trim($_POST['filtro_fecha_desde']) : '';
     $filtro_fecha_hasta = isset($_POST['filtro_fecha_hasta']) ? trim($_POST['filtro_fecha_hasta']) : '';
@@ -40,20 +38,6 @@ try {
     $whereConditions = array();
     $params = array();
     $types = '';
-    
-    // Filtro de tipo
-    if (!empty($filtro_tipo)) {
-        $whereConditions[] = "av.tipo = ?";
-        $params[] = $filtro_tipo;
-        $types .= 's';
-    }
-    
-    // Filtro de estado
-    if (!empty($filtro_estado)) {
-        $whereConditions[] = "av.estado = ?";
-        $params[] = $filtro_estado;
-        $types .= 's';
-    }
     
     // Filtro de origen
     if (!empty($filtro_origen)) {
@@ -91,14 +75,12 @@ try {
     if (!empty($searchValue)) {
         $whereConditions[] = "(
             av.id LIKE ? OR
-            av.descripcion LIKE ? OR
-            av.estado LIKE ?
+            av.descripcion LIKE ?
         )";
         $searchParam = '%' . $searchValue . '%';
         $params[] = $searchValue;
         $params[] = $searchParam;
-        $params[] = $searchParam;
-        $types .= 'sss';
+        $types .= 'ss';
     }
     
     $whereClause = '';
@@ -138,16 +120,12 @@ try {
         SELECT 
             av.id as id_articulo,
             av.descripcion,
-            av.peso,
             av.precio,
             av.precio_coste,
-            av.precio_gramo,
-            av.tipo,
             av.estado,
             av.fecha_enviado,
             av.fecha_en_venta,
             av.fecha_vendido,
-            av.fecha_retirado,
             av.origen_articulo,
             u.nombre_usuario
         FROM articulos_venta av
@@ -173,69 +151,6 @@ try {
     
     $data = [];
     while ($row = mysqli_fetch_assoc($result)) {
-        // Calcular € por gramo si no está precalculado
-        $euro_gramo = $row['precio_gramo'];
-        if (empty($euro_gramo) && $row['peso'] > 0) {
-            $euro_gramo = $row['precio'] / $row['peso'];
-        }
-        
-        // Badge para tipo
-        $tipo_badge = '';
-        if ($row['tipo'] === 'oro') {
-            $tipo_badge = '<span class="badge bg-label-warning ">Oro</span>';
-        } elseif ($row['tipo'] === 'plata') {
-            $tipo_badge = '<span class="badge bg-label-secondary ">Plata</span>';
-        } elseif ($row['tipo'] === 'acero') {
-            $tipo_badge = '<span class="badge bg-label-dark ">Acero</span>';
-        } else {
-            $tipo_badge = '<span class="badge bg-label-secondary ">Otros</span>';
-        }
-        
-        // Badge para estado
-        $estado_badge = '';
-        if (!empty($row['estado'])) {
-            $estado_class = 'secondary';
-            $estado_texto = $row['estado'];
-            
-            switch($row['estado']) {
-                case 'enventa': 
-                    $estado_class = 'success';
-                    $estado_texto = 'En venta';
-                    break;
-                case 'vendido': 
-                case 'vendido_web':
-                    $estado_class = 'info';
-                    $estado_texto = $row['estado'] === 'vendido_web' ? 'Vendido web' : 'Vendido';
-                    break;
-                case 'reservado': 
-                    $estado_class = 'warning';
-                    $estado_texto = 'Reservado';
-                    break;
-                case 'enviado': 
-                    $estado_class = 'primary';
-                    $estado_texto = 'Enviado';
-                    break;
-                case 'retirado': 
-                    $estado_class = 'danger';
-                    $estado_texto = 'Retirado';
-                    break;
-                case 'mermado': 
-                    $estado_class = 'dark';
-                    $estado_texto = 'Mermado';
-                    break;
-                case 'enreparacion': 
-                    $estado_class = 'secondary';
-                    $estado_texto = 'En reparación';
-                    break;
-                case 'noetiquetado_c': 
-                case 'noetiquetado_u':
-                    $estado_class = 'secondary';
-                    $estado_texto = 'No etiquetado';
-                    break;
-            }
-            $estado_badge = '<span class="badge bg-label-' . $estado_class . ' ">' . htmlspecialchars($estado_texto) . '</span>';
-        }
-        
         // Badge para origen
         $origen_badge = '';
         if ($row['origen_articulo'] === 'central') {
@@ -261,20 +176,15 @@ try {
         $data[] = [
             htmlspecialchars($row['id_articulo']),                              // 0 - SKU
             htmlspecialchars($row['descripcion']),                              // 1 - Descripción
-            number_format($row['peso'], 2, ',', '.') . ' g',                   // 2 - Peso
-            number_format($row['precio'], 0, ',', '.') . ' €',                 // 3 - Precio (sin decimales)
-            number_format($row['precio_coste'], 0, ',', '.') . ' €',           // 4 - Precio Coste (sin decimales)
-            number_format($euro_gramo, 2, ',', '.') . ' €/g',                  // 5 - €/g
-            $tipo_badge,                                                         // 6 - Tipo
-            $estado_badge,                                                       // 7 - Estado
-            !empty($row['fecha_enviado']) && $row['fecha_enviado'] !== '0000-00-00 00:00:00' ? date('d/m/Y', strtotime($row['fecha_enviado'])) : '-',  // 8 - F. Enviado
-            !empty($row['fecha_en_venta']) && $row['fecha_en_venta'] !== '0000-00-00 00:00:00' ? date('d/m/Y', strtotime($row['fecha_en_venta'])) : '-', // 9 - F. En Venta
-            !empty($row['fecha_vendido']) && $row['fecha_vendido'] !== '0000-00-00' ? date('d/m/Y', strtotime($row['fecha_vendido'])) : '-',             // 10 - F. Vendido
-            !empty($row['fecha_retirado']) && $row['fecha_retirado'] !== '0000-00-00 00:00:00' ? date('d/m/Y', strtotime($row['fecha_retirado'])) : '-', // 11 - F. Retirado
-            htmlspecialchars($row['nombre_usuario'] ?: '---'),                 // 12 - Creado Por
-            $origen_badge,                                                       // 13 - Origen
-            $boton_vender,                                                       // 14 - Acciones
-            $row['id_articulo']                                                 // 15 - ID (hidden para click)
+            number_format($row['precio'], 0, ',', '.') . ' €',                 // 2 - Precio (sin decimales)
+            number_format($row['precio_coste'], 0, ',', '.') . ' €',           // 3 - Precio Coste (sin decimales)
+            !empty($row['fecha_enviado']) && $row['fecha_enviado'] !== '0000-00-00 00:00:00' ? date('d/m/Y', strtotime($row['fecha_enviado'])) : '-',  // 4 - F. Enviado
+            !empty($row['fecha_en_venta']) && $row['fecha_en_venta'] !== '0000-00-00 00:00:00' ? date('d/m/Y', strtotime($row['fecha_en_venta'])) : '-', // 5 - F. En Venta
+            !empty($row['fecha_vendido']) && $row['fecha_vendido'] !== '0000-00-00' ? date('d/m/Y', strtotime($row['fecha_vendido'])) : '-',             // 6 - F. Vendido
+            htmlspecialchars($row['nombre_usuario'] ?: '---'),                 // 7 - Creado Por
+            $origen_badge,                                                       // 8 - Origen
+            $boton_vender,                                                       // 9 - Venta
+            $row['id_articulo']                                                 // 10 - ID (hidden para click)
         ];
     }
     

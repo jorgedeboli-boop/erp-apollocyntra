@@ -5,8 +5,6 @@
     opacity: 0;
 }
 
-#articulos_filtros_container:not(.articulos-filtros-ready) .articulo_tipo,
-#articulos_filtros_container:not(.articulos-filtros-ready) .articulo_estado,
 #articulos_filtros_container:not(.articulos-filtros-ready) .articulo_origen,
 #articulos_filtros_container:not(.articulos-filtros-ready) .articulo_auditado {
     min-height: 38px;
@@ -170,8 +168,6 @@
     font-size: 1rem;
 }
 @media (max-width: 767px) {
-    .articulo_tipo,
-    .articulo_estado,
     .articulo_origen {
         width: 100% !important;
         flex: 0 0 100% !important;

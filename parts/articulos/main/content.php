@@ -47,51 +47,7 @@
               mysqli_stmt_close($stmt_traz);
           }
           
-          // Calcular € gramo
-          $euro_gramo = 0;
-          if ($articulo['peso'] > 0) {
-              $euro_gramo = $articulo['precio'] / $articulo['peso'];
-          }
-
-          $lote_origen_url = '';
-          $lote_origen_display = '';
-          if (!empty($articulo['id_lote_origen']) && (int) $articulo['id_lote_origen'] > 0) {
-              $id_lote_origen = (int) $articulo['id_lote_origen'];
-              $id_sucursal_lote_origen = (int) ($articulo['id_sucursal_origen'] ?? 0);
-              $lote_origen_display = (string) $id_lote_origen;
-              $identificador_lote_origen = obtenerIdLotesJoyeria($id_lote_origen, $id_sucursal_lote_origen);
-              if ($identificador_lote_origen !== false && (int) $identificador_lote_origen > 0) {
-                  $lote_origen_url = 'lote.php?id=' . (int) $identificador_lote_origen;
-              }
-          }
-
-          $estado_lower_header = strtolower($articulo['estado'] ?? '');
-          $estado_badge_class = 'secondary';
-          switch ($estado_lower_header) {
-              case 'noetiquetado_c':
-              case 'noetiquetado_u':
-                  $estado_badge_class = 'primary';
-                  break;
-              case 'enventa':
-              case 'en_venta':
-                  $estado_badge_class = 'info';
-                  break;
-              case 'vendido':
-              case 'vendido_web':
-                  $estado_badge_class = 'success';
-                  break;
-              case 'retirado':
-              case 'mermado':
-                  $estado_badge_class = 'warning';
-                  break;
-              case 'enviado':
-              case 'enreparacion':
-                  $estado_badge_class = 'dark';
-                  break;
-              case 'publicadoweb':
-                  $estado_badge_class = 'success';
-                  break;
-          }
+          $estado_articulo_header = strtolower((string) ($articulo['estado'] ?? ''));
   ?>
 <?php if (!$puede_acceder_editar): ?>
 <style>
@@ -125,7 +81,6 @@
                     : '—';
                 $precio_venta_badge = isset($articulo['precio']) ? number_format((float) $articulo['precio'], 2, ',', '.') . ' €' : '—';
 
-                $estado_articulo_header = strtolower((string) ($articulo['estado'] ?? ''));
                 $venta_id_rel = isset($articulo['last_id_venta']) ? (int) $articulo['last_id_venta'] : 0;
                 $venta_num_suc = isset($articulo['id_venta_sucursal']) ? trim((string) $articulo['id_venta_sucursal']) : '';
                 $venta_num_display = ($venta_num_suc !== '' && $venta_num_suc !== '0') ? $venta_num_suc : (($venta_id_rel > 0) ? (string) $venta_id_rel : '');
@@ -137,7 +92,6 @@
                 <?php if ($mostrar_badge_venta): ?>
                 <div class="badge bg-label-secondary rounded-pill lh-xs badget-estados">Venta Nº <?php echo htmlspecialchars($venta_num_display); ?></div>
                 <?php endif; ?>
-                <div id="articulo_estado_badge_header" class="badge bg-label-<?php echo htmlspecialchars($estado_badge_class); ?> rounded-pill lh-xs badget-estados"><?php echo htmlspecialchars($articulo['estado'] ?? ''); ?></div>
               </div>
             </div>
           </div>
@@ -194,65 +148,9 @@
           <!-- Información del Artículo -->
           <div class="card mb-6">
             <div class="card-body">
-              <?php
-              $estado_det_class = 'secondary';
-              switch (strtolower((string) ($articulo['estado'] ?? ''))) {
-                  case 'noetiquetado_c':
-                  case 'noetiquetado_u':
-                      $estado_det_class = 'primary';
-                      break;
-                  case 'enventa':
-                  case 'en_venta':
-                      $estado_det_class = 'info';
-                      break;
-                  case 'vendido':
-                  case 'vendido_web':
-                  case 'publicadoweb':
-                      $estado_det_class = 'success';
-                      break;
-                  case 'retirado':
-                  case 'mermado':
-                      $estado_det_class = 'warning';
-                      break;
-                  case 'enviado':
-                  case 'enreparacion':
-                      $estado_det_class = 'dark';
-                      break;
-              }
-              $tipo_iva = $articulo['tipo_iva_articulo'] ?? '';
-              $tipo_iva_class = 'secondary';
-              $tipo_iva_texto = $tipo_iva;
-              switch (strtoupper((string) $tipo_iva)) {
-                  case 'REBU':
-                      $tipo_iva_class = 'primary';
-                      $tipo_iva_texto = 'REBU';
-                      break;
-                  case 'INVERSION':
-                      $tipo_iva_class = 'info';
-                      $tipo_iva_texto = 'Inversión';
-                      break;
-                  case 'GENERAL':
-                      $tipo_iva_class = 'success';
-                      $tipo_iva_texto = 'General';
-                      break;
-              }
-              ?>
               <small class="card-text text-uppercase text-body-secondary small">Información del Artículo</small>
               <ul class="list-unstyled my-3 py-1">
               <li class="d-flex align-items-center mb-4"><span class="fw-medium"><?php echo htmlspecialchars($articulo['descripcion']); ?></span>
-                </li>
-                <li class="d-flex align-items-center mb-4">
-                  <i class="icon-base ri ri-shopping-bag-line icon-24px"></i><span class="fw-medium mx-2">Tipo:</span> 
-                  <span>
-                    <span class="badge bg-label-<?php echo (stripos($articulo['tipo'], 'oro') !== false) ? 'warning' : ((stripos($articulo['tipo'], 'plata') !== false) ? 'secondary' : 'info'); ?> me-2 ms-2 rounded-pill">
-                      <?php echo htmlspecialchars($articulo['tipo']); ?>
-                    </span>
-                  </span>
-                </li>
-                
-                <li class="d-flex align-items-center mb-4">
-                  <i class="icon-base ri ri-award-line icon-24px"></i><span class="fw-medium mx-2">Ley:</span> 
-                  <span class="fw-semibold"><?php echo htmlspecialchars($articulo['ley']); ?></span>
                 </li>
                 <?php if (!empty($articulo['inscripciones']) && $articulo['inscripciones'] != 'no'): ?>
                 <li class="d-flex align-items-center mb-4">
@@ -267,23 +165,8 @@
                 </li>
                 <?php endif; ?>
               </ul>
-              <small class="card-text text-uppercase text-body-secondary small">Pesos y Medidas</small>
-              <ul class="list-unstyled my-3 py-1">
-                <li class="d-flex align-items-center mb-4">
-                  <i class="icon-base ri ri-scales-3-line icon-24px"></i><span class="fw-medium mx-2">Peso:</span> 
-                  <span><?php echo number_format($articulo['peso'], 2, ',', '.'); ?> g</span>
-                </li>
-                <li class="d-flex align-items-center mb-4">
-                  <i class="icon-base ri ri-calculator-line icon-24px"></i><span class="fw-medium mx-2">€/gramo:</span> 
-                  <span><?php echo number_format($euro_gramo, 2, ',', '.'); ?> €/g</span>
-                </li>
-              </ul>
               <small class="card-text text-uppercase text-body-secondary small">Detalles del Artículo</small>
               <ul class="list-unstyled my-3 py-1">
-                <li class="d-flex align-items-center mb-4">
-                  <i class="icon-base ri ri-pulse-line icon-24px"></i><span class="fw-medium mx-2">Estado:</span>
-                  <span id="articulo_estado_badge_detalle" class="badge bg-label-<?php echo htmlspecialchars($estado_det_class); ?> rounded-pill"><?php echo htmlspecialchars($articulo['estado']); ?></span>
-                </li>
                 <li class="d-flex align-items-center mb-4">
                   <i class="icon-base ri ri-store-2-line icon-24px"></i><span class="fw-medium mx-2">Origen:</span>
                   <span class="badge bg-label-<?php echo ($articulo['origen_articulo'] === 'central') ? 'primary' : 'info'; ?> rounded-pill"><?php echo htmlspecialchars($articulo['origen_articulo']); ?></span>
@@ -320,12 +203,6 @@
                   <span><?php echo date('d/m/Y H:i', strtotime($articulo['fecha_enviado'])); ?></span>
                 </li>
                 <?php endif; ?>
-                <?php if (!empty($articulo['fecha_retirado']) && $articulo['fecha_retirado'] != '0000-00-00 00:00:00'): ?>
-                <li class="d-flex align-items-center mb-4">
-                  <i class="icon-base ri ri-logout-box-line icon-24px"></i><span class="fw-medium mx-2">Fecha Retirado:</span>
-                  <span><?php echo date('d/m/Y H:i', strtotime($articulo['fecha_retirado'])); ?></span>
-                </li>
-                <?php endif; ?>
                 <?php if (!empty($articulo['observaciones'])): ?>
                 <li class="d-flex align-items-start mb-4">
                   <i class="icon-base ri ri-chat-1-line icon-24px flex-shrink-0"></i>
@@ -333,16 +210,6 @@
                     <span class="fw-medium d-block mb-1">Observaciones</span>
                     <span class="text-body-secondary"><?php echo nl2br(htmlspecialchars($articulo['observaciones'])); ?></span>
                   </div>
-                </li>
-                <?php endif; ?>
-                <?php if (!empty($articulo['id_lote_origen']) && (int) $articulo['id_lote_origen'] > 0): ?>
-                <li class="d-flex align-items-center mb-4">
-                  <i class="icon-base ri ri-archive-line icon-24px"></i><span class="fw-medium mx-2">Lote origen:</span>
-                  <?php if ($lote_origen_url !== ''): ?>
-                  <a target="_blank" rel="noopener" href="<?php echo htmlspecialchars($lote_origen_url, ENT_QUOTES, 'UTF-8'); ?>"><?php echo htmlspecialchars($lote_origen_display); ?></a>
-                  <?php else: ?>
-                  <span><?php echo htmlspecialchars($lote_origen_display); ?></span>
-                  <?php endif; ?>
                 </li>
                 <?php endif; ?>
               </ul>
@@ -470,10 +337,6 @@
               </div>
             </div>
             <div class="col-md-6">
-              <div class="mb-4">
-                <h6 class="fw-medium mb-2">Precio por Gramo</h6>
-                <p class="text-body-secondary"><?php echo number_format($articulo['precio_gramo'] ?? $euro_gramo, 2, ',', '.'); ?> €/g</p>
-              </div>
               <div class="mb-4">
                 <h6 class="fw-medium mb-2">Beneficio</h6>
                 <p class="text-body-secondary">

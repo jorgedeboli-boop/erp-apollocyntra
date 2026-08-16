@@ -8,8 +8,6 @@ try {
     $conexion = conectar_bd();
     
     // Obtener filtros
-    $filtro_tipo = isset($_POST['filtro_tipo']) ? trim($_POST['filtro_tipo']) : '';
-    $filtro_estado = isset($_POST['filtro_estado']) ? trim($_POST['filtro_estado']) : '';
     $filtro_origen = isset($_POST['filtro_origen']) ? trim($_POST['filtro_origen']) : '';
     $filtro_fecha_desde = isset($_POST['filtro_fecha_desde']) ? trim($_POST['filtro_fecha_desde']) : '';
     $filtro_fecha_hasta = isset($_POST['filtro_fecha_hasta']) ? trim($_POST['filtro_fecha_hasta']) : '';
@@ -29,20 +27,6 @@ try {
     $whereConditions = array();
     $params = array();
     $types = '';
-    
-    // Filtro de tipo
-    if (!empty($filtro_tipo)) {
-        $whereConditions[] = "av.tipo = ?";
-        $params[] = $filtro_tipo;
-        $types .= 's';
-    }
-    
-    // Filtro de estado
-    if (!empty($filtro_estado)) {
-        $whereConditions[] = "av.estado = ?";
-        $params[] = $filtro_estado;
-        $types .= 's';
-    }
     
     // Filtro de origen
     if (!empty($filtro_origen)) {

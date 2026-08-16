@@ -17,8 +17,6 @@ try {
     
     // Obtener parámetros de filtros
     $searchValue = isset($_POST['search']) ? trim($_POST['search']) : '';
-    $filtro_tipo = isset($_POST['filtro_tipo']) ? trim($_POST['filtro_tipo']) : '';
-    $filtro_estado = isset($_POST['filtro_estado']) ? trim($_POST['filtro_estado']) : '';
     $filtro_origen = isset($_POST['filtro_origen']) ? trim($_POST['filtro_origen']) : '';
     $filtro_fecha_desde = isset($_POST['filtro_fecha_desde']) ? trim($_POST['filtro_fecha_desde']) : '';
     $filtro_fecha_hasta = isset($_POST['filtro_fecha_hasta']) ? trim($_POST['filtro_fecha_hasta']) : '';
@@ -36,18 +34,6 @@ try {
     // Construir WHERE clause
     $whereConditions = array();
     $searchParams = array();
-    
-    // Filtro de tipo
-    if (!empty($filtro_tipo)) {
-        $whereConditions[] = "av.tipo = ?";
-        $searchParams[] = $filtro_tipo;
-    }
-    
-    // Filtro de estado
-    if (!empty($filtro_estado)) {
-        $whereConditions[] = "av.estado = ?";
-        $searchParams[] = $filtro_estado;
-    }
     
     // Filtro de origen
     if (!empty($filtro_origen)) {
@@ -80,12 +66,10 @@ try {
     if (!empty($searchValue)) {
         $whereConditions[] = "(
             av.id LIKE ? OR
-            av.descripcion LIKE ? OR
-            av.estado LIKE ?
+            av.descripcion LIKE ?
         )";
         $searchTerm = '%' . $searchValue . '%';
         $searchParams[] = $searchValue;
-        $searchParams[] = $searchTerm;
         $searchParams[] = $searchTerm;
     }
     
@@ -99,16 +83,11 @@ try {
         SELECT 
             av.id as id_articulo,
             av.descripcion,
-            av.peso,
             av.precio,
             av.precio_coste,
-            av.precio_gramo,
-            av.tipo,
-            av.estado,
             av.fecha_enviado,
             av.fecha_en_venta,
             av.fecha_vendido,
-            av.fecha_retirado,
             av.origen_articulo,
             u.nombre_usuario
         FROM articulos_venta av
@@ -138,26 +117,6 @@ try {
     // Obtener TODOS los datos
     $data = [];
     while ($row = mysqli_fetch_assoc($result)) {
-        // Calcular € por gramo si no está precalculado
-        $euro_gramo = $row['precio_gramo'];
-        if (empty($euro_gramo) && $row['peso'] > 0) {
-            $euro_gramo = $row['precio'] / $row['peso'];
-        }
-        
-        // Formatear tipo
-        $tipo = ucfirst($row['tipo']);
-        
-        // Formatear estado
-        $estado = $row['estado'];
-        switch($row['estado']) {
-            case 'enventa': $estado = 'En venta'; break;
-            case 'vendido_web': $estado = 'Vendido web'; break;
-            case 'enreparacion': $estado = 'En reparación'; break;
-            case 'noetiquetado_c':
-            case 'noetiquetado_u': $estado = 'No etiquetado'; break;
-            default: $estado = ucfirst($estado);
-        }
-        
         // Formatear origen
         $origen = ($row['origen_articulo'] === 'sucursal') ? 'Otro' : ucfirst((string) $row['origen_articulo']);
         
@@ -165,18 +124,13 @@ try {
         $data[] = [
             $row['id_articulo'],                                                                                                                          // 0 - SKU
             $row['descripcion'],                                                                                                                          // 1 - Descripción
-            number_format($row['peso'], 2, ',', '.') . ' g',                                                                                             // 2 - Peso
-            number_format($row['precio'], 0, ',', '.') . ' €',                                                                                           // 3 - Precio (sin decimales)
-            number_format($row['precio_coste'], 0, ',', '.') . ' €',                                                                                     // 4 - Precio Coste (sin decimales)
-            number_format($euro_gramo, 2, ',', '.') . ' €/g',                                                                                            // 5 - €/g
-            $tipo,                                                                                                                                        // 6 - Tipo
-            $estado,                                                                                                                                      // 7 - Estado
-            !empty($row['fecha_enviado']) && $row['fecha_enviado'] !== '0000-00-00 00:00:00' ? date('d/m/Y', strtotime($row['fecha_enviado'])) : '-',  // 8 - F. Enviado
-            !empty($row['fecha_en_venta']) && $row['fecha_en_venta'] !== '0000-00-00 00:00:00' ? date('d/m/Y', strtotime($row['fecha_en_venta'])) : '-', // 9 - F. En Venta
-            !empty($row['fecha_vendido']) && $row['fecha_vendido'] !== '0000-00-00' ? date('d/m/Y', strtotime($row['fecha_vendido'])) : '-',             // 10 - F. Vendido
-            !empty($row['fecha_retirado']) && $row['fecha_retirado'] !== '0000-00-00 00:00:00' ? date('d/m/Y', strtotime($row['fecha_retirado'])) : '-', // 11 - F. Retirado
-            $row['nombre_usuario'] ? $row['nombre_usuario'] : 'N/A',                                                                                     // 12 - Creado Por
-            $origen                                                                                                                                       // 13 - Origen
+            number_format($row['precio'], 0, ',', '.') . ' €',                                                                                           // 2 - Precio (sin decimales)
+            number_format($row['precio_coste'], 0, ',', '.') . ' €',                                                                                     // 3 - Precio Coste (sin decimales)
+            !empty($row['fecha_enviado']) && $row['fecha_enviado'] !== '0000-00-00 00:00:00' ? date('d/m/Y', strtotime($row['fecha_enviado'])) : '-',  // 4 - F. Enviado
+            !empty($row['fecha_en_venta']) && $row['fecha_en_venta'] !== '0000-00-00 00:00:00' ? date('d/m/Y', strtotime($row['fecha_en_venta'])) : '-', // 5 - F. En Venta
+            !empty($row['fecha_vendido']) && $row['fecha_vendido'] !== '0000-00-00' ? date('d/m/Y', strtotime($row['fecha_vendido'])) : '-',             // 6 - F. Vendido
+            $row['nombre_usuario'] ? $row['nombre_usuario'] : 'N/A',                                                                                     // 7 - Creado Por
+            $origen                                                                                                                                       // 8 - Origen
         ];
     }
     

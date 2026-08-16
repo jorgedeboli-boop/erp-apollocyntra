@@ -20,7 +20,7 @@ try {
     try {
         // Validar campos obligatorios
         $campos_obligatorios = array(
-            'precio_venta', 'peso', 'descripcion', 'system_codigo_regimen', 'tipo_iva_articulo', 'tipo_articulo'
+            'precio_venta', 'descripcion', 'system_codigo_regimen', 'tipo_iva_articulo'
         );
         
         foreach ($campos_obligatorios as $campo) {
@@ -31,8 +31,8 @@ try {
         
         // Obtener datos del formulario
         $precio_venta = (float)$_POST['precio_venta'];
-        $peso = (float)$_POST['peso'];
-        $tipo_articulo = trim($_POST['tipo_articulo']);
+        $peso = 0;
+        $tipo_articulo = '';
         $descripcion = trim($_POST['descripcion']);
         $system_codigo_regimen = trim($_POST['system_codigo_regimen']);
         $regimenes_validos = array('REBU', 'INVERSION', 'GENERAL');
@@ -46,8 +46,7 @@ try {
         }
         $id_sucursal_destino = 0;
         $id_sucursal_origen = 0;
-        $lote_origen = isset($_POST['lote_origen']) ? trim($_POST['lote_origen']) : '';
-        $id_lote_origen = !empty($lote_origen) ? (int)$lote_origen : 0;
+        $id_lote_origen = 0;
         
         
         $precio_coste = (float)$_POST['precio_coste'];
@@ -57,10 +56,8 @@ try {
         }else{
             $precio_coste = number_format($precio_coste, 2, '.', '');
         }
-        // Calcular precio por gramo
-        $precio_gramo = number_format($precio_venta / $peso, 2, '.', '');
-
-        $ley = trim($_POST['ley']);
+        $precio_gramo = 0;
+        $ley = '';
         $inscripciones = isset($_POST['inscripciones']) ? trim($_POST['inscripciones']) : 'no';
         $piedras = isset($_POST['piedras']) ? trim($_POST['piedras']) : 'no';
         $observaciones = isset($_POST['observaciones']) ? trim($_POST['observaciones']) : '';
