@@ -1,6 +1,14 @@
 <?php
 $id_sucursal = isset($_POST['id_sucursal']) ? (int)$_POST['id_sucursal'] : 0;
 $id_articulo = isset($_POST['id_articulo']) ? (int)$_POST['id_articulo'] : 0;
+$empresa_sesion = function_exists('obtener_datos_empresa_sesion') ? obtener_datos_empresa_sesion() : null;
+if (!is_array($empresa_sesion)) {
+    $empresa_sesion = [];
+}
+$empTxt = function ($k, $d = '-') use ($empresa_sesion) {
+    $v = trim((string) ($empresa_sesion[$k] ?? ''));
+    return $v !== '' ? $v : $d;
+};
 ?>
 <!-- Content -->
 <div class="container-fluid flex-grow-1 container-p-y">
@@ -69,13 +77,13 @@ $id_articulo = isset($_POST['id_articulo']) ? (int)$_POST['id_articulo'] : 0;
         <div class="d-flex justify-content-between flex-xl-row flex-md-column flex-sm-row flex-column text-heading align-items-xl-center align-items-md-start align-items-sm-center flex-wrap gap-6">
           <div>
             <div class="d-flex gap-2 mb-2">
-              <h5 class="mb-0" id="nombre_empresa">-</h5>
+              <h5 class="mb-0" id="nombre_empresa"><?php echo htmlspecialchars($empTxt('nombre_empresa')); ?></h5>
             </div>
-            <p class="mb-1 texto_direccion" id="cif_empresa">-</p>
-            <p class="mb-1 texto_direccion" id="direccion_sucursal">-</p>
-            <p class="mb-1 texto_direccion" id="otrosdatos_sucursal"><span id="poblacion_sucursal">-</span> <span id="codigo_postal_sucursal">-</span></p>
-            <p class="mb-1 texto_direccion" id="telefono_sucursal">-</p>
-            <p class="mb-1 texto_direccion" id="email_empresa">-</p>
+            <p class="mb-1 texto_direccion" id="cif_empresa"><?php echo $empTxt('cif_empresa') !== '-' ? 'CIF: ' . htmlspecialchars($empTxt('cif_empresa')) : '-'; ?></p>
+            <p class="mb-1 texto_direccion" id="direccion_sucursal"><?php echo htmlspecialchars($empTxt('direccion_empresa')); ?></p>
+            <p class="mb-1 texto_direccion" id="otrosdatos_sucursal"><span id="poblacion_sucursal"><?php echo htmlspecialchars($empTxt('poblacion_empresa')); ?></span> <span id="codigo_postal_sucursal"><?php echo htmlspecialchars($empTxt('codigo_postal_empresa')); ?></span></p>
+            <p class="mb-1 texto_direccion" id="telefono_sucursal"><?php echo htmlspecialchars($empTxt('telefono_empresa')); ?></p>
+            <p class="mb-1 texto_direccion" id="email_empresa"><?php echo htmlspecialchars($empTxt('email_empresa')); ?></p>
           </div>
           
           <!-- Skeleton (mostrar mientras carga) -->

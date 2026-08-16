@@ -34,7 +34,7 @@ try {
 
     $stmtV = mysqli_prepare(
         $conexion,
-        'SELECT id, precio, venta_plazos, estado, id_sucursal, cliente, tipo_pago FROM ventas WHERE id = ? LIMIT 1'
+        'SELECT id, precio, estado, rel_id_empresa, cliente, tipo_pago FROM ventas WHERE id = ? LIMIT 1'
     );
     if (!$stmtV) {
         throw new Exception(mysqli_error($conexion));
@@ -48,7 +48,17 @@ try {
     if (!$venta) {
         throw new Exception('Venta no encontrada');
     }
-    if (strtolower((string) ($venta['venta_plazos'] ?? '')) !== 'si') {
+
+    $stPlazos = mysqli_prepare($conexion, 'SELECT id FROM ventas_plazos WHERE id_venta = ? LIMIT 1');
+    $es_plazos = false;
+    if ($stPlazos) {
+        mysqli_stmt_bind_param($stPlazos, 'i', $id_venta);
+        mysqli_stmt_execute($stPlazos);
+        $rp = mysqli_stmt_get_result($stPlazos);
+        $es_plazos = (bool) ($rp && mysqli_fetch_assoc($rp));
+        mysqli_stmt_close($stPlazos);
+    }
+    if (!$es_plazos) {
         throw new Exception('La venta no es a plazos');
     }
 
@@ -57,7 +67,7 @@ try {
         throw new Exception('La venta no está cerrada');
     }
 
-    $id_sucursal = (int) ($venta['id_sucursal'] ?? 0);
+    $id_sucursal = 0;
     $precio = (float) ($venta['precio'] ?? 0);
     $id_cliente = (int) ($venta['cliente'] ?? 0);
     $tipo_pago = trim((string) ($venta['tipo_pago'] ?? ''));

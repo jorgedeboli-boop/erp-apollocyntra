@@ -10,9 +10,12 @@ header('Content-Type: application/json; charset=utf-8');
 try {
     $q = isset($_GET['q']) ? trim((string)$_GET['q']) : '';
     $rel_id_empresa = isset($_GET['rel_id_empresa']) ? (int)$_GET['rel_id_empresa'] : 0;
+    if ($rel_id_empresa <= 0) {
+        $rel_id_empresa = obtener_rel_id_empresa_sesion();
+    }
 
     if ($rel_id_empresa <= 0) {
-        throw new Exception('Empresa no indicada');
+        throw new Exception('No se pudo determinar la empresa del usuario');
     }
     if ($q === '') {
         throw new Exception('Indique código, nombre o ID de servicio');

@@ -1111,42 +1111,36 @@ function mostrarDatosVenta() {
   const idSucursal = inputSucursal && inputSucursal.value ? inputSucursal.value : '0';
   $('#insert_id_sucursal').val(idSucursal);
 
-  if (parseInt(idSucursal, 10) > 0) {
-    cargarDatosEmpresa(idSucursal);
-    cargarDatosSucursal(idSucursal);
-  }
+  cargarDatosEmpresa();
 
   divDatosVenta.classList.remove('formulario-borroso');
   divInvoiceActions.classList.remove('formulario-borroso');
 }
 
 /**
- * Cargar datos de la empresa según la sucursal seleccionada
+ * Cargar datos de la empresa del usuario logueado
  */
-function cargarDatosEmpresa(idSucursal) {
+function cargarDatosEmpresa() {
   $.ajax({
     url: 'parts/ventas/crear/get_empresa_sucursal.php',
-    data: {
-      id_sucursal: idSucursal
-    },
     dataType: 'json',
     success: function(response) {
       if (response.success && response.empresa) {
         const empresa = response.empresa;
-        
-        // Actualizar datos de la empresa en el formulario
         $('#nombre_empresa').text(empresa.nombre_empresa || '-');
         $('#cif_empresa').text('CIF: ' + (empresa.cif_empresa || '-'));
         $('#email_empresa').text(empresa.email_empresa || '-');
+        $('#direccion_sucursal').text(empresa.direccion_empresa || '-');
+        $('#poblacion_sucursal').text(empresa.poblacion_empresa || '-');
+        $('#codigo_postal_sucursal').text(empresa.codigo_postal_empresa || '-');
+        $('#telefono_sucursal').text(empresa.telefono_empresa || '-');
       } else {
-        // Si hay error, mostrar valores por defecto
         $('#nombre_empresa').text('-');
         $('#cif_empresa').text('-');
         $('#email_empresa').text('-');
       }
     },
-    error: function(xhr, status, error) {
-      // Si hay error, mostrar valores por defecto
+    error: function() {
       $('#nombre_empresa').text('-');
       $('#cif_empresa').text('-');
       $('#email_empresa').text('-');

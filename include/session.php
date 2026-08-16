@@ -22,6 +22,10 @@ $usuario_estado = isset($_SESSION['usuario_estado']) ? $_SESSION['usuario_estado
 $usuario_telefono = isset($_SESSION['usuario_telefono']) ? $_SESSION['usuario_telefono'] : '';
 $usuario_sucursal = isset($_SESSION['usuario_sucursal']) ? $_SESSION['usuario_sucursal'] : '';
 $usuario_sucursal_nombre = isset($_SESSION['usuario_sucursal_nombre']) ? $_SESSION['usuario_sucursal_nombre'] : '';
+$usuario_rel_id_empresa = isset($_SESSION['usuario_rel_id_empresa']) ? (int) $_SESSION['usuario_rel_id_empresa'] : 0;
+if ($usuario_rel_id_empresa <= 0 && function_exists('obtener_rel_id_empresa_sesion')) {
+    $usuario_rel_id_empresa = obtener_rel_id_empresa_sesion();
+}
 $usuario_privilegio_id = isset($_SESSION['usuario_privilegio_id']) ? $_SESSION['usuario_privilegio_id'] : '';
 $usuario_privilegio_nombre = isset($_SESSION['usuario_privilegio_nombre']) ? $_SESSION['usuario_privilegio_nombre'] : '';
 $usuario_observaciones = isset($_SESSION['usuario_observaciones']) ? $_SESSION['usuario_observaciones'] : '';

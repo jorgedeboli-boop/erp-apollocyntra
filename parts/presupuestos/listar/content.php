@@ -19,17 +19,9 @@ $estados_presupuesto = ['borrador', 'enviado', 'aceptado', 'rechazado', 'caducad
       <div class="d-flex justify-content-between align-items-center w-100 flex-wrap gap-2">
         <h5 class="card-title mb-0">Presupuestos</h5>
         <?php if ($puede_acceder_crear): ?>
-        <a href="javascript:void(0);" class="btn btn-primary waves-effect waves-light px-3 btn-create-record" id="btn_nuevo_presupuesto">
+        <a href="crear_presupuesto.php" class="btn btn-primary waves-effect waves-light px-3 btn-create-record" id="btn_nuevo_presupuesto">
           <span class="icon-base ri ri-add-fill icon-22px me-1"></span>Nuevo presupuesto
         </a>
-        <div style="max-width: 280px; width: 100%; display: none;" id="select_sucursal_nuevo_presupuesto_container">
-          <select class="form-select select2 select2-custom" id="select_sucursal_nuevo_presupuesto" name="id_sucursal_presupuesto" autocomplete="off">
-            <option value="">Sucursal para el presupuesto</option>
-            <?php if (function_exists('obtener_select_sucursales_habilitadas')) {
-              obtener_select_sucursales_habilitadas();
-            } ?>
-          </select>
-        </div>
         <?php endif; ?>
       </div>
     </div>

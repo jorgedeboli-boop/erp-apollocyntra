@@ -309,41 +309,4 @@ document.addEventListener('DOMContentLoaded', function () {
 
   initSelect2Filter('#filtro_presupuesto_estado');
   initSelect2Filter('#filtro_presupuesto_empresa');
-
-  const btnNuevo = document.getElementById('btn_nuevo_presupuesto');
-  const wrapSuc = document.getElementById('select_sucursal_nuevo_presupuesto_container');
-  const selSuc = window.jQuery ? window.jQuery('#select_sucursal_nuevo_presupuesto') : null;
-
-  if (btnNuevo && wrapSuc && selSuc && selSuc.length) {
-    btnNuevo.addEventListener('click', function () {
-      btnNuevo.style.display = 'none';
-      wrapSuc.style.display = 'block';
-      if (!selSuc.hasClass('select2-hidden-accessible')) {
-        selSuc.select2({
-          placeholder: 'Sucursal para el presupuesto',
-          width: '100%',
-          dropdownParent: wrapSuc
-        });
-      }
-      setTimeout(function () {
-        selSuc.select2('open');
-      }, 100);
-    });
-
-    selSuc.on('change', function () {
-      const id = window.jQuery(this).val();
-      if (id) {
-        const form = document.createElement('form');
-        form.method = 'POST';
-        form.action = 'crear_presupuesto.php';
-        const input = document.createElement('input');
-        input.type = 'hidden';
-        input.name = 'id_sucursal';
-        input.value = id;
-        form.appendChild(input);
-        document.body.appendChild(form);
-        form.submit();
-      }
-    });
-  }
 });

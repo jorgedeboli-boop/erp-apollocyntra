@@ -28,24 +28,22 @@ if (!$id_articulo || $motivo === '') {
 try {
     $conexion = conectar_bd();
 
-    $stSucArt = mysqli_prepare($conexion, 'SELECT id_sucursal_destino FROM articulos_venta WHERE id = ? LIMIT 1');
-    if (!$stSucArt) {
-        throw new Exception('Error al comprobar sucursal del artículo: ' . mysqli_error($conexion));
+    $rel_id_empresa_dev = obtener_rel_id_empresa_sesion();
+    $stArt = mysqli_prepare($conexion, 'SELECT sku FROM articulos WHERE sku = ? LIMIT 1');
+    if (!$stArt) {
+        throw new Exception('Error al comprobar el artículo: ' . mysqli_error($conexion));
     }
-    mysqli_stmt_bind_param($stSucArt, 'i', $id_articulo);
-    mysqli_stmt_execute($stSucArt);
-    $resSucArt = mysqli_stmt_get_result($stSucArt);
-    $rowSucArt = $resSucArt ? mysqli_fetch_assoc($resSucArt) : null;
-    mysqli_stmt_close($stSucArt);
-    if (!$rowSucArt) {
+    mysqli_stmt_bind_param($stArt, 'i', $id_articulo);
+    mysqli_stmt_execute($stArt);
+    $resArt = mysqli_stmt_get_result($stArt);
+    $rowArt = $resArt ? mysqli_fetch_assoc($resArt) : null;
+    mysqli_stmt_close($stArt);
+    if (!$rowArt) {
         mysqli_close($conexion);
         echo json_encode(['success' => false, 'message' => 'Artículo no encontrado.']);
         exit;
     }
-    $suc_dest_art = isset($rowSucArt['id_sucursal_destino']) ? (int) $rowSucArt['id_sucursal_destino'] : 0;
-    if ($sucursal_devolucion <= 0) {
-        $sucursal_devolucion = $suc_dest_art;
-    }
+    $suc_dest_art = 0;
 
     if ($id_autorizacion_req > 0) {
         $sku_match = (string) $id_articulo;
@@ -70,8 +68,16 @@ try {
         }
     }
 
-    // Obtener la última venta asociada al artículo desde articulos_venta.last_id_venta
-    $stmt_last = mysqli_prepare($conexion, 'SELECT last_id_venta FROM articulos_venta WHERE id = ? LIMIT 1');
+    // Última venta del artículo (línea en rel_articulos_venta)
+    $stmt_last = mysqli_prepare(
+        $conexion,
+        "SELECT r.rel_id_venta
+         FROM rel_articulos_venta r
+         INNER JOIN ventas v ON v.id = r.rel_id_venta
+         WHERE r.sku_articulo = ? AND v.estado = 'vendido'
+         ORDER BY v.id DESC
+         LIMIT 1"
+    );
     if (!$stmt_last) {
         throw new Exception('Error al preparar consulta last_id_venta: ' . mysqli_error($conexion));
     }
@@ -81,7 +87,7 @@ try {
     $row_last = $res_last ? mysqli_fetch_assoc($res_last) : null;
     mysqli_stmt_close($stmt_last);
 
-    $last_id_venta = $row_last ? (int) ($row_last['last_id_venta'] ?? 0) : 0;
+    $last_id_venta = $row_last ? (int) ($row_last['rel_id_venta'] ?? 0) : 0;
     if ($last_id_venta <= 0) {
         echo json_encode(['success' => false, 'message' => 'El artículo no tiene last_id_venta asociado.']);
         exit;
@@ -91,15 +97,13 @@ try {
     $sql_venta = "SELECT
                     v.id,
                     v.cliente,
-                    v.id_sucursal,
+                    v.rel_id_empresa,
                     v.precio,
                     v.tipo_pago,
                     v.cantidad_contado,
                     v.cantidad_tarjeta,
                     v.cantidad_transferencia,
                     v.cantidad_bizum,
-                    v.venta_web,
-                    v.id_venta_sucursal,
                     f.id_factura AS id_factura,
                     f.factura_simplificada AS factura_simplificada,
                     fs.id_factura AS id_factura_simplificada,
@@ -113,7 +117,7 @@ try {
                     fs.factura_regimen AS factura_regimen_simplificada,
                     f.tipo_factura AS tipo_factura,
                     fs.tipo_factura AS tipo_factura_simplificada,
-                    f.rel_id_empresa AS rel_id_empresa,
+                    f.rel_id_empresa AS rel_id_empresa_factura,
                     fs.rel_id_empresa AS rel_id_empresa_simplificada,
                     f.cliente_factura AS cliente_factura,
                     fs.cliente_factura AS cliente_factura_simplificada,
@@ -141,7 +145,11 @@ try {
 
     $id_venta = (int) $venta['id'];
     $cliente = (int) $venta['cliente'];
-    $sucursal = (int) $venta['id_sucursal'];
+    $sucursal = 0;
+    $rel_id_empresa_dev = (int) ($venta['rel_id_empresa'] ?? 0);
+    if ($rel_id_empresa_dev <= 0) {
+        $rel_id_empresa_dev = obtener_rel_id_empresa_sesion();
+    }
     $cantidad_contado = (float) $venta['cantidad_contado'];
     $cantidad_tarjeta = (float) $venta['cantidad_tarjeta'];
     $cantidad_transferencia = (float) $venta['cantidad_transferencia'];
@@ -150,10 +158,10 @@ try {
     $importe = 0.0;
     $stmtPrecio = mysqli_prepare(
         $conexion,
-        'SELECT precio_venta FROM rel_articulos_venta WHERE sku_articulo = ? AND rel_id_venta = ? AND sucursal_venta = ? LIMIT 1'
+        'SELECT precio_venta FROM rel_articulos_venta WHERE sku_articulo = ? AND rel_id_venta = ? LIMIT 1'
     );
     if ($stmtPrecio) {
-        mysqli_stmt_bind_param($stmtPrecio, 'iii', $id_articulo, $id_venta, $sucursal);
+        mysqli_stmt_bind_param($stmtPrecio, 'ii', $id_articulo, $id_venta);
         mysqli_stmt_execute($stmtPrecio);
         $resPrecio = mysqli_stmt_get_result($stmtPrecio);
         $rowPrecio = $resPrecio ? mysqli_fetch_assoc($resPrecio) : null;
@@ -167,7 +175,7 @@ try {
         $importe = (float) $venta['precio'];
     }
     $forma_pago = $venta['tipo_pago'] ?: '';
-    $devolucion_web = ($venta['venta_web'] === 'true') ? 'true' : 'false';
+    $devolucion_web = 'false';
     
     
 
@@ -186,24 +194,11 @@ try {
     if ($id_factura_orig > 0) {
         // Histórico → facturas_rectificativas_simplificadas.
         // Unificada (simplificada o completa en `facturas`) → facturas_rectificativas.
-        $stmtPref = mysqli_prepare(
-            $conexion,
-            'SELECT empresa_id FROM sucursal WHERE id_sucursal = ? LIMIT 1'
-        );
-        if (!$stmtPref) {
-            throw new Exception('Error al leer sucursal para prefijo rectificativa: ' . mysqli_error($conexion));
-        }
-        mysqli_stmt_bind_param($stmtPref, 'i', $sucursal);
-        mysqli_stmt_execute($stmtPref);
-        $rp = mysqli_stmt_get_result($stmtPref);
-        $rowP = $rp ? mysqli_fetch_assoc($rp) : null;
-        mysqli_stmt_close($stmtPref);
-
         $rel_id_empresa_fact = $id_factura > 0
-            ? (int) ($venta['rel_id_empresa'] ?? 0)
+            ? (int) ($venta['rel_id_empresa_factura'] ?? 0)
             : (int) ($venta['rel_id_empresa_simplificada'] ?? 0);
-        if ($rel_id_empresa_fact <= 0 && $rowP) {
-            $rel_id_empresa_fact = (int) ($rowP['empresa_id'] ?? 0);
+        if ($rel_id_empresa_fact <= 0) {
+            $rel_id_empresa_fact = $rel_id_empresa_dev;
         }
 
         $tipo_factura_v = $id_factura > 0
@@ -317,11 +312,11 @@ try {
                 $conexion,
                 'SELECT descripcion_articulo_rel, coste_articulo_venta, tipo_iva_articulo, system_codigo_regimen
                  FROM rel_articulos_venta
-                 WHERE sku_articulo = ? AND rel_id_venta = ? AND sucursal_venta = ?
+                 WHERE sku_articulo = ? AND rel_id_venta = ?
                  LIMIT 1'
             );
             if ($stmtLineaArt) {
-                mysqli_stmt_bind_param($stmtLineaArt, 'iii', $id_articulo, $id_venta, $sucursal);
+                mysqli_stmt_bind_param($stmtLineaArt, 'ii', $id_articulo, $id_venta);
                 mysqli_stmt_execute($stmtLineaArt);
                 $resLineaArt = mysqli_stmt_get_result($stmtLineaArt);
                 $rowLineaArt = $resLineaArt ? mysqli_fetch_assoc($resLineaArt) : null;
@@ -365,26 +360,28 @@ try {
                 articulo_devolucion,
                 motivo_devolucion,
                 cliente_devolucion,
-                sucursal_devolucion,
+                rel_id_empresa,
+                empresa_devolucion,
                 importe_devolucion,
                 forma_de_pago_devolucion,
                 devolucion_web,
                 factura_rel_id,
                 tipo_factura,
                 fecha_devolucion
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())";
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())";
     $stmt = mysqli_prepare($conexion, $sql);
     if (!$stmt) {
         throw new Exception('Error al preparar inserción: ' . mysqli_error($conexion));
     }
     mysqli_stmt_bind_param(
         $stmt,
-        'iisiiissis',
+        'iisiiidssis',
         $id_venta,
         $id_articulo,
         $motivo,
         $cliente,
-        $sucursal,
+        $rel_id_empresa_dev,
+        $rel_id_empresa_dev,
         $importe,
         $forma_pago,
         $devolucion_web,
@@ -403,10 +400,10 @@ try {
         $conexion,
         "UPDATE rel_articulos_venta
          SET estado_rel_Articulo = 'devuelto'
-         WHERE sku_articulo = ? AND rel_id_venta = ? AND sucursal_venta = ?"
+         WHERE sku_articulo = ? AND rel_id_venta = ?"
     );
     if ($stmt_up_rel_av) {
-        mysqli_stmt_bind_param($stmt_up_rel_av, 'iii', $id_articulo, $id_venta, $sucursal);
+        mysqli_stmt_bind_param($stmt_up_rel_av, 'ii', $id_articulo, $id_venta);
         mysqli_stmt_execute($stmt_up_rel_av);
         mysqli_stmt_close($stmt_up_rel_av);
     }
@@ -431,9 +428,17 @@ try {
         }
     }
 
-    $numero_venta_display = isset($venta['id_venta_sucursal']) && (string) $venta['id_venta_sucursal'] !== ''
-        ? (string) $venta['id_venta_sucursal']
-        : (string) $id_venta;
+    $numero_venta_display = (string) $id_venta;
+
+    $stmt_up_art = mysqli_prepare(
+        $conexion,
+        "UPDATE articulos SET estado = 'enventa' WHERE sku = ?"
+    );
+    if ($stmt_up_art) {
+        mysqli_stmt_bind_param($stmt_up_art, 'i', $id_articulo);
+        mysqli_stmt_execute($stmt_up_art);
+        mysqli_stmt_close($stmt_up_art);
+    }
 
     $stmt_art = mysqli_prepare(
         $conexion,

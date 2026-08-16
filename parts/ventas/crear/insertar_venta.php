@@ -131,6 +131,12 @@ if ($usuario_id <= 0) {
     exit;
 }
 
+$rel_id_empresa_usuario = obtener_rel_id_empresa_sesion();
+if ($rel_id_empresa_usuario <= 0) {
+    echo json_encode(['success' => false, 'message' => 'El usuario no tiene empresa asignada']);
+    exit;
+}
+
 if ($venta_plazos_db === 'si') {
     $estado_venta = "enfecha";
     $estado_articulo = "reservado";
@@ -266,21 +272,7 @@ try {
             }
 
             // Empresa de sucursal origen
-            $rel_id_empresa = 0;
-            if ($id_sucursal_origen > 0) {
-                $stmt4 = mysqli_prepare($conexion, 'SELECT empresa_id FROM sucursal WHERE id_sucursal = ? LIMIT 1');
-                if (!$stmt4) {
-                    throw new Exception('Error al preparar SELECT sucursal.empresa_id: ' . mysqli_error($conexion));
-                }
-                mysqli_stmt_bind_param($stmt4, 'i', $id_sucursal_origen);
-                if (!mysqli_stmt_execute($stmt4)) {
-                    throw new Exception('Error al ejecutar SELECT sucursal.empresa_id: ' . mysqli_stmt_error($stmt4));
-                }
-                $res4 = mysqli_stmt_get_result($stmt4);
-                $row4 = $res4 ? mysqli_fetch_assoc($res4) : null;
-                mysqli_stmt_close($stmt4);
-                $rel_id_empresa = (int) ($row4['empresa_id'] ?? 0);
-            }
+            $rel_id_empresa = obtener_rel_id_empresa_sesion();
 
             // Insert en rel_articulos_estados
             $sqlInsRel = "
@@ -391,23 +383,7 @@ try {
     }
     mysqli_stmt_close($stmtExisteRel);
 
-    $stmtMax = mysqli_prepare(
-        $conexion,
-        'SELECT COALESCE(MAX(id_venta_sucursal), 0) + 1 AS n
-         FROM ventas
-         WHERE id_sucursal = ?
-           AND YEAR(CURRENT_DATE()) = YEAR(fecha)'
-    );
-    if (!$stmtMax) {
-        throw new Exception('Error al preparar lectura de numeración: ' . mysqli_error($conexion));
-    }
-    mysqli_stmt_bind_param($stmtMax, 'i', $sucursal_venta);
-    mysqli_stmt_execute($stmtMax);
-    $resMax = mysqli_stmt_get_result($stmtMax);
-    $rowMax = mysqli_fetch_assoc($resMax);
-    mysqli_stmt_close($stmtMax);
-    $id_venta_sucursal = (int) ($rowMax['n'] ?? 1);
-
+    $id_venta_sucursal = 1;
     $id_cliente = asegurarClienteParaVenta($conexion, $datos_cliente_venta, $usuario_id, $sucursal_venta);
 
     $venta_web = 'false';
@@ -418,49 +394,47 @@ try {
     $anulado_por = 0;
 
     $sqlIns = "INSERT INTO ventas (
-            id_sucursal,
-            id_venta_sucursal,
+            rel_id_empresa,
             cliente,
-            comprado_por,
+            vendido_por,
             intereses,
             estado,
-            venta_plazos,
-            porcentaje_plazos,
-            numero_plazos,
             tipo_pago,
             precio,
             cantidad_contado,
             cantidad_tarjeta,
             cantidad_transferencia,
             cantidad_bizum,
-            cantidad_articulos,
-            fecha
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())";
+            cantidad_items,
+            motivo_anulacion,
+            fecha_anulacion,
+            anulado_por
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
     $stmtI = mysqli_prepare($conexion, $sqlIns);
     if (!$stmtI) {
         throw new Exception('Error al preparar INSERT ventas: ' . mysqli_error($conexion));
     }
 
+    $intereses_int = (int) $intereses;
     mysqli_stmt_bind_param(
         $stmtI,
-        'iiiissssssssssss',
-        $sucursal_venta,
-        $id_venta_sucursal,
+        'iiisssddddisssi',
+        $rel_id_empresa_usuario,
         $id_cliente,
         $usuario_id,
-        $intereses,
+        $intereses_int,
         $estado_venta,
-        $venta_plazos_db,
-        $porcentaje_plazos,
-        $numero_plazos_db,
         $tipo_pago_db,
         $total_venta,
         $cant_contado,
         $cant_tarjeta,
         $cant_transferencia,
         $cant_bizum,
-        $cantidad_articulos
+        $cantidad_articulos,
+        $motivo_anulacion,
+        $fecha_anulacion,
+        $anulado_por
     );
 
     if (!mysqli_stmt_execute($stmtI)) {
@@ -843,21 +817,7 @@ try {
     if ($venta_plazos_db === 'no' && $total_venta > obtenerMaximoTotalFacturaSimplificada()) {
 
         try {
-            $stmtPref = mysqli_prepare(
-                $conexion,
-                'SELECT empresa_id, TRIM(COALESCE(inicio_facturas, "")) AS pref FROM sucursal WHERE id_sucursal = ? LIMIT 1'
-            );
-            if (!$stmtPref) {
-                insertErrorLog('No se pudo leer sucursal para factura: ' . mysqli_error($conexion));
-                throw new Exception('No se pudo leer sucursal para factura: ' . mysqli_error($conexion));
-            }
-            mysqli_stmt_bind_param($stmtPref, 'i', $sucursal_venta);
-            mysqli_stmt_execute($stmtPref);
-            $rp = mysqli_stmt_get_result($stmtPref);
-            $rowP = $rp ? mysqli_fetch_assoc($rp) : null;
-            mysqli_stmt_close($stmtPref);
-
-            $rel_id_empresa_fact = $rowP ? (int) ($rowP['empresa_id'] ?? 0) : 0;
+            $rel_id_empresa_fact = $rel_id_empresa_usuario;
             $prefijo_f = facturaConstruirPrefijo($sucursal_venta, false, $tipo_factura_items);
 
             $fiskaly_eval = fiskalyEvaluarSucursalEmpresa($sucursal_venta, $rel_id_empresa_fact);
@@ -979,21 +939,7 @@ try {
         if($tipo_factura === 'completa'){
 
             try {
-                $stmtPref = mysqli_prepare(
-                    $conexion,
-                    'SELECT empresa_id, TRIM(COALESCE(inicio_facturas, "")) AS pref FROM sucursal WHERE id_sucursal = ? LIMIT 1'
-                );
-                if (!$stmtPref) {
-                    insertErrorLog('No se pudo leer sucursal para factura: ' . mysqli_error($conexion));
-                    throw new Exception('No se pudo leer sucursal para factura: ' . mysqli_error($conexion));
-                }
-                mysqli_stmt_bind_param($stmtPref, 'i', $sucursal_venta);
-                mysqli_stmt_execute($stmtPref);
-                $rp = mysqli_stmt_get_result($stmtPref);
-                $rowP = $rp ? mysqli_fetch_assoc($rp) : null;
-                mysqli_stmt_close($stmtPref);
-    
-                $rel_id_empresa_fact = $rowP ? (int) ($rowP['empresa_id'] ?? 0) : 0;
+                $rel_id_empresa_fact = $rel_id_empresa_usuario;
                 $prefijo_f = facturaConstruirPrefijo($sucursal_venta, false, $tipo_factura_items);
 
                 $fiskaly_eval = fiskalyEvaluarSucursalEmpresa($sucursal_venta, $rel_id_empresa_fact);
@@ -1102,21 +1048,7 @@ try {
         }else{
 
             try {
-                $stmtPref = mysqli_prepare(
-                    $conexion,
-                    'SELECT empresa_id, TRIM(COALESCE(prefijo_factura_simplificada, "")) AS pref FROM sucursal WHERE id_sucursal = ? LIMIT 1'
-                );
-                if (!$stmtPref) {
-                    insertErrorLog('No se pudo leer sucursal para factura simplificada: ' . mysqli_error($conexion));
-                    throw new Exception('No se pudo leer sucursal para factura simplificada: ' . mysqli_error($conexion));
-                }
-                mysqli_stmt_bind_param($stmtPref, 'i', $sucursal_venta);
-                mysqli_stmt_execute($stmtPref);
-                $rp = mysqli_stmt_get_result($stmtPref);
-                $rowP = $rp ? mysqli_fetch_assoc($rp) : null;
-                mysqli_stmt_close($stmtPref);
-
-                $rel_id_empresa_fact = $rowP ? (int) ($rowP['empresa_id'] ?? 0) : 0;
+                $rel_id_empresa_fact = $rel_id_empresa_usuario;
                 $prefijo_f = facturaConstruirPrefijo($sucursal_venta, true, $tipo_factura_items);
 
                 $fiskaly_eval = fiskalyEvaluarSucursalEmpresa($sucursal_venta, $rel_id_empresa_fact);

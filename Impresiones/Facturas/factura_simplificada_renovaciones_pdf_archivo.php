@@ -71,19 +71,19 @@ $queryFR = "SELECT
     FCTR.rel_id_lote,
     FCTR.id_rel_factura_fiskaly,
     FCTR.factura_regimen,
-    SCR.nombre_sucursal,
-    SCR.identificacion_tienda,
-    SCR.numero_identificacion_tienda,
-    SCR.direccion_tienda,
-    SCR.poblacion_tienda,
-    SCR.provincia_tienda,
-    SCR.codigo_postal_tienda,
-    SCR.email_tienda,
-    SCR.telefono_tienda,
-    SCR.empresa,
-    SCR.logotipo_sucursal,
-    SCR.sello_sucursal,
-    SCR.sello_image,
+    EMPS.nombre_empresa AS nombre_sucursal,
+    'CIF' AS identificacion_tienda,
+    EMPS.cif_empresa AS numero_identificacion_tienda,
+    EMPS.direccion_empresa AS direccion_tienda,
+    EMPS.poblacion_empresa AS poblacion_tienda,
+    EMPS.provincia_empresa AS provincia_tienda,
+    EMPS.codigo_postal_empresa AS codigo_postal_tienda,
+    EMPS.email_empresa AS email_tienda,
+    EMPS.telefono_empresa AS telefono_tienda,
+    EMPS.nombre_empresa AS empresa,
+    EMPS.logotipo_empresa AS logotipo_sucursal,
+    NULL AS sello_sucursal,
+    NULL AS sello_image,
     EMPS.id_empresa,
     EMPS.nombre_empresa,
     EMPS.cif_empresa,
@@ -94,8 +94,7 @@ $queryFR = "SELECT
     EMPS.telefono_empresa,
     EMPS.codigo_postal_empresa
 FROM {$tabla_cabecera_simp} AS FCTR
-LEFT JOIN sucursal AS SCR ON SCR.id_sucursal = FCTR.id_sucursal
-LEFT JOIN empresas AS EMPS ON EMPS.id_empresa = SCR.empresa_id
+LEFT JOIN empresas AS EMPS ON EMPS.id_empresa = COALESCE(NULLIF(FCTR.rel_id_empresa, 0), 0)
 WHERE FCTR.id_factura = ?
 LIMIT 1";
 

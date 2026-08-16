@@ -42,45 +42,16 @@ mysqli_stmt_close($stmtL);
 
 $id_sucursal = 0;
 $nombre_sucursal = '';
-$uid_suc = isset($_SESSION['usuario_sucursal']) ? (int)$_SESSION['usuario_sucursal'] : 0;
-if ($uid_suc > 0) {
-    $st = mysqli_prepare($conexion, 'SELECT id_sucursal, nombre_sucursal FROM sucursal WHERE id_sucursal = ? AND empresa_id = ? LIMIT 1');
-    mysqli_stmt_bind_param($st, 'ii', $uid_suc, $id_empresa_rel);
-    mysqli_stmt_execute($st);
-    $rs = mysqli_stmt_get_result($st);
-    if ($sr = mysqli_fetch_assoc($rs)) {
-        $id_sucursal = (int)$sr['id_sucursal'];
-        $nombre_sucursal = $sr['nombre_sucursal'];
+$stEmp = mysqli_prepare($conexion, 'SELECT * FROM empresas WHERE id_empresa = ? LIMIT 1');
+if ($stEmp) {
+    mysqli_stmt_bind_param($stEmp, 'i', $id_empresa_rel);
+    mysqli_stmt_execute($stEmp);
+    $rsEmp = mysqli_stmt_get_result($stEmp);
+    $empresa = $rsEmp ? mysqli_fetch_assoc($rsEmp) : null;
+    mysqli_stmt_close($stEmp);
+    if (is_array($empresa) && !empty($empresa['nombre_empresa'])) {
+        $nombre_sucursal = (string) $empresa['nombre_empresa'];
     }
-    mysqli_stmt_close($st);
-}
-if ($id_sucursal <= 0) {
-    $st = mysqli_prepare(
-        $conexion,
-        "SELECT id_sucursal, nombre_sucursal FROM sucursal WHERE empresa_id = ? AND estado_tienda = 'habilitada' ORDER BY id_sucursal ASC LIMIT 1"
-    );
-    mysqli_stmt_bind_param($st, 'i', $id_empresa_rel);
-    mysqli_stmt_execute($st);
-    $rs = mysqli_stmt_get_result($st);
-    if ($sr = mysqli_fetch_assoc($rs)) {
-        $id_sucursal = (int)$sr['id_sucursal'];
-        $nombre_sucursal = $sr['nombre_sucursal'];
-    }
-    mysqli_stmt_close($st);
-}
-if ($id_sucursal <= 0) {
-    $st = mysqli_prepare(
-        $conexion,
-        'SELECT id_sucursal, nombre_sucursal FROM sucursal WHERE empresa_id = ? ORDER BY id_sucursal ASC LIMIT 1'
-    );
-    mysqli_stmt_bind_param($st, 'i', $id_empresa_rel);
-    mysqli_stmt_execute($st);
-    $rs = mysqli_stmt_get_result($st);
-    if ($sr = mysqli_fetch_assoc($rs)) {
-        $id_sucursal = (int)$sr['id_sucursal'];
-        $nombre_sucursal = $sr['nombre_sucursal'];
-    }
-    mysqli_stmt_close($st);
 }
 
 $cli = null;

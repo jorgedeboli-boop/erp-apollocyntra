@@ -51,16 +51,17 @@ try {
         }
     }
 
-    // Obtener la venta asociada a este artículo (ventas tiene una fila por artículo vendido)
-    $sql_venta = "SELECT id, cliente, id_sucursal, precio, tipo_pago, venta_web 
-                  FROM ventas 
-                  WHERE id_articulo_venta = ? AND estado = 'vendido' 
+    $rel_id_empresa_dev = obtener_rel_id_empresa_sesion();
+    $sql_venta = "SELECT v.id, v.cliente, v.rel_id_empresa, v.precio, v.tipo_pago
+                  FROM ventas v
+                  LEFT JOIN rel_articulos_venta r ON r.rel_id_venta = v.id
+                  WHERE (r.sku_articulo = ? OR v.id = ?) AND v.estado = 'vendido'
                   LIMIT 1";
     $stmt_v = mysqli_prepare($conexion, $sql_venta);
     if (!$stmt_v) {
         throw new Exception('Error al preparar consulta de venta: ' . mysqli_error($conexion));
     }
-    mysqli_stmt_bind_param($stmt_v, 'i', $id_articulo);
+    mysqli_stmt_bind_param($stmt_v, 'ii', $id_articulo, $id_articulo);
     mysqli_stmt_execute($stmt_v);
     $res_v = mysqli_stmt_get_result($stmt_v);
     $venta = mysqli_fetch_assoc($res_v);
@@ -73,35 +74,53 @@ try {
 
     $id_venta = (int)$venta['id'];
     $cliente = (int)$venta['cliente'];
-    $sucursal = isset($venta['id_sucursal']) ? (int)$venta['id_sucursal'] : 0;
+    $rel_id_empresa_dev = (int) ($venta['rel_id_empresa'] ?? 0);
+    if ($rel_id_empresa_dev <= 0) {
+        $rel_id_empresa_dev = obtener_rel_id_empresa_sesion();
+    }
     $importe = (float)$venta['precio'];
     $forma_pago = $venta['tipo_pago'] ?: '';
-    $devolucion_web = ($venta['venta_web'] === 'true') ? 'true' : 'false';
+    $devolucion_web = 'false';
+    $usuario_dev = isset($_SESSION['usuario_id']) ? (int) $_SESSION['usuario_id'] : 0;
+    $estado_dev = 'creada';
+    $codigo_auth = '';
+    $estado_auth = 'nousada';
 
     $sql = "INSERT INTO devoluciones (
                 id_venta_original,
                 articulo_devolucion,
                 motivo_devolucion,
                 cliente_devolucion,
-                sucursal_devolucion,
+                rel_id_empresa,
+                empresa_devolucion,
                 importe_devolucion,
                 forma_de_pago_devolucion,
                 devolucion_web,
-                fecha_devolucion
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW())";
+                usuario_devolucion,
+                estado_devolucion,
+                codigo_autorizacion,
+                estado_autorizacion,
+                fecha_devolucion,
+                hora_devolucion
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURDATE(), CURTIME())";
     $stmt = mysqli_prepare($conexion, $sql);
     if (!$stmt) {
         throw new Exception('Error al preparar inserción: ' . mysqli_error($conexion));
     }
-    mysqli_stmt_bind_param($stmt, 'iisiiiss',
+    mysqli_stmt_bind_param($stmt, 'iisiiidssisss',
         $id_venta,
         $id_articulo,
         $motivo,
         $cliente,
-        $sucursal,
+        $rel_id_empresa_dev,
+        $rel_id_empresa_dev,
         $importe,
         $forma_pago,
-        $devolucion_web
+        $devolucion_web,
+        $usuario_dev,
+        $estado_dev,
+        $codigo_auth,
+        $estado_auth
     );
 
     if (!mysqli_stmt_execute($stmt)) {
@@ -141,17 +160,30 @@ try {
             $id_usuario = (int)$row_u['id_usuario'];
         }
     }
-    $res_num = mysqli_query($conexion, "SELECT COALESCE(MAX(numero_factura), 0) + 1 AS siguiente FROM facturas_rectificativas WHERE id_sucursal = " . $sucursal);
-    $row_num = mysqli_fetch_assoc($res_num);
-    $numero_rect = (int)($row_num['siguiente'] ?? 1);
-    $total_abono = -abs($importe);
-    $stmt_rect = mysqli_prepare($conexion, "INSERT INTO facturas_rectificativas (
-        id_sucursal, numero_factura, cliente_factura, facturado_por, estado_factura, tipo_pago_factura, total_factura, fecha_factura, hora_factura, rel_id_venta, factura_original
-    ) VALUES (?, ?, ?, ?, 'pagada', ?, ?, CURDATE(), CURTIME(), ?, ?)");
-    if ($stmt_rect) {
-        mysqli_stmt_bind_param($stmt_rect, 'iiisdsii', $sucursal, $numero_rect, $cliente, $id_usuario, $forma_pago, $total_abono, $id_venta, $factura_original);
-        mysqli_stmt_execute($stmt_rect);
-        mysqli_stmt_close($stmt_rect);
+    if ($factura_original > 0) {
+        try {
+            $numero_rect = (int) obtenerNumeroFacturaRectificativa(0, 'articulos');
+            $prefijo_rect = facturaConstruirPrefijoRectificativa(0, false, 'articulos');
+            $total_abono = -abs($importe);
+            crearFacturaRectificativa([
+                'id_sucursal' => 0,
+                'numero_factura' => $numero_rect,
+                'cliente_factura' => $cliente,
+                'facturado_por' => $id_usuario,
+                'estado_factura' => 'pagada',
+                'tipo_pago_factura' => $forma_pago,
+                'total_factura' => $total_abono,
+                'rel_id_venta' => $id_venta,
+                'prefijo_factura' => $prefijo_rect,
+                'tipo_factura' => 'articulos',
+                'rel_id_empresa' => $rel_id_empresa_dev,
+                'rel_id_factura' => $factura_original,
+                'factura_original' => $factura_original,
+                'motivo_rectificado' => $motivo,
+            ]);
+        } catch (Throwable $eRect) {
+            insertErrorLog('insertar_devolucion: rectificativa no generada: ' . $eRect->getMessage());
+        }
     }
 
     mysqli_close($conexion);

@@ -19,7 +19,7 @@ if (!is_array($data)) {
 }
 
 $id_presupuesto = isset($data['id_presupuesto']) ? (int)$data['id_presupuesto'] : 0;
-$rel_id_empresa = isset($data['rel_id_empresa']) ? (int)$data['rel_id_empresa'] : 0;
+$rel_id_empresa = obtener_rel_id_empresa_sesion();
 $titulo = isset($data['titulo']) ? trim($data['titulo']) : '';
 $id_cliente = isset($data['id_cliente']) ? (int)$data['id_cliente'] : 0;
 $lineasIn = isset($data['lineas']) && is_array($data['lineas']) ? $data['lineas'] : [];

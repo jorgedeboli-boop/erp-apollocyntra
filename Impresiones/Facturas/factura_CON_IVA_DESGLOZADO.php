@@ -54,19 +54,19 @@ $queryFR = "SELECT
     CLT.tipo_identificacion,
     CLT.identificacion,
     CLT.telefono,
-    SCR.nombre_sucursal,
-    SCR.identificacion_tienda,
-    SCR.numero_identificacion_tienda,
-    SCR.direccion_tienda,
-    SCR.poblacion_tienda,
-    SCR.provincia_tienda,
-    SCR.codigo_postal_tienda,
-    SCR.email_tienda,
-    SCR.telefono_tienda,
-    SCR.empresa,
-    SCR.logotipo_sucursal,
-    SCR.sello_sucursal,
-    SCR.sello_image,
+    EMPS.nombre_empresa AS nombre_sucursal,
+    'CIF' AS identificacion_tienda,
+    EMPS.cif_empresa AS numero_identificacion_tienda,
+    EMPS.direccion_empresa AS direccion_tienda,
+    EMPS.poblacion_empresa AS poblacion_tienda,
+    EMPS.provincia_empresa AS provincia_tienda,
+    EMPS.codigo_postal_empresa AS codigo_postal_tienda,
+    EMPS.email_empresa AS email_tienda,
+    EMPS.telefono_empresa AS telefono_tienda,
+    EMPS.nombre_empresa AS empresa,
+    EMPS.logotipo_empresa AS logotipo_sucursal,
+    NULL AS sello_sucursal,
+    NULL AS sello_image,
     VTS.tipo_pago,
     EMPS.nombre_empresa,
     EMPS.cif_empresa,
@@ -93,9 +93,8 @@ $queryFR = "SELECT
     dc.firma_cliente
 FROM facturas AS FCTR
 LEFT JOIN clientes AS CLT ON CLT.id_cliente = FCTR.cliente_factura
-LEFT JOIN sucursal AS SCR ON SCR.id_sucursal = FCTR.id_sucursal
 LEFT JOIN ventas AS VTS ON VTS.id = FCTR.rel_id_venta
-LEFT JOIN empresas AS EMPS ON EMPS.id_empresa = SCR.empresa_id
+LEFT JOIN empresas AS EMPS ON EMPS.id_empresa = COALESCE(NULLIF(FCTR.rel_id_empresa, 0), NULLIF(VTS.rel_id_empresa, 0))
 LEFT JOIN direcciones d ON d.rel_id_item = CLT.id_cliente AND d.type_direccion = 'clientes'
 LEFT JOIN datos_clientes dc ON dc.rel_id_cliente = CLT.id_cliente
 WHERE FCTR.id_factura = ?
@@ -111,6 +110,9 @@ mysqli_stmt_bind_param($stmtFR, 'i', $id_factura);
 mysqli_stmt_execute($stmtFR);
 $result = mysqli_stmt_get_result($stmtFR);
 $rsItemFR = mysqli_fetch_assoc($result);
+if ($rsItemFR && function_exists('facturaRellenarEmisorDesdeEmpresa')) {
+    $rsItemFR = facturaRellenarEmisorDesdeEmpresa($rsItemFR);
+}
 mysqli_stmt_close($stmtFR);
 
 if (!$rsItemFR) {

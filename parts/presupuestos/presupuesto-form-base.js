@@ -18,15 +18,11 @@ document.addEventListener('DOMContentLoaded', function() {
     invoiceActions.classList.add('formulario-borroso');
   }
 
-  // Obtener id_sucursal del input hidden (recibido por POST)
   const inputSucursal = document.getElementById('sucursal_venta');
-  if (inputSucursal && inputSucursal.value) {
-    // Actualizar input hidden de sucursal en el formulario de INSERT
-    $('#insert_id_sucursal').val(inputSucursal.value);
-    
-    // Mostrar datos de la venta automáticamente
-    mostrarDatosVenta();
+  if (inputSucursal) {
+    $('#insert_id_sucursal').val(inputSucursal.value || '0');
   }
+  mostrarDatosVenta();
   
   // Obtener id_articulo del input hidden (recibido por POST, opcional)
   const inputArticulo = document.getElementById('articulo_venta');
@@ -525,57 +521,43 @@ function mostrarDatosVenta() {
   const divInvoiceActions = document.getElementById('invoice_actions');
   const nombreSucursal = document.getElementById('nombre_sucursal');
   
-  if (!inputSucursal || !divDatosVenta || !divInvoiceActions) {
+  if (!divDatosVenta || !divInvoiceActions) {
     return;
   }
-  
-  if (inputSucursal.value) {
-      // El nombre de la sucursal ya está en el HTML, no necesitamos actualizarlo
-      // Actualizar input hidden de sucursal
-      $('#insert_id_sucursal').val(inputSucursal.value);
 
-      // Cargar datos de la empresa
-      cargarDatosEmpresa(inputSucursal.value);
-      // Cargar datos de la sucursal
-      cargarDatosSucursal(inputSucursal.value);
-
-      divDatosVenta.classList.remove('formulario-borroso');
-      divInvoiceActions.classList.remove('formulario-borroso');
-  } else {
-      $('#insert_id_sucursal').val('');
-      
-      divDatosVenta.classList.add('formulario-borroso');
-      divInvoiceActions.classList.add('formulario-borroso');
+  if (inputSucursal) {
+    $('#insert_id_sucursal').val(inputSucursal.value || '0');
   }
+
+  cargarDatosEmpresa();
+  divDatosVenta.classList.remove('formulario-borroso');
+  divInvoiceActions.classList.remove('formulario-borroso');
 }
 
 /**
- * Cargar datos de la empresa según la sucursal seleccionada
+ * Cargar datos de la empresa del usuario logueado
  */
-function cargarDatosEmpresa(idSucursal) {
+function cargarDatosEmpresa() {
   $.ajax({
     url: 'parts/ventas/crear/get_empresa_sucursal.php',
-    data: {
-      id_sucursal: idSucursal
-    },
     dataType: 'json',
     success: function(response) {
       if (response.success && response.empresa) {
         const empresa = response.empresa;
-        
-        // Actualizar datos de la empresa en el formulario
         $('#nombre_empresa').text(empresa.nombre_empresa || '-');
         $('#cif_empresa').text('CIF: ' + (empresa.cif_empresa || '-'));
         $('#email_empresa').text(empresa.email_empresa || '-');
+        $('#direccion_sucursal').text(empresa.direccion_empresa || '-');
+        $('#poblacion_sucursal').text(empresa.poblacion_empresa || '-');
+        $('#codigo_postal_sucursal').text(empresa.codigo_postal_empresa || '-');
+        $('#telefono_sucursal').text(empresa.telefono_empresa || '-');
       } else {
-        // Si hay error, mostrar valores por defecto
         $('#nombre_empresa').text('-');
         $('#cif_empresa').text('-');
         $('#email_empresa').text('-');
       }
     },
-    error: function(xhr, status, error) {
-      // Si hay error, mostrar valores por defecto
+    error: function() {
       $('#nombre_empresa').text('-');
       $('#cif_empresa').text('-');
       $('#email_empresa').text('-');

@@ -113,6 +113,24 @@ function gfv_contexto_fiskaly(int $id_sucursal, int $rel_id_empresa, string $con
     ];
 }
 
+function gfv_rel_id_empresa_venta(mysqli $conexion, int $id_venta): int
+{
+    $id = 0;
+    $st = mysqli_prepare($conexion, 'SELECT rel_id_empresa FROM ventas WHERE id = ? LIMIT 1');
+    if ($st) {
+        mysqli_stmt_bind_param($st, 'i', $id_venta);
+        mysqli_stmt_execute($st);
+        $res = mysqli_stmt_get_result($st);
+        $row = $res ? mysqli_fetch_assoc($res) : null;
+        mysqli_stmt_close($st);
+        $id = (int) ($row['rel_id_empresa'] ?? 0);
+    }
+    if ($id <= 0 && function_exists('obtener_rel_id_empresa_sesion')) {
+        $id = obtener_rel_id_empresa_sesion();
+    }
+    return $id;
+}
+
 function gfv_generar_factura_completa(
     mysqli $conexion,
     int $id_venta,
@@ -123,20 +141,7 @@ function gfv_generar_factura_completa(
     int $usuario_id,
     string $tipo_factura_items = 'articulos'
 ): int {
-    $stmtPref = mysqli_prepare(
-        $conexion,
-        'SELECT empresa_id, TRIM(COALESCE(inicio_facturas, "")) AS pref FROM sucursal WHERE id_sucursal = ? LIMIT 1'
-    );
-    if (!$stmtPref) {
-        throw new Exception(mysqli_error($conexion));
-    }
-    mysqli_stmt_bind_param($stmtPref, 'i', $id_sucursal);
-    mysqli_stmt_execute($stmtPref);
-    $rp = mysqli_stmt_get_result($stmtPref);
-    $rowP = $rp ? mysqli_fetch_assoc($rp) : null;
-    mysqli_stmt_close($stmtPref);
-
-    $rel_id_empresa_fact = $rowP ? (int) ($rowP['empresa_id'] ?? 0) : 0;
+    $rel_id_empresa_fact = gfv_rel_id_empresa_venta($conexion, $id_venta);
     $prefijo_f = facturaConstruirPrefijo($id_sucursal, false, $tipo_factura_items);
     $ctxFiskaly = gfv_contexto_fiskaly($id_sucursal, $rel_id_empresa_fact, 'venta_plazos factura completa');
     $numero_sig = (int) obtenerNumeroFactura($id_sucursal, $tipo_factura_items);
@@ -227,20 +232,7 @@ function gfv_generar_factura_simplificada(
     int $usuario_id,
     string $tipo_factura_items = 'articulos'
 ): int {
-    $stmtPref = mysqli_prepare(
-        $conexion,
-        'SELECT empresa_id, TRIM(COALESCE(prefijo_factura_simplificada, "")) AS pref FROM sucursal WHERE id_sucursal = ? LIMIT 1'
-    );
-    if (!$stmtPref) {
-        throw new Exception(mysqli_error($conexion));
-    }
-    mysqli_stmt_bind_param($stmtPref, 'i', $id_sucursal);
-    mysqli_stmt_execute($stmtPref);
-    $rp = mysqli_stmt_get_result($stmtPref);
-    $rowP = $rp ? mysqli_fetch_assoc($rp) : null;
-    mysqli_stmt_close($stmtPref);
-
-    $rel_id_empresa_fact = $rowP ? (int) ($rowP['empresa_id'] ?? 0) : 0;
+    $rel_id_empresa_fact = gfv_rel_id_empresa_venta($conexion, $id_venta);
     $prefijo_f = facturaConstruirPrefijo($id_sucursal, true, $tipo_factura_items);
     $ctxFiskaly = gfv_contexto_fiskaly($id_sucursal, $rel_id_empresa_fact, 'venta_plazos factura simplificada');
     $numero_sig = (int) obtenerNumeroFactura($id_sucursal, $tipo_factura_items);

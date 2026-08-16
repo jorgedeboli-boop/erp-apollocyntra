@@ -17,6 +17,72 @@ function conectar_bd() {
 }
 
 /**
+ * Empresa del usuario logueado (`usuarios.rel_id_empresa`).
+ * Si la sesión es antigua, la lee de BD y la guarda. Fallback: APP_ID.
+ *
+ * @return int
+ */
+function obtener_rel_id_empresa_sesion()
+{
+    $id = 0;
+    if (isset($_SESSION['usuario_rel_id_empresa'])) {
+        $id = (int) $_SESSION['usuario_rel_id_empresa'];
+    }
+    if ($id <= 0 && !empty($_SESSION['usuario_id'])) {
+        $conexion = conectar_bd();
+        if ($conexion) {
+            $uid = (int) $_SESSION['usuario_id'];
+            $stmt = mysqli_prepare($conexion, 'SELECT rel_id_empresa FROM usuarios WHERE id_usuario = ? LIMIT 1');
+            if ($stmt) {
+                mysqli_stmt_bind_param($stmt, 'i', $uid);
+                mysqli_stmt_execute($stmt);
+                $res = mysqli_stmt_get_result($stmt);
+                $row = $res ? mysqli_fetch_assoc($res) : null;
+                mysqli_stmt_close($stmt);
+                $id = (int) ($row['rel_id_empresa'] ?? 0);
+            }
+            mysqli_close($conexion);
+        }
+        if ($id > 0) {
+            $_SESSION['usuario_rel_id_empresa'] = $id;
+        }
+    }
+    if ($id <= 0 && defined('APP_ID')) {
+        $id = (int) APP_ID;
+    }
+    return $id > 0 ? $id : 0;
+}
+
+/**
+ * Fila de `empresas` de la empresa del usuario logueado.
+ *
+ * @return array<string,mixed>|null
+ */
+function obtener_datos_empresa_sesion()
+{
+    $id = obtener_rel_id_empresa_sesion();
+    if ($id <= 0) {
+        return null;
+    }
+    $conexion = conectar_bd();
+    if (!$conexion) {
+        return null;
+    }
+    $stmt = mysqli_prepare($conexion, 'SELECT * FROM empresas WHERE id_empresa = ? LIMIT 1');
+    if (!$stmt) {
+        mysqli_close($conexion);
+        return null;
+    }
+    mysqli_stmt_bind_param($stmt, 'i', $id);
+    mysqli_stmt_execute($stmt);
+    $res = mysqli_stmt_get_result($stmt);
+    $row = $res ? mysqli_fetch_assoc($res) : null;
+    mysqli_stmt_close($stmt);
+    mysqli_close($conexion);
+    return $row ? $row : null;
+}
+
+/**
  * Inserta un mensaje en la tabla `error_log` de la base de datos.
  * Esquema esperado: columnas `mensaje` (TEXT o VARCHAR) y `fecha` (DATETIME; se rellena con NOW()).
  * Si tu tabla usa otros nombres de columna, adapta la consulta SQL aquí.
@@ -468,6 +534,13 @@ function facturaConstruirPrefijo($id_sucursal, $simplificada = false, $tipo_fact
         $tipo = 'articulos';
     }
 
+    if ($id_sucursal <= 0) {
+        if ($tipo === 'renovaciones') {
+            return 'GC';
+        }
+        return '';
+    }
+
     $conexion = conectar_bd();
     $stmt = mysqli_prepare(
         $conexion,
@@ -516,6 +589,13 @@ function facturaConstruirPrefijoRectificativa($id_sucursal, $simplificada = fals
     $tipo = strtolower(trim((string) $tipo_factura));
     if (!in_array($tipo, ['articulos', 'oro_inversion', 'renovaciones'], true)) {
         $tipo = 'articulos';
+    }
+
+    if ($id_sucursal <= 0) {
+        if ($tipo === 'renovaciones') {
+            return $es_simplificada ? 'SRGC' : 'RGC';
+        }
+        return $es_simplificada ? 'SR' : 'R';
     }
 
     $conexion = conectar_bd();
@@ -575,6 +655,47 @@ function obtenerNumeroFactura($sucursal_consulta, $tipo_factura = 'articulos') {
     $tipo = strtolower(trim((string) $tipo_factura));
     if (!in_array($tipo, ['articulos', 'oro_inversion', 'renovaciones'], true)) {
         $tipo = 'articulos';
+    }
+
+    if ($sucursal_id <= 0) {
+        $rel_emp = function_exists('obtener_rel_id_empresa_sesion') ? obtener_rel_id_empresa_sesion() : 0;
+        if ($rel_emp <= 0) {
+            mysqli_close($conexion);
+            return (string) ($ano_hoy . '00001');
+        }
+        $sqlTipo = ($tipo === 'renovaciones')
+            ? "tipo_factura = 'renovaciones'"
+            : "tipo_factura IN ('articulos', 'oro_inversion')";
+        $stmt_fact = mysqli_prepare(
+            $conexion,
+            "SELECT fecha_factura, numero_factura
+             FROM facturas
+             WHERE rel_id_empresa = ? AND $sqlTipo
+             ORDER BY id_factura DESC
+             LIMIT 1"
+        );
+        if (!$stmt_fact) {
+            $err = mysqli_error($conexion);
+            mysqli_close($conexion);
+            throw new Exception('Error al preparar consulta de facturas por empresa: ' . $err);
+        }
+        mysqli_stmt_bind_param($stmt_fact, 'i', $rel_emp);
+        mysqli_stmt_execute($stmt_fact);
+        $res_fact = mysqli_stmt_get_result($stmt_fact);
+        $row_fact = $res_fact ? mysqli_fetch_assoc($res_fact) : null;
+        mysqli_stmt_close($stmt_fact);
+        mysqli_close($conexion);
+        if (!$row_fact) {
+            return (string) ($ano_hoy . '00001');
+        }
+        $numero_factura_actual = (string) ($row_fact['numero_factura'] ?? '0');
+        $fecha_factura = (string) ($row_fact['fecha_factura'] ?? '');
+        $ano_fecha = $fecha_factura ? date('Y', strtotime($fecha_factura)) : $ano_hoy;
+        $numero_siguiente = (string) ((int) $numero_factura_actual + 1);
+        if ((int) $ano_hoy > (int) $ano_fecha) {
+            $numero_siguiente = $ano_hoy . '00001';
+        }
+        return (string) $numero_siguiente;
     }
     
     // 1) Leer configuración de la sucursal
@@ -699,6 +820,47 @@ function obtenerNumeroFacturaRectificativa($sucursal_consulta, $tipo_factura = '
         $tipo = 'articulos';
     }
 
+    if ($sucursal_id <= 0) {
+        $rel_emp = function_exists('obtener_rel_id_empresa_sesion') ? obtener_rel_id_empresa_sesion() : 0;
+        $sqlTipo = ($tipo === 'renovaciones')
+            ? "tipo_factura = 'renovaciones'"
+            : "tipo_factura IN ('articulos', 'oro_inversion')";
+        if ($rel_emp <= 0) {
+            mysqli_close($conexion);
+            return (string) ($ano_hoy . '00001');
+        }
+        $stmt_fact = mysqli_prepare(
+            $conexion,
+            "SELECT fecha_factura, numero_factura
+             FROM facturas_rectificativas
+             WHERE rel_id_empresa = ? AND $sqlTipo
+             ORDER BY id_factura DESC
+             LIMIT 1"
+        );
+        if (!$stmt_fact) {
+            $err = mysqli_error($conexion);
+            mysqli_close($conexion);
+            throw new Exception('Error al preparar consulta de facturas_rectificativas por empresa: ' . $err);
+        }
+        mysqli_stmt_bind_param($stmt_fact, 'i', $rel_emp);
+        mysqli_stmt_execute($stmt_fact);
+        $res_fact = mysqli_stmt_get_result($stmt_fact);
+        $row_fact = $res_fact ? mysqli_fetch_assoc($res_fact) : null;
+        mysqli_stmt_close($stmt_fact);
+        mysqli_close($conexion);
+        if (!$row_fact) {
+            return (string) ($ano_hoy . '00001');
+        }
+        $numero_factura_actual = (string) ($row_fact['numero_factura'] ?? '0');
+        $fecha_factura = (string) ($row_fact['fecha_factura'] ?? '');
+        $ano_fecha = $fecha_factura ? date('Y', strtotime($fecha_factura)) : $ano_hoy;
+        $numero_siguiente = (string) ((int) $numero_factura_actual + 1);
+        if ((int) $ano_hoy > (int) $ano_fecha) {
+            $numero_siguiente = $ano_hoy . '00001';
+        }
+        return (string) $numero_siguiente;
+    }
+
     $stmt_sucu = mysqli_prepare(
         $conexion,
         "SELECT reiniciar_numero_factura FROM sucursal WHERE id_sucursal = ? LIMIT 1"
@@ -813,6 +975,47 @@ function obtenerNumeroFacturaRectificativaSimplificadas($sucursal_consulta, $tip
     $tipo = strtolower(trim((string) $tipo_factura));
     if (!in_array($tipo, ['articulos', 'oro_inversion', 'renovaciones'], true)) {
         $tipo = 'articulos';
+    }
+
+    if ($sucursal_id <= 0) {
+        $rel_emp = function_exists('obtener_rel_id_empresa_sesion') ? obtener_rel_id_empresa_sesion() : 0;
+        $sqlTipo = ($tipo === 'renovaciones')
+            ? "tipo_factura = 'renovaciones'"
+            : "tipo_factura IN ('articulos', 'oro_inversion')";
+        if ($rel_emp <= 0) {
+            mysqli_close($conexion);
+            return (string) ($ano_hoy . '00001');
+        }
+        $stmt_fact = mysqli_prepare(
+            $conexion,
+            "SELECT fecha_factura, numero_factura
+             FROM facturas_rectificativas_simplificadas
+             WHERE rel_id_empresa = ? AND $sqlTipo
+             ORDER BY id_factura DESC
+             LIMIT 1"
+        );
+        if (!$stmt_fact) {
+            $err = mysqli_error($conexion);
+            mysqli_close($conexion);
+            throw new Exception('Error al preparar consulta de facturas_rectificativas_simplificadas por empresa: ' . $err);
+        }
+        mysqli_stmt_bind_param($stmt_fact, 'i', $rel_emp);
+        mysqli_stmt_execute($stmt_fact);
+        $res_fact = mysqli_stmt_get_result($stmt_fact);
+        $row_fact = $res_fact ? mysqli_fetch_assoc($res_fact) : null;
+        mysqli_stmt_close($stmt_fact);
+        mysqli_close($conexion);
+        if (!$row_fact) {
+            return (string) ($ano_hoy . '00001');
+        }
+        $numero_factura_actual = (string) ($row_fact['numero_factura'] ?? '0');
+        $fecha_factura = (string) ($row_fact['fecha_factura'] ?? '');
+        $ano_fecha = $fecha_factura ? date('Y', strtotime($fecha_factura)) : $ano_hoy;
+        $numero_siguiente = (string) ((int) $numero_factura_actual + 1);
+        if ((int) $ano_hoy > (int) $ano_fecha) {
+            $numero_siguiente = $ano_hoy . '00001';
+        }
+        return (string) $numero_siguiente;
     }
 
     $stmt_sucu = mysqli_prepare(
@@ -989,6 +1192,9 @@ function crearFactura(array $datos) {
     }
     $id_rel_factura_fiskaly = (int)$d['id_rel_factura_fiskaly'];
     $rel_id_empresa = (int)$d['rel_id_empresa'];
+    if ($rel_id_empresa <= 0 && function_exists('obtener_rel_id_empresa_sesion')) {
+        $rel_id_empresa = obtener_rel_id_empresa_sesion();
+    }
 
     $conexion = conectar_bd();
 
@@ -1123,6 +1329,9 @@ function crearFacturaRectificativa(array $datos) {
     }
     $id_rel_factura_fiskaly = (int)$d['id_rel_factura_fiskaly'];
     $rel_id_empresa = (int)$d['rel_id_empresa'];
+    if ($rel_id_empresa <= 0 && function_exists('obtener_rel_id_empresa_sesion')) {
+        $rel_id_empresa = obtener_rel_id_empresa_sesion();
+    }
     $rel_id_factura = (int)$d['rel_id_factura'];
     $factura_original = (int)$d['factura_original'];
     $motivo_rectificado = (string)$d['motivo_rectificado'];
@@ -1270,6 +1479,9 @@ function crearFacturaRectificativaSimplificadas(array $datos) {
     }
     $id_rel_factura_fiskaly = (int)$d['id_rel_factura_fiskaly'];
     $rel_id_empresa = (int)$d['rel_id_empresa'];
+    if ($rel_id_empresa <= 0 && function_exists('obtener_rel_id_empresa_sesion')) {
+        $rel_id_empresa = obtener_rel_id_empresa_sesion();
+    }
     $rel_id_factura = (int)$d['rel_id_factura'];
     $factura_original = (int)$d['factura_original'];
     $motivo_rectificado = (string)$d['motivo_rectificado'];
@@ -1940,7 +2152,8 @@ function verificar_usuario($usuario, $password) {
             privilegio_usuario,
             observaciones_usuario,
             ultimo_acceso,
-            usuario_root
+            usuario_root,
+            rel_id_empresa
         FROM usuarios
         WHERE usuario = ? AND estado_usuario = 'true'
         LIMIT 1
@@ -2053,6 +2266,10 @@ function iniciar_sesion($usuario_data) {
     $_SESSION['usuario_autenticado'] = true;
     $_SESSION['usuario_login_time'] = time();
     $_SESSION['usuario'] = $usuario_data['usuario'];
+    $_SESSION['usuario_rel_id_empresa'] = (int) ($usuario_data['rel_id_empresa'] ?? 0);
+    if ((int) $_SESSION['usuario_rel_id_empresa'] <= 0 && defined('APP_ID')) {
+        $_SESSION['usuario_rel_id_empresa'] = (int) APP_ID;
+    }
     
     // Guardar variables de la app (idioma, país y nombre)
     $_SESSION['app_lang_id'] = $usuario_data['app_lang_id'];
@@ -10301,22 +10518,72 @@ function proforma_generar_jpg_empresa($ruta_salida, $texto, $ancho = 600, $alto 
     return (bool) $ok;
 }
 
-// FUNCION PAR OBTENER ID_EMPRESA CON ID_SUCURSAL
+// Empresa del usuario logueado; si hay sucursal, se intenta leer sucursal.empresa_id.
 function obtenerIdEmpresa($id_sucursal) {
+    $fallback = 0;
+    if (function_exists('obtener_rel_id_empresa_sesion')) {
+        $fallback = obtener_rel_id_empresa_sesion();
+    }
+    if ($fallback <= 0 && defined('APP_ID')) {
+        $fallback = (int) APP_ID;
+    }
+    $id_sucursal = (int) $id_sucursal;
+    if ($id_sucursal <= 0) {
+        return $fallback > 0 ? $fallback : null;
+    }
     $conexion = conectar_bd();
     if (!$conexion || !($conexion instanceof mysqli)) {
-        return null;
+        return $fallback > 0 ? $fallback : null;
     }
-    $sql = "SELECT empresa_id FROM sucursal WHERE id_sucursal = ?";
-    $stmt = mysqli_prepare($conexion, $sql);
-    mysqli_stmt_bind_param($stmt, 'i', $id_sucursal);
-    mysqli_stmt_execute($stmt);
-    $result = mysqli_stmt_get_result($stmt);
-    $row = $result ? mysqli_fetch_assoc($result) : null;
-    $id_empresa = isset($row['empresa_id']) ? (int) $row['empresa_id'] : null;
-    mysqli_stmt_close($stmt);
+    $stmt = @mysqli_prepare($conexion, 'SELECT empresa_id FROM sucursal WHERE id_sucursal = ?');
+    $id_empresa = null;
+    if ($stmt) {
+        mysqli_stmt_bind_param($stmt, 'i', $id_sucursal);
+        mysqli_stmt_execute($stmt);
+        $result = mysqli_stmt_get_result($stmt);
+        $row = $result ? mysqli_fetch_assoc($result) : null;
+        $id_empresa = isset($row['empresa_id']) ? (int) $row['empresa_id'] : null;
+        mysqli_stmt_close($stmt);
+    }
     mysqli_close($conexion);
+    if ($id_empresa === null || $id_empresa <= 0) {
+        $id_empresa = $fallback > 0 ? $fallback : null;
+    }
     return $id_empresa;
+}
+
+/**
+ * Completa cabecera de factura con datos de `empresas` si faltan los de sucursal.
+ *
+ * @param array<string,mixed> $rs
+ * @return array<string,mixed>
+ */
+function facturaRellenarEmisorDesdeEmpresa(array $rs)
+{
+    $map = [
+        'nombre_sucursal' => 'nombre_empresa',
+        'empresa' => 'nombre_empresa',
+        'numero_identificacion_tienda' => 'cif_empresa',
+        'direccion_tienda' => 'direccion_empresa',
+        'poblacion_tienda' => 'poblacion_empresa',
+        'provincia_tienda' => 'provincia_empresa',
+        'codigo_postal_tienda' => 'codigo_postal_empresa',
+        'email_tienda' => 'email_empresa',
+        'telefono_tienda' => 'telefono_empresa',
+        'logotipo_sucursal' => 'logotipo_empresa',
+    ];
+    foreach ($map as $dest => $src) {
+        $actual = isset($rs[$dest]) ? trim((string) $rs[$dest]) : '';
+        $desdeEmpresa = isset($rs[$src]) ? trim((string) $rs[$src]) : '';
+        if ($actual === '' && $desdeEmpresa !== '') {
+            $rs[$dest] = $desdeEmpresa;
+        }
+    }
+    $tipoId = isset($rs['identificacion_tienda']) ? trim((string) $rs['identificacion_tienda']) : '';
+    if ($tipoId === '') {
+        $rs['identificacion_tienda'] = 'CIF';
+    }
+    return $rs;
 }
 
 function calcular_datos_envio($id_sucursal) {

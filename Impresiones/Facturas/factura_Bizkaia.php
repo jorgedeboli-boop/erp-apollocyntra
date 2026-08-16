@@ -29,19 +29,19 @@ CLT.codigo_postal,
 CLT.tipo_identificacion,
 CLT.identificacion,
 CLT.telefono,
-SCR.nombre_sucursal,
-SCR.identificacion_tienda,
-SCR.numero_identificacion_tienda,
-SCR.direccion_tienda,
-SCR.poblacion_tienda,
-SCR.provincia_tienda,
-SCR.codigo_postal_tienda,
-SCR.email_tienda,
-SCR.telefono_tienda,
-SCR.empresa,
-SCR.logotipo_sucursal,
-SCR.sello_sucursal,
-SCR.sello_image,
+EMPS.nombre_empresa AS nombre_sucursal,
+'CIF' AS identificacion_tienda,
+EMPS.cif_empresa AS numero_identificacion_tienda,
+EMPS.direccion_empresa AS direccion_tienda,
+EMPS.poblacion_empresa AS poblacion_tienda,
+EMPS.provincia_empresa AS provincia_tienda,
+EMPS.codigo_postal_empresa AS codigo_postal_tienda,
+EMPS.email_empresa AS email_tienda,
+EMPS.telefono_empresa AS telefono_tienda,
+EMPS.nombre_empresa AS empresa,
+EMPS.logotipo_empresa AS logotipo_sucursal,
+NULL AS sello_sucursal,
+NULL AS sello_image,
 VTS.id AS identificador_venta,
 VTS.tipo_pago,
 EMPS.id_empresa,
@@ -55,9 +55,8 @@ EMPS.telefono_empresa,
 EMPS.codigo_postal_empresa
 FROM facturas AS FCTR
 LEFT JOIN clientes AS CLT ON CLT.id_cliente = FCTR.cliente_factura 
-LEFT JOIN sucursal AS SCR ON SCR.id_sucursal = FCTR.id_sucursal 
 LEFT JOIN ventas AS VTS ON VTS.id = FCTR.rel_id_venta
-LEFT JOIN empresas AS EMPS ON EMPS.id_empresa = SCR.empresa_id 
+LEFT JOIN empresas AS EMPS ON EMPS.id_empresa = COALESCE(NULLIF(FCTR.rel_id_empresa, 0), NULLIF(VTS.rel_id_empresa, 0))
 WHERE FCTR.id_factura = $id_factura
 ";
 
