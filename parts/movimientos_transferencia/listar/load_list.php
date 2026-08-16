@@ -27,7 +27,6 @@ try {
     $orderDir = isset($_POST['order'][0]['dir']) ? $_POST['order'][0]['dir'] : 'desc';
     
     // Filtros personalizados
-    $filtroSucursal = isset($_POST['filtro_sucursal']) ? trim($_POST['filtro_sucursal']) : '';
     $filtroGrupo = isset($_POST['filtro_grupo']) ? trim($_POST['filtro_grupo']) : '';
     $filtroFechaDesde = isset($_POST['filtro_fecha_desde']) ? trim($_POST['filtro_fecha_desde']) : '';
     $filtroFechaHasta = isset($_POST['filtro_fecha_hasta']) ? trim($_POST['filtro_fecha_hasta']) : '';
@@ -45,12 +44,11 @@ try {
     $columnMap = [
         0 => 'mt.id',
         1 => 'mt.fecha',
-        2 => 's.nombre_sucursal',
-        3 => 'mt.grupos',
-        4 => 'mt.descripcion',
-        5 => 'mt.salida',
-        6 => 'mt.entrada',
-        7 => 'u.usuario'
+        2 => 'mt.grupos',
+        3 => 'mt.descripcion',
+        4 => 'mt.salida',
+        5 => 'mt.entrada',
+        6 => 'u.usuario'
     ];
     
     // Validar columna de ordenamiento
@@ -66,16 +64,9 @@ try {
     $searchParams = [];
     
     if (!empty($searchValue)) {
-        $whereConditions[] = "(mt.id = ? OR mt.grupos LIKE ? OR mt.descripcion LIKE ? OR mt.usuario LIKE ? OR s.nombre_sucursal LIKE ?)";
+        $whereConditions[] = "(mt.id = ? OR mt.grupos LIKE ? OR mt.descripcion LIKE ? OR mt.usuario LIKE ?)";
         $searchTerm = "%$searchValue%";
-        $searchParams = [$searchValue, $searchTerm, $searchTerm, $searchTerm, $searchTerm];
-    }
-    
-    // Agregar filtros personalizados
-    $filtroSucursalId = $filtroSucursal !== '' ? (int) $filtroSucursal : 0;
-    if ($filtroSucursalId > 0) {
-        $whereConditions[] = "mt.sucursal = ?";
-        $searchParams[] = $filtroSucursalId;
+        $searchParams = [$searchValue, $searchTerm, $searchTerm, $searchTerm];
     }
     
     // Filtro por grupo
@@ -107,8 +98,7 @@ try {
     
     // Contar registros totales
     $queryCountTotal = "SELECT COUNT(*) as total 
-                       FROM movimientos_transferencia mt
-                       LEFT JOIN sucursal s ON mt.sucursal = s.id_sucursal";
+                       FROM movimientos_transferencia mt";
     $resultCountTotal = mysqli_query($conexion, $queryCountTotal);
     $rowCountTotal = mysqli_fetch_assoc($resultCountTotal);
     $recordsTotal = (int)$rowCountTotal['total'];
@@ -116,7 +106,6 @@ try {
     // Contar registros filtrados
     $queryCountFiltered = "SELECT COUNT(*) as total 
                           FROM movimientos_transferencia mt
-                          LEFT JOIN sucursal s ON mt.sucursal = s.id_sucursal
                           $whereClause";
     
     if (!empty($searchParams)) {
@@ -135,10 +124,9 @@ try {
     }
     
     // Consulta principal
-    $query = "SELECT mt.id, mt.fecha, s.nombre_sucursal, mt.grupos, mt.descripcion, mt.salida, mt.entrada,
+    $query = "SELECT mt.id, mt.fecha, mt.grupos, mt.descripcion, mt.salida, mt.entrada,
                      COALESCE(u.usuario, mt.usuario) as usuario
               FROM movimientos_transferencia mt
-              LEFT JOIN sucursal s ON mt.sucursal = s.id_sucursal
               LEFT JOIN usuarios u ON mt.usuario = u.id_usuario
               $whereClause
               ORDER BY $orderBy $orderDirection
@@ -160,7 +148,6 @@ try {
         $data[] = [
             $row['id'],
             date('d/m/Y H:i', strtotime($row['fecha'])),
-            htmlspecialchars($row['nombre_sucursal']),
             htmlspecialchars($row['grupos']),
             htmlspecialchars($row['descripcion']),
             $row['salida'],

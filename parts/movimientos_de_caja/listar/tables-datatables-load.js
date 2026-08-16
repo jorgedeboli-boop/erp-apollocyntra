@@ -6,7 +6,7 @@
 
 const movimientosExportConfig = {
   exportUrl: 'parts/movimientos_de_caja/listar/export_all.php',
-  headers: ['ID', 'Fecha', 'Sucursal', 'Grupo', 'Concepto', 'Salida', 'Entrada', 'Usuario']
+  headers: ['ID', 'Fecha', 'Grupo', 'Concepto', 'Salida', 'Entrada', 'Usuario']
 };
 
 // Datatable (js)
@@ -31,10 +31,6 @@ document.addEventListener('DOMContentLoaded', function (e) {
       window.actualizarTituloFiltros();
     }
   }
-
-  const createFilterSucursal = function (containerClass, selectId, defaultOptionText) {
-    return FD.createFilterSucursal(containerClass, selectId, defaultOptionText, onFiltroMovimientoChange);
-  };
 
   const createFilterGrupo = function (containerClass, selectId, defaultOptionText) {
     return FD.createFilterAjax(
@@ -73,8 +69,7 @@ document.addEventListener('DOMContentLoaded', function (e) {
 
   function renderDropdownAccionesMovimiento(full) {
     var idMovimiento = full[0];
-    var sucursalNombre = full[2];
-    var idSucursal = full[8] || '';
+    var idTabla = full[7] || '';
 
     return (
       '<div class="btn-group">' +
@@ -85,22 +80,19 @@ document.addEventListener('DOMContentLoaded', function (e) {
         '<ul class="dropdown-menu dropdown-menu-end">' +
           '<li><a class="dropdown-item accion-editar-movimiento" href="javascript:void(0);" ' +
             'data-id="' + escapeHtml(idMovimiento) + '" ' +
-            'data-sucursal="' + escapeHtml(sucursalNombre) + '">Editar apunte</a></li>' +
+            'data-id-tabla="' + escapeHtml(idTabla) + '">Editar apunte</a></li>' +
           '<li><a class="dropdown-item accion-mover-movimiento" href="javascript:void(0);" data-tipo="tarjeta" ' +
             'data-id="' + escapeHtml(idMovimiento) + '" ' +
-            'data-sucursal="' + escapeHtml(sucursalNombre) + '" ' +
-            'data-id-sucursal="' + escapeHtml(idSucursal) + '">A movimientos tarjetas</a></li>' +
+            'data-id-tabla="' + escapeHtml(idTabla) + '">A movimientos tarjetas</a></li>' +
           '<li><a class="dropdown-item accion-mover-movimiento" href="javascript:void(0);" data-tipo="transferencia" ' +
             'data-id="' + escapeHtml(idMovimiento) + '" ' +
-            'data-sucursal="' + escapeHtml(sucursalNombre) + '" ' +
-            'data-id-sucursal="' + escapeHtml(idSucursal) + '">A movimientos tranferencias</a></li>' +
+            'data-id-tabla="' + escapeHtml(idTabla) + '">A movimientos tranferencias</a></li>' +
           '<li><a class="dropdown-item accion-mover-movimiento" href="javascript:void(0);" data-tipo="bizum" ' +
             'data-id="' + escapeHtml(idMovimiento) + '" ' +
-            'data-sucursal="' + escapeHtml(sucursalNombre) + '" ' +
-            'data-id-sucursal="' + escapeHtml(idSucursal) + '">A movimientos bizum</a></li>' +
+            'data-id-tabla="' + escapeHtml(idTabla) + '">A movimientos bizum</a></li>' +
           '<li><a class="dropdown-item accion-eliminar-movimiento text-danger" href="javascript:void(0);" ' +
             'data-id="' + escapeHtml(idMovimiento) + '" ' +
-            'data-id-sucursal="' + escapeHtml(idSucursal) + '">Eliminar apunte</a></li>' +
+            'data-id-tabla="' + escapeHtml(idTabla) + '">Eliminar apunte</a></li>' +
         '</ul>' +
       '</div>'
     );
@@ -117,8 +109,6 @@ document.addEventListener('DOMContentLoaded', function (e) {
       : new Date().toISOString().split('T')[0];
     document.getElementById('nuevo-fecha').value = hoy;
     
-    // Cargar sucursales y grupos
-    cargarSucursalesNuevoApunte();
     cargarGruposNuevoApunte();
     
     // Abrir modal
@@ -126,46 +116,6 @@ document.addEventListener('DOMContentLoaded', function (e) {
     modal.show();
   }
 
-  // Función para cargar sucursales en el modal de nuevo apunte
-  function cargarSucursalesNuevoApunte() {
-    fetch('parts/clientes/listar/get_sucursales.php')
-      .then(response => response.json())
-      .then(data => {
-        if (data.success) {
-          const select = document.getElementById('nuevo-sucursal');
-          select.innerHTML = '<option value="">Seleccionar sucursal...</option>';
-          
-          data.sucursales.forEach(sucursal => {
-            const option = document.createElement('option');
-            option.value = sucursal.id_sucursal;
-            option.textContent = sucursal.nombre_sucursal;
-            select.appendChild(option);
-          });
-          
-          // Inicializar Select2 después de cargar las opciones
-          const select2 = $(select);
-          if (select2.length) {
-            // Destruir Select2 si ya está inicializado
-            if (select2.hasClass("select2-hidden-accessible")) {
-              select2.select2('destroy');
-            }
-            
-            // Inicializar Select2
-            select2.select2({
-              dropdownParent: $('#modalNuevoApunte'),
-              placeholder: 'Seleccionar sucursal...',
-              allowClear: true
-            });
-          }
-        } else {
-          console.error('Error al cargar sucursales:', data.error);
-        }
-      })
-      .catch(error => {
-        console.error('Error al cargar sucursales:', error);
-      });
-  }
-  
   // Función para cargar grupos en el modal de nuevo apunte
   function cargarGruposNuevoApunte() {
     fetch('parts/movimientos_de_caja/listar/get_grupos.php')
@@ -240,12 +190,10 @@ document.addEventListener('DOMContentLoaded', function (e) {
         type: 'POST',
         data: function(d) {
           // Agregar filtros de columna personalizados
-          const sucursalFilter = document.getElementById('filtro_sucursal');
           const grupoFilter = document.getElementById('filtro_grupo');
           const fechaDesdeFilter = document.getElementById('filtro_fecha_desde');
           const fechaHastaFilter = document.getElementById('filtro_fecha_hasta');
           
-          d.filtro_sucursal = sucursalFilter ? sucursalFilter.value : '';
           d.filtro_grupo = grupoFilter ? grupoFilter.value : '';
           d.filtro_fecha_desde = fechaDesdeFilter ? fechaDesdeFilter.value : '';
           d.filtro_fecha_hasta = fechaHastaFilter ? fechaHastaFilter.value : '';
@@ -270,11 +218,10 @@ document.addEventListener('DOMContentLoaded', function (e) {
           { data: 3 },
           { data: 4 },
           { data: 5 },
-          { data: 6 },
-          { data: 7 }
+          { data: 6 }
         ];
         if (window.puede_acceder_edit) {
-          cols.push({ data: 8, visible: false, searchable: false });
+          cols.push({ data: 7, visible: false, searchable: false });
           cols.push({ data: null, orderable: false, searchable: false, defaultContent: '' });
         }
         return cols;
@@ -290,15 +237,8 @@ document.addEventListener('DOMContentLoaded', function (e) {
           }
         },
         {
-          // Sucursal
-          targets: 2,
-          render: function (data, type, full, meta) {
-            return '<span class="badge bg-label-primary">' + data + '</span>';
-          }
-        },
-        {
           // Salida (formato moneda)
-          targets: 5,
+          targets: 4,
           width: '100px',
           className: 'text-center',
           render: function (data, type, full, meta) {
@@ -310,7 +250,7 @@ document.addEventListener('DOMContentLoaded', function (e) {
         },
         {
           // Entrada (formato moneda)
-          targets: 6,
+          targets: 5,
           width: '100px',
           className: 'text-center',
           render: function (data, type, full, meta) {
@@ -321,7 +261,7 @@ document.addEventListener('DOMContentLoaded', function (e) {
           }
         }
       ].concat(window.puede_acceder_edit ? [{
-          targets: 9,
+          targets: 8,
           className: 'text-center',
           orderable: false,
           searchable: false,
@@ -335,8 +275,7 @@ document.addEventListener('DOMContentLoaded', function (e) {
       lengthMenu: [10, 25, 50, 100],
       
       createdRow: function(row, data, dataIndex) {
-        // data[3] es la columna de Grupo
-        const grupo = data[3];
+        const grupo = data[2];
         
         if (grupo === 'CAJA INICIO') {
           $(row).addClass('bg-label-success');
@@ -581,10 +520,6 @@ console.log(hoy);
 
   // Función para cargar los filtros
   function cargarFiltros() {
-    // Filtro de Sucursal usando la función createFilterSucursal
-    createFilterSucursal('.movimiento_sucursal', 'filtro_sucursal', 'Seleccionar Sucursal');
-    
-    // Filtro de Grupo
     createFilterGrupo('.movimiento_grupo', 'filtro_grupo', 'Todos los grupos');
 
     if (FD) {
@@ -719,7 +654,7 @@ console.log(hoy);
     if (btnEditar) {
       abrirModalEditarMovimiento(
         btnEditar.getAttribute('data-id'),
-        btnEditar.getAttribute('data-sucursal')
+        btnEditar.getAttribute('data-id-tabla')
       );
       return;
     }
@@ -729,8 +664,7 @@ console.log(hoy);
       abrirModalMoverMovimiento(
         btnMover.getAttribute('data-tipo'),
         btnMover.getAttribute('data-id'),
-        btnMover.getAttribute('data-sucursal'),
-        btnMover.getAttribute('data-id-sucursal')
+        btnMover.getAttribute('data-id-tabla')
       );
       return;
     }
@@ -739,7 +673,7 @@ console.log(hoy);
     if (btnEliminar) {
       confirmarEliminarMovimiento(
         btnEliminar.getAttribute('data-id'),
-        btnEliminar.getAttribute('data-id-sucursal')
+        btnEliminar.getAttribute('data-id-tabla')
       );
     }
   });
@@ -750,7 +684,7 @@ console.log(hoy);
     bizum: 'modalMoverMovimientoBizum'
   };
 
-  function abrirModalMoverMovimiento(tipo, idMovimiento, sucursalNombre, idSucursal) {
+  function abrirModalMoverMovimiento(tipo, idMovimiento, idTabla) {
     var modalId = modalesTrasladoMap[tipo];
     if (!modalId) {
       return;
@@ -767,7 +701,7 @@ console.log(hoy);
         'Content-Type': 'application/x-www-form-urlencoded',
       },
       body: 'id_movimiento=' + encodeURIComponent(idMovimiento) +
-        '&sucursal_nombre=' + encodeURIComponent(sucursalNombre)
+        '&id_tabla=' + encodeURIComponent(idTabla)
     })
     .then(function(response) { return response.json(); })
     .then(function(data) {
@@ -785,8 +719,7 @@ console.log(hoy);
         el.textContent = mov.id_movimientos;
       });
       modalEl.querySelector('.mover-id-movimiento').value = mov.id_movimientos;
-      modalEl.querySelector('.mover-id-sucursal').value = mov.id_sucursal || idSucursal || '';
-      modalEl.querySelector('.mover-sucursal-nombre').value = sucursalNombre;
+      modalEl.querySelector('.mover-id-tabla').value = mov.id_tabla || idTabla || '';
       modalEl.querySelector('.mover-fecha-apunte').textContent = formatearFechaApunte(mov.fecha_apunte, mov.hora_de_apunte);
       modalEl.querySelector('.mover-grupo').textContent = mov.grupos || '';
       modalEl.querySelector('.mover-concepto').textContent = mov.concepto || '';
@@ -806,7 +739,7 @@ console.log(hoy);
     });
   }
 
-  function confirmarEliminarMovimiento(idMovimiento, idSucursal) {
+  function confirmarEliminarMovimiento(idMovimiento, idTabla) {
     Swal.fire({
       icon: 'warning',
       title: '¿Eliminar apunte?',
@@ -833,7 +766,7 @@ console.log(hoy);
 
       var formData = new FormData();
       formData.append('id_movimiento', idMovimiento);
-      formData.append('id_sucursal', idSucursal);
+      formData.append('id_tabla', idTabla);
 
       fetch('parts/movimientos_de_caja/listar/delete_movimiento.php', {
         method: 'POST',
@@ -880,9 +813,9 @@ console.log(hoy);
       }
 
       var idMovimiento = modalEl.querySelector('.mover-id-movimiento').value;
-      var idSucursal = modalEl.querySelector('.mover-id-sucursal').value;
+      var idTabla = modalEl.querySelector('.mover-id-tabla').value;
 
-      if (!idMovimiento || !idSucursal) {
+      if (!idMovimiento || !idTabla) {
         Swal.fire({
           icon: 'error',
           title: 'Error',
@@ -917,7 +850,7 @@ console.log(hoy);
 
         var formData = new FormData();
         formData.append('id_movimiento', idMovimiento);
-        formData.append('id_sucursal', idSucursal);
+        formData.append('id_tabla', idTabla);
         formData.append('tipo', tipo);
 
         fetch('parts/movimientos_de_caja/listar/trasladar_movimiento_caja.php', {
@@ -980,7 +913,7 @@ console.log(hoy);
     return texto;
   }
 
-  function abrirModalEditarMovimiento(idMovimiento, sucursalNombre) {
+  function abrirModalEditarMovimiento(idMovimiento, idTabla) {
     // Mostrar el ID en el modal
     document.getElementById('modal-movimiento-id').textContent = idMovimiento;
     
@@ -990,7 +923,7 @@ console.log(hoy);
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
       },
-      body: 'id_movimiento=' + idMovimiento + '&sucursal_nombre=' + encodeURIComponent(sucursalNombre)
+      body: 'id_movimiento=' + encodeURIComponent(idMovimiento) + '&id_tabla=' + encodeURIComponent(idTabla)
     })
     .then(response => response.json())
     .then(data => {
@@ -999,7 +932,7 @@ console.log(hoy);
         
         // Llenar el formulario
         document.getElementById('edit-id-movimiento').value = mov.id_movimientos;
-        document.getElementById('edit-id-sucursal').value = mov.id_sucursal;
+        document.getElementById('edit-id-tabla').value = mov.id_tabla || idTabla;
         document.getElementById('edit-fecha-apunte').value = formatearFechaApunte(mov.fecha_apunte, mov.hora_de_apunte);
         document.getElementById('edit-grupo').value = mov.grupos;
         document.getElementById('edit-concepto').value = mov.concepto;

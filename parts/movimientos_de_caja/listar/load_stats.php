@@ -23,28 +23,19 @@ try {
     $total = 0;
     
     // Obtener filtros
-    $filtroSucursal = isset($_POST['filtro_sucursal']) ? trim($_POST['filtro_sucursal']) : '';
     $filtroGrupo = isset($_POST['filtro_grupo']) ? trim($_POST['filtro_grupo']) : '';
     $filtroFechaDesde = isset($_POST['filtro_fecha_desde']) ? trim($_POST['filtro_fecha_desde']) : '';
     $filtroFechaHasta = isset($_POST['filtro_fecha_hasta']) ? trim($_POST['filtro_fecha_hasta']) : '';
     $filtroPeriodo = isset($_POST['filtro_periodo']) ? trim($_POST['filtro_periodo']) : 'dia';
     
-    // Obtener sucursales disponibles (sin filtro para incluir todas)
-    $querySucursales = "SELECT id_sucursal, nombre_sucursal FROM sucursal ORDER BY nombre_sucursal";
-    $resultSucursales = mysqli_query($conexion, $querySucursales);
-    $sucursales = [];
-    
-    while ($row = mysqli_fetch_assoc($resultSucursales)) {
-        $sucursales[(int) $row['id_sucursal']] = $row['nombre_sucursal'];
-    }
-    
-    // Si se especificó un filtro de sucursal (id_sucursal), solo consultar esa sucursal
-    $filtroSucursalId = $filtroSucursal !== '' ? (int) $filtroSucursal : 0;
-    $sucursalesAConsultar = [];
-    if ($filtroSucursalId > 0 && isset($sucursales[$filtroSucursalId])) {
-        $sucursalesAConsultar = [$filtroSucursalId => $sucursales[$filtroSucursalId]];
-    } else {
-        $sucursalesAConsultar = $sucursales;
+    $tablasCaja = [];
+    $resultTablas = mysqli_query($conexion, "SHOW TABLES LIKE 'movimientos_de_caja_%'");
+    if ($resultTablas) {
+        while ($rowTabla = mysqli_fetch_row($resultTablas)) {
+            if (preg_match('/^movimientos_de_caja_\d+$/', $rowTabla[0])) {
+                $tablasCaja[] = $rowTabla[0];
+            }
+        }
     }
     
     // Construir condiciones WHERE para la fecha
@@ -78,17 +69,10 @@ try {
         $whereClause = ' WHERE ' . implode(' AND ', $whereConditions);
     }
     
-    // Recorrer todas las sucursales y sumar los resultados
+    // Recorrer todas las tablas de caja y sumar los resultados
     $total = 0;
     
-    foreach ($sucursalesAConsultar as $idSucursal => $nombreSucursal) {
-        $tableName = "movimientos_de_caja_$idSucursal";
-        
-        // Verificar si la tabla existe
-        $checkTable = mysqli_query($conexion, "SHOW TABLES LIKE '$tableName'");
-        if (mysqli_num_rows($checkTable) == 0) {
-            continue;
-        }
+    foreach ($tablasCaja as $tableName) {
         
         switch ($tipo) {
             case 'total_entradas':

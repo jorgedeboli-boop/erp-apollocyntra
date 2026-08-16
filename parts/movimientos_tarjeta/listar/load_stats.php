@@ -23,7 +23,6 @@ try {
     $total = 0;
     
     // Obtener filtros
-    $filtroSucursal = isset($_POST['filtro_sucursal']) ? trim($_POST['filtro_sucursal']) : '';
     $filtroFechaDesde = isset($_POST['filtro_fecha_desde']) ? trim($_POST['filtro_fecha_desde']) : '';
     $filtroFechaHasta = isset($_POST['filtro_fecha_hasta']) ? trim($_POST['filtro_fecha_hasta']) : '';
     $filtroPeriodo = isset($_POST['filtro_periodo']) ? trim($_POST['filtro_periodo']) : 'dia';
@@ -31,12 +30,6 @@ try {
     // Construir condiciones WHERE
     $whereConditions = [];
     $searchParams = [];
-    
-    $filtroSucursalId = $filtroSucursal !== '' ? (int) $filtroSucursal : 0;
-    if ($filtroSucursalId > 0) {
-        $whereConditions[] = "mt.sucursal = ?";
-        $searchParams[] = $filtroSucursalId;
-    }
     
     // Filtro por fecha
     if (!empty($filtroFechaDesde) && !empty($filtroFechaHasta)) {
@@ -63,7 +56,6 @@ try {
         case 'total_entradas':
             $query = "SELECT COALESCE(SUM(mt.importe), 0) as total 
                      FROM movimientos_tarjeta mt
-                     LEFT JOIN sucursal s ON mt.sucursal = s.id_sucursal
                      $whereClause";
             break;
             
@@ -82,7 +74,6 @@ try {
             // Solo entradas para tarjeta
             $query = "SELECT COALESCE(SUM(mt.importe), 0) as total 
                      FROM movimientos_tarjeta mt
-                     LEFT JOIN sucursal s ON mt.sucursal = s.id_sucursal
                      $whereClause";
             break;
             

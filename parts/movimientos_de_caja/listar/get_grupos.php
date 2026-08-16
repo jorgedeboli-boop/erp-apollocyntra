@@ -11,22 +11,14 @@ try {
     // Conectar BD
     $conexion = conectar_bd();
     
-    // Obtener todas las sucursales
-    $querySucursales = "SELECT id_sucursal FROM sucursal ORDER BY id_sucursal";
-    $resultSucursales = mysqli_query($conexion, $querySucursales);
-    
     $gruposUnicos = [];
+    $resultTablas = mysqli_query($conexion, "SHOW TABLES LIKE 'movimientos_de_caja_%'");
     
-    // Recorrer todas las sucursales para obtener los grupos
-    while ($row = mysqli_fetch_assoc($resultSucursales)) {
-        $idSucursal = $row['id_sucursal'];
-        $tableName = "movimientos_de_caja_$idSucursal";
-        
-        // Verificar si la tabla existe
-        $checkTable = mysqli_query($conexion, "SHOW TABLES LIKE '$tableName'");
-        if (mysqli_num_rows($checkTable) == 0) {
+    while ($resultTablas && ($rowTabla = mysqli_fetch_row($resultTablas))) {
+        if (!preg_match('/^movimientos_de_caja_\d+$/', $rowTabla[0])) {
             continue;
         }
+        $tableName = $rowTabla[0];
         
         // Obtener grupos únicos de esta tabla
         $queryGrupos = "SELECT DISTINCT grupos FROM $tableName WHERE grupos != '' AND grupos IS NOT NULL ORDER BY grupos";

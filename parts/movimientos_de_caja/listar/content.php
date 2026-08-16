@@ -82,9 +82,6 @@
       <div class="d-flex justify-content-between align-items-center row gx-1 pt-4 gap-5 gap-md-0 mt-0">
         <div class="col-md-12">
           <div class="d-flex gx-1 gap-1">
-            <div class="flex-fill movimiento_sucursal select2-btn-height">
-              <!-- El filtro de sucursal se creará dinámicamente -->
-            </div>
             <div class="flex-fill movimiento_grupo select2-btn-height">
               <!-- El filtro de grupo se creará dinámicamente -->
             </div>
@@ -114,13 +111,13 @@
           <tr>
             <th>ID</th>
             <th>Fecha</th>
-            <th>Sucursal</th>
             <th>Grupo</th>
             <th>Concepto</th>
             <th>Salida</th>
             <th>Entrada</th>
             <th>Usuario</th>
             <?php if ($puede_acceder_edit): ?>
+            <th class="d-none"></th>
             <th class="text-center">Acciones</th>
             <?php endif; ?>
           </tr>
@@ -140,13 +137,6 @@
       </div>
       <div class="modal-body">
         <form id="formNuevoApunte">
-          <div class="mb-3">
-            <label for="nuevo-sucursal" class="form-label">Sucursal</label>
-            <select class="form-select" id="nuevo-sucursal" name="id_sucursal" required>
-              <option value="">Seleccionar sucursal...</option>
-            </select>
-          </div>
-          
           <div class="mb-3">
             <label for="nuevo-fecha" class="form-label">Fecha</label>
             <input type="date" class="form-control" id="nuevo-fecha" name="fecha_apunte" required>
@@ -201,7 +191,7 @@
       <div class="modal-body">
         <form id="formEditarMovimiento">
           <input type="hidden" id="edit-id-movimiento" name="id_movimiento">
-          <input type="hidden" id="edit-id-sucursal" name="id_sucursal">
+          <input type="hidden" id="edit-id-tabla" name="id_tabla">
           
           <div class="mb-3">
             <label for="edit-fecha-apunte" class="form-label">Fecha del apunte</label>
@@ -258,8 +248,7 @@
       <div class="modal-body">
         <p class="text-muted mb-3">Movimiento #<span class="mover-movimiento-id-label"></span></p>
         <input type="hidden" class="mover-id-movimiento" id="mover-tarjeta-id-movimiento">
-        <input type="hidden" class="mover-id-sucursal" id="mover-tarjeta-id-sucursal">
-        <input type="hidden" class="mover-sucursal-nombre" id="mover-tarjeta-sucursal-nombre">
+        <input type="hidden" class="mover-id-tabla" id="mover-tarjeta-id-tabla">
         <div class="mb-2"><strong>Fecha:</strong> <span class="mover-fecha-apunte"></span></div>
         <div class="mb-2"><strong>Grupo:</strong> <span class="mover-grupo"></span></div>
         <div class="mb-2"><strong>Concepto:</strong> <span class="mover-concepto"></span></div>
@@ -287,8 +276,7 @@
       <div class="modal-body">
         <p class="text-muted mb-3">Movimiento #<span class="mover-movimiento-id-label"></span></p>
         <input type="hidden" class="mover-id-movimiento" id="mover-transferencia-id-movimiento">
-        <input type="hidden" class="mover-id-sucursal" id="mover-transferencia-id-sucursal">
-        <input type="hidden" class="mover-sucursal-nombre" id="mover-transferencia-sucursal-nombre">
+        <input type="hidden" class="mover-id-tabla" id="mover-transferencia-id-tabla">
         <div class="mb-2"><strong>Fecha:</strong> <span class="mover-fecha-apunte"></span></div>
         <div class="mb-2"><strong>Grupo:</strong> <span class="mover-grupo"></span></div>
         <div class="mb-2"><strong>Concepto:</strong> <span class="mover-concepto"></span></div>
@@ -316,8 +304,7 @@
       <div class="modal-body">
         <p class="text-muted mb-3">Movimiento #<span class="mover-movimiento-id-label"></span></p>
         <input type="hidden" class="mover-id-movimiento" id="mover-bizum-id-movimiento">
-        <input type="hidden" class="mover-id-sucursal" id="mover-bizum-id-sucursal">
-        <input type="hidden" class="mover-sucursal-nombre" id="mover-bizum-sucursal-nombre">
+        <input type="hidden" class="mover-id-tabla" id="mover-bizum-id-tabla">
         <div class="mb-2"><strong>Fecha:</strong> <span class="mover-fecha-apunte"></span></div>
         <div class="mb-2"><strong>Grupo:</strong> <span class="mover-grupo"></span></div>
         <div class="mb-2"><strong>Concepto:</strong> <span class="mover-concepto"></span></div>

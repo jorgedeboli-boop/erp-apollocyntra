@@ -9,12 +9,12 @@ header('Content-Type: application/json');
 
 try {
     // Verificar que se reciban los parámetros necesarios
-    if (!isset($_POST['id_movimiento']) || !isset($_POST['id_sucursal'])) {
+    $idTabla = isset($_POST['id_tabla']) ? (int)$_POST['id_tabla'] : 0;
+    if (!isset($_POST['id_movimiento']) || $idTabla <= 0) {
         throw new Exception("Parámetros incompletos");
     }
     
     $idMovimiento = (int)$_POST['id_movimiento'];
-    $idSucursal = (int)$_POST['id_sucursal'];
     $grupos = trim($_POST['grupos']);
     $concepto = trim($_POST['concepto']);
     $salida = floatval($_POST['salida']);
@@ -41,7 +41,7 @@ try {
     $conexion = conectar_bd();
     
     // Nombre de la tabla
-    $tableName = "movimientos_de_caja_$idSucursal";
+    $tableName = "movimientos_de_caja_$idTabla";
     
     // Verificar si la tabla existe
     $checkTable = mysqli_query($conexion, "SHOW TABLES LIKE '$tableName'");

@@ -23,7 +23,6 @@ try {
     $total = 0;
     
     // Obtener filtros
-    $filtroSucursal = isset($_POST['filtro_sucursal']) ? trim($_POST['filtro_sucursal']) : '';
     $filtroFechaDesde = isset($_POST['filtro_fecha_desde']) ? trim($_POST['filtro_fecha_desde']) : '';
     $filtroFechaHasta = isset($_POST['filtro_fecha_hasta']) ? trim($_POST['filtro_fecha_hasta']) : '';
     $filtroPeriodo = isset($_POST['filtro_periodo']) ? trim($_POST['filtro_periodo']) : 'dia';
@@ -31,12 +30,6 @@ try {
     // Construir condiciones WHERE
     $whereConditions = [];
     $searchParams = [];
-    
-    $filtroSucursalId = $filtroSucursal !== '' ? (int) $filtroSucursal : 0;
-    if ($filtroSucursalId > 0) {
-        $whereConditions[] = "mb.sucursal = ?";
-        $searchParams[] = $filtroSucursalId;
-    }
     
     // Filtro por fecha
     if (!empty($filtroFechaDesde) && !empty($filtroFechaHasta)) {
@@ -63,7 +56,6 @@ try {
         case 'total_entradas':
             $query = "SELECT COALESCE(SUM(mb.importe), 0) as total 
                      FROM movimientos_bizum mb
-                     LEFT JOIN sucursal s ON mb.sucursal = s.id_sucursal
                      $whereClause";
             break;
             
@@ -82,7 +74,6 @@ try {
             // Solo entradas para bizum
             $query = "SELECT COALESCE(SUM(mb.importe), 0) as total 
                      FROM movimientos_bizum mb
-                     LEFT JOIN sucursal s ON mb.sucursal = s.id_sucursal
                      $whereClause";
             break;
             

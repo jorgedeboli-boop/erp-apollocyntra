@@ -25,15 +25,11 @@ function cargarEstadisticas() {
  * Función para obtener los filtros actuales
  */
 function obtenerFiltrosActuales() {
-    const sucursalFilter = document.getElementById('filtro_sucursal');
     const fechaDesdeFilter = document.getElementById('filtro_fecha_desde');
     const fechaHastaFilter = document.getElementById('filtro_fecha_hasta');
     
     const params = new URLSearchParams();
     
-    if (sucursalFilter && sucursalFilter.value) {
-        params.append('filtro_sucursal', sucursalFilter.value);
-    }
     if (fechaDesdeFilter && fechaDesdeFilter.value) {
         params.append('filtro_fecha_desde', fechaDesdeFilter.value);
     }

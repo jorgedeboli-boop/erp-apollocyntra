@@ -9,11 +9,6 @@ header('Content-Type: application/json');
 
 try {
     // Verificar que se reciban los parámetros necesarios
-    if (!isset($_POST['id_sucursal'])) {
-        throw new Exception("ID de sucursal es requerido");
-    }
-    
-    $idSucursal = (int)$_POST['id_sucursal'];
     $fechaApunte = trim($_POST['fecha_apunte']);
     $grupos = trim($_POST['grupos']);
     $concepto = trim($_POST['concepto']);
@@ -40,24 +35,23 @@ try {
     // Conectar BD
     $conexion = conectar_bd();
     
-    // Verificar que la sucursal existe
-    $querySucursal = "SELECT id_sucursal FROM sucursal WHERE id_sucursal = ?";
-    $stmtSucursal = mysqli_prepare($conexion, $querySucursal);
-    mysqli_stmt_bind_param($stmtSucursal, 'i', $idSucursal);
-    mysqli_stmt_execute($stmtSucursal);
-    $resultSucursal = mysqli_stmt_get_result($stmtSucursal);
-    
-    if (!$resultSucursal || mysqli_num_rows($resultSucursal) == 0) {
-        throw new Exception("Sucursal no encontrada");
+    $tablasCaja = [];
+    $resultTablas = mysqli_query($conexion, "SHOW TABLES LIKE 'movimientos_de_caja_%'");
+    if ($resultTablas) {
+        while ($rowTabla = mysqli_fetch_row($resultTablas)) {
+            if (preg_match('/^movimientos_de_caja_(\d+)$/', $rowTabla[0], $m)) {
+                $tablasCaja[] = [
+                    'name' => $rowTabla[0],
+                    'id' => (int) $m[1],
+                ];
+            }
+        }
     }
-    mysqli_stmt_close($stmtSucursal);
-    
-    // Nombre de la tabla
-    $tableName = "movimientos_de_caja_$idSucursal";
-    
-    // Verificar si la tabla existe
-    $checkTable = mysqli_query($conexion, "SHOW TABLES LIKE '$tableName'");
-    if (mysqli_num_rows($checkTable) == 0) {
+    usort($tablasCaja, function ($a, $b) {
+        return $a['id'] <=> $b['id'];
+    });
+    $tableName = $tablasCaja[0]['name'] ?? '';
+    if ($tableName === '') {
         throw new Exception("Tabla de movimientos no encontrada");
     }
     

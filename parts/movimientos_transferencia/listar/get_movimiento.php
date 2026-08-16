@@ -19,7 +19,7 @@ try {
     $conexion = conectar_bd();
     
     // Obtener los datos del movimiento
-    $query = "SELECT id, fecha, grupos, descripcion, salida, entrada, usuario, sucursal
+    $query = "SELECT id, fecha, grupos, descripcion, salida, entrada, usuario
               FROM movimientos_transferencia 
               WHERE id = ?";
     

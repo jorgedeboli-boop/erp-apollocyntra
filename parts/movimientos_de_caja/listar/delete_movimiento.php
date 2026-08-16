@@ -9,27 +9,22 @@ header('Content-Type: application/json');
 
 try {
     // Verificar que se reciban los parámetros necesarios
-    if (!isset($_POST['id_movimiento']) || !isset($_POST['id_sucursal'])) {
+    $idTabla = isset($_POST['id_tabla']) ? (int)$_POST['id_tabla'] : 0;
+    if (!isset($_POST['id_movimiento']) || $idTabla <= 0) {
         throw new Exception("Parámetros incompletos");
     }
     
     $idMovimiento = (int)$_POST['id_movimiento'];
-    $idSucursal = (int)$_POST['id_sucursal'];
     
     // Validaciones
     if ($idMovimiento <= 0) {
         throw new Exception("ID de movimiento inválido");
     }
     
-    if ($idSucursal <= 0) {
-        throw new Exception("ID de sucursal inválido");
-    }
-    
     // Conectar BD
     $conexion = conectar_bd();
     
-    // Nombre de la tabla
-    $tableName = "movimientos_de_caja_$idSucursal";
+    $tableName = "movimientos_de_caja_$idTabla";
     
     // Verificar si la tabla existe
     $checkTable = mysqli_query($conexion, "SHOW TABLES LIKE '$tableName'");

@@ -4,9 +4,7 @@ $vFiltrosDinamicos = filemtime(__DIR__ . '/../../universal/filtros-dinamicos-lis
 <script>
 window.FiltrosDinamicosConfig = {
   containerId: 'collapse_filtros',
-  readyClass: 'movimientos-bizum-filtros-ready',
-  sucursalValueField: 'id_sucursal',
-  sucursalLabelField: 'nombre_sucursal'
+  readyClass: 'movimientos-bizum-filtros-ready'
 };
 </script>
 <script src="parts/universal/filtros-dinamicos-listar.js?v=<?php echo $vFiltrosDinamicos; ?>"></script>

@@ -163,12 +163,12 @@ function traslado_caja_ajustar_aperturas_posteriores_mismo_dia(
 }
 
 try {
-    if (!isset($_POST['id_movimiento'], $_POST['id_sucursal'], $_POST['tipo'])) {
+    $idTabla = isset($_POST['id_tabla']) ? (int) $_POST['id_tabla'] : 0;
+    if (!isset($_POST['id_movimiento'], $_POST['tipo']) || $idTabla <= 0) {
         throw new Exception('Parámetros incompletos');
     }
 
     $idMovimiento = (int) $_POST['id_movimiento'];
-    $idSucursal = (int) $_POST['id_sucursal'];
     $tipo = strtolower(trim($_POST['tipo']));
 
     $tiposValidos = [
@@ -177,7 +177,7 @@ try {
         'bizum' => 'bizum',
     ];
 
-    if ($idMovimiento <= 0 || $idSucursal <= 0) {
+    if ($idMovimiento <= 0) {
         throw new Exception('Parámetros inválidos');
     }
 
@@ -186,7 +186,7 @@ try {
     }
 
     $tipoCajaTexto = $tiposValidos[$tipo];
-    $tableName = 'movimientos_de_caja_' . $idSucursal;
+    $tableName = 'movimientos_de_caja_' . $idTabla;
 
     $conexion = conectar_bd();
     if (!$conexion) {
@@ -239,11 +239,6 @@ try {
     $importeTexto = number_format($importeMovimiento, 2, ',', '.') . '€';
     $deltaCaja = traslado_caja_calcular_delta($entradaOriginal, $salidaOriginal);
 
-    $nombreSucursal = obtener_nombre_sucursal($idSucursal);
-    if (!$nombreSucursal) {
-        $nombreSucursal = 'Sucursal ' . $idSucursal;
-    }
-
     $uidMov = (int) $usuario_id;
     $gruposDestino = $gruposOriginal !== '' ? $gruposOriginal : 'General';
 
@@ -251,16 +246,15 @@ try {
 
     if ($tipo === 'transferencia') {
         $queryInsert = "INSERT INTO movimientos_transferencia (
-                            sucursal, id_lote, id_venta, descripcion, entrada, salida, usuario, grupos, fecha
-                        ) VALUES (?, 0, 0, ?, ?, ?, ?, ?, NOW())";
+                            id_lote, id_venta, descripcion, entrada, salida, usuario, grupos, fecha
+                        ) VALUES (0, 0, ?, ?, ?, ?, ?, NOW())";
         $stmtInsert = mysqli_prepare($conexion, $queryInsert);
         if (!$stmtInsert) {
             throw new Exception('Error al insertar en transferencias: ' . mysqli_error($conexion));
         }
         mysqli_stmt_bind_param(
             $stmtInsert,
-            'isddis',
-            $idSucursal,
+            'sddis',
             $conceptoOriginal,
             $entradaOriginal,
             $salidaOriginal,
@@ -269,16 +263,15 @@ try {
         );
     } elseif ($tipo === 'tarjeta') {
         $queryInsert = "INSERT INTO movimientos_tarjeta (
-                            id_venta, sucursal, id_lote, descripcion, importe, usuario, grupos, fecha
-                        ) VALUES (0, ?, 0, ?, ?, ?, ?, NOW())";
+                            id_venta, id_lote, descripcion, importe, usuario, grupos, fecha
+                        ) VALUES (0, 0, ?, ?, ?, ?, NOW())";
         $stmtInsert = mysqli_prepare($conexion, $queryInsert);
         if (!$stmtInsert) {
             throw new Exception('Error al insertar en tarjetas: ' . mysqli_error($conexion));
         }
         mysqli_stmt_bind_param(
             $stmtInsert,
-            'isdis',
-            $idSucursal,
+            'sdis',
             $conceptoOriginal,
             $importeMovimiento,
             $uidMov,
@@ -286,16 +279,15 @@ try {
         );
     } else {
         $queryInsert = "INSERT INTO movimientos_bizum (
-                            sucursal, id_venta, id_lote, descripcion, importe, usuario, grupos, fecha
-                        ) VALUES (?, 0, 0, ?, ?, ?, ?, NOW())";
+                            id_venta, id_lote, descripcion, importe, usuario, grupos, fecha
+                        ) VALUES (0, 0, ?, ?, ?, ?, NOW())";
         $stmtInsert = mysqli_prepare($conexion, $queryInsert);
         if (!$stmtInsert) {
             throw new Exception('Error al insertar en bizum: ' . mysqli_error($conexion));
         }
         mysqli_stmt_bind_param(
             $stmtInsert,
-            'isdis',
-            $idSucursal,
+            'sdis',
             $conceptoOriginal,
             $importeMovimiento,
             $uidMov,
@@ -361,8 +353,6 @@ try {
     $textoActionUser = $nombreUsuarioAction
         . ' traslado movimiento de caja nº '
         . $idMovimiento
-        . ' de la sucursal '
-        . $nombreSucursal
         . ' a caja '
         . $tipoCajaTexto;
     $idActionUser = '25';

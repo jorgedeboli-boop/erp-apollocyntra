@@ -82,9 +82,6 @@
       <div class="d-flex justify-content-between align-items-center row gx-1 pt-4 gap-5 gap-md-0 mt-0">
         <div class="col-md-12">
           <div class="d-flex gx-1 gap-1">
-            <div class="flex-fill movimiento_sucursal select2-btn-height">
-              <!-- El filtro de sucursal se creará dinámicamente -->
-            </div>
             <div class="flex-fill movimiento_grupo select2-btn-height">
               <!-- El filtro de grupo se creará dinámicamente -->
             </div>
@@ -114,7 +111,6 @@
           <tr>
             <th>ID</th>
             <th>Fecha</th>
-            <th>Sucursal</th>
             <th>Grupo</th>
             <th>Descripción</th>
             <th>Salida</th>
@@ -138,13 +134,6 @@
       </div>
       <div class="modal-body">
         <form id="formNuevoApunte">
-          <div class="mb-3">
-            <label for="nuevo-sucursal" class="form-label">Sucursal</label>
-            <select class="form-select" id="nuevo-sucursal" name="sucursal" required>
-              <option value="">Seleccionar sucursal...</option>
-            </select>
-          </div>
-          
           <div class="mb-3">
             <label for="nuevo-fecha" class="form-label">Fecha</label>
             <input type="date" class="form-control" id="nuevo-fecha" name="fecha" required>

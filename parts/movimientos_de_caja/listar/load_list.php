@@ -27,7 +27,6 @@ try {
     $orderDir = isset($_POST['order'][0]['dir']) ? $_POST['order'][0]['dir'] : 'desc';
     
     // Filtros personalizados
-    $filtroSucursal = isset($_POST['filtro_sucursal']) ? trim($_POST['filtro_sucursal']) : '';
     $filtroGrupo = isset($_POST['filtro_grupo']) ? trim($_POST['filtro_grupo']) : '';
     $filtroFechaDesde = isset($_POST['filtro_fecha_desde']) ? trim($_POST['filtro_fecha_desde']) : '';
     $filtroFechaHasta = isset($_POST['filtro_fecha_hasta']) ? trim($_POST['filtro_fecha_hasta']) : '';
@@ -47,12 +46,11 @@ try {
     $columnMap = [
         0 => 'id_movimientos',
         1 => 'fecha_apunte',
-        2 => 'sucursal_nombre',
-        3 => 'grupos',
-        4 => 'concepto',
-        5 => 'salida',
-        6 => 'entrada',
-        7 => 'usuario'
+        2 => 'grupos',
+        3 => 'concepto',
+        4 => 'salida',
+        5 => 'entrada',
+        6 => 'usuario'
     ];
     
     // Validar columna de ordenamiento
@@ -63,22 +61,17 @@ try {
     $orderBy = $columnMap[$orderColumn];
     $orderDirection = strtoupper($orderDir) === 'ASC' ? 'ASC' : 'DESC';
     
-    // Obtener sucursales disponibles (sin filtro para incluir todas)
-    $querySucursales = "SELECT id_sucursal, nombre_sucursal FROM sucursal ORDER BY nombre_sucursal";
-    $resultSucursales = mysqli_query($conexion, $querySucursales);
-    $sucursales = [];
-    
-    while ($row = mysqli_fetch_assoc($resultSucursales)) {
-        $sucursales[(int) $row['id_sucursal']] = $row['nombre_sucursal'];
-    }
-    
-    // Si se especificó un filtro de sucursal (id_sucursal), solo consultar esa sucursal
-    $filtroSucursalId = $filtroSucursal !== '' ? (int) $filtroSucursal : 0;
-    $sucursalesAConsultar = [];
-    if ($filtroSucursalId > 0 && isset($sucursales[$filtroSucursalId])) {
-        $sucursalesAConsultar = [$filtroSucursalId => $sucursales[$filtroSucursalId]];
-    } else {
-        $sucursalesAConsultar = $sucursales;
+    $tablasCaja = [];
+    $resultTablas = mysqli_query($conexion, "SHOW TABLES LIKE 'movimientos_de_caja_%'");
+    if ($resultTablas) {
+        while ($rowTabla = mysqli_fetch_row($resultTablas)) {
+            if (preg_match('/^movimientos_de_caja_(\d+)$/', $rowTabla[0], $m)) {
+                $tablasCaja[] = [
+                    'name' => $rowTabla[0],
+                    'id' => (int) $m[1],
+                ];
+            }
+        }
     }
     
     // Construir condiciones de búsqueda
@@ -130,23 +123,17 @@ try {
     $recordsTotal = 0;
     $recordsFiltered = 0;
     
-    // Recorrer todas las sucursales y combinar resultados
-    foreach ($sucursalesAConsultar as $idSucursal => $nombreSucursal) {
-        $tableName = "movimientos_de_caja_$idSucursal";
+    foreach ($tablasCaja as $tablaCaja) {
+        $tableName = $tablaCaja['name'];
+        $idTabla = $tablaCaja['id'];
         
-        // Verificar si la tabla existe
-        $checkTable = mysqli_query($conexion, "SHOW TABLES LIKE '$tableName'");
-        if (mysqli_num_rows($checkTable) == 0) {
-            continue;
-        }
-        
-        // Contar registros totales de esta sucursal
+        // Contar registros totales de esta tabla
         $queryCountTotal = "SELECT COUNT(*) as total FROM $tableName";
         $resultCountTotal = mysqli_query($conexion, $queryCountTotal);
         $rowCountTotal = mysqli_fetch_assoc($resultCountTotal);
         $recordsTotal += (int)$rowCountTotal['total'];
         
-        // Contar registros filtrados de esta sucursal
+        // Contar registros filtrados de esta tabla
         $queryCountFiltered = "SELECT COUNT(*) as total FROM $tableName $whereClause";
         if (!empty($searchParams)) {
             $stmtCount = mysqli_prepare($conexion, $queryCountFiltered);
@@ -181,8 +168,7 @@ try {
                 
                 if ($result) {
                     while ($row = mysqli_fetch_assoc($result)) {
-                        $row['sucursal_nombre'] = $nombreSucursal;
-                        $row['id_sucursal'] = $idSucursal;
+                        $row['id_tabla'] = $idTabla;
                         $allMovimientos[] = $row;
                     }
                 }
@@ -192,8 +178,7 @@ try {
             $result = mysqli_query($conexion, $query);
             if ($result) {
                 while ($row = mysqli_fetch_assoc($result)) {
-                    $row['sucursal_nombre'] = $nombreSucursal;
-                    $row['id_sucursal'] = $idSucursal;
+                    $row['id_tabla'] = $idTabla;
                     $allMovimientos[] = $row;
                 }
             }
@@ -253,13 +238,12 @@ try {
         $data[] = [
             $row['id_movimientos'],
             date('d/m/Y', strtotime($row['fecha_apunte'])) . ' ' . $row['hora_de_apunte'],
-            htmlspecialchars($row['sucursal_nombre']),
             htmlspecialchars($row['grupos']),
             htmlspecialchars($row['concepto']),
             $row['salida'],
             $row['entrada'],
             htmlspecialchars($nombreUsuario),
-            (int) ($row['id_sucursal'] ?? 0),
+            (int) ($row['id_tabla'] ?? 0),
         ];
     }
     

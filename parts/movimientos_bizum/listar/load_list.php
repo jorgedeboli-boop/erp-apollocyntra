@@ -27,7 +27,6 @@ try {
     $orderDir = isset($_POST['order'][0]['dir']) ? $_POST['order'][0]['dir'] : 'desc';
     
     // Filtros personalizados
-    $filtroSucursal = isset($_POST['filtro_sucursal']) ? trim($_POST['filtro_sucursal']) : '';
     $filtroGrupo = isset($_POST['filtro_grupo']) ? trim($_POST['filtro_grupo']) : '';
     $filtroFechaDesde = isset($_POST['filtro_fecha_desde']) ? trim($_POST['filtro_fecha_desde']) : '';
     $filtroFechaHasta = isset($_POST['filtro_fecha_hasta']) ? trim($_POST['filtro_fecha_hasta']) : '';
@@ -45,12 +44,11 @@ try {
     $columnMap = [
         0 => 'mb.id',
         1 => 'mb.fecha',
-        2 => 's.nombre_sucursal',
-        3 => 'mb.grupos',
-        4 => 'mb.descripcion',
-        5 => 'mb.importe',
-        6 => 'mb.salida',
-        7 => 'u.usuario'
+        2 => 'mb.grupos',
+        3 => 'mb.descripcion',
+        4 => 'mb.importe',
+        5 => 'mb.salida',
+        6 => 'u.usuario'
     ];
     
     // Validar columna de ordenamiento
@@ -66,16 +64,9 @@ try {
     $searchParams = [];
     
     if (!empty($searchValue)) {
-        $whereConditions[] = "(mb.id = ? OR mb.grupos LIKE ? OR mb.descripcion LIKE ? OR mb.usuario LIKE ? OR s.nombre_sucursal LIKE ?)";
+        $whereConditions[] = "(mb.id = ? OR mb.grupos LIKE ? OR mb.descripcion LIKE ? OR mb.usuario LIKE ?)";
         $searchTerm = "%$searchValue%";
-        $searchParams = [$searchValue, $searchTerm, $searchTerm, $searchTerm, $searchTerm];
-    }
-    
-    // Agregar filtros personalizados
-    $filtroSucursalId = $filtroSucursal !== '' ? (int) $filtroSucursal : 0;
-    if ($filtroSucursalId > 0) {
-        $whereConditions[] = "mb.sucursal = ?";
-        $searchParams[] = $filtroSucursalId;
+        $searchParams = [$searchValue, $searchTerm, $searchTerm, $searchTerm];
     }
     
     // Filtro por grupo
@@ -107,8 +98,7 @@ try {
     
     // Contar registros totales
     $queryCountTotal = "SELECT COUNT(*) as total 
-                       FROM movimientos_bizum mb
-                       LEFT JOIN sucursal s ON mb.sucursal = s.id_sucursal";
+                       FROM movimientos_bizum mb";
     $resultCountTotal = mysqli_query($conexion, $queryCountTotal);
     $rowCountTotal = mysqli_fetch_assoc($resultCountTotal);
     $recordsTotal = (int)$rowCountTotal['total'];
@@ -116,7 +106,6 @@ try {
     // Contar registros filtrados
     $queryCountFiltered = "SELECT COUNT(*) as total 
                           FROM movimientos_bizum mb
-                          LEFT JOIN sucursal s ON mb.sucursal = s.id_sucursal
                           $whereClause";
     
     if (!empty($searchParams)) {
@@ -135,10 +124,9 @@ try {
     }
     
     // Consulta principal
-    $query = "SELECT mb.id, mb.fecha, s.nombre_sucursal, mb.grupos, mb.descripcion, mb.importe, mb.salida,
+    $query = "SELECT mb.id, mb.fecha, mb.grupos, mb.descripcion, mb.importe, mb.salida,
                      COALESCE(u.usuario, mb.usuario) as usuario
               FROM movimientos_bizum mb
-              LEFT JOIN sucursal s ON mb.sucursal = s.id_sucursal
               LEFT JOIN usuarios u ON mb.usuario = u.id_usuario
               $whereClause
               ORDER BY $orderBy $orderDirection
@@ -160,7 +148,6 @@ try {
         $data[] = [
             $row['id'],
             date('d/m/Y H:i', strtotime($row['fecha'])),
-            htmlspecialchars($row['nombre_sucursal']),
             htmlspecialchars($row['grupos']),
             htmlspecialchars($row['descripcion']),
             $row['importe'],

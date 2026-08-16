@@ -6,7 +6,7 @@
 
 const movimientosExportConfig = {
   exportUrl: 'parts/movimientos_tarjeta/listar/export_all.php',
-  headers: ['ID', 'Fecha', 'Sucursal', 'Grupo', 'Descripción', 'Importe', 'Salida', 'Usuario']
+  headers: ['ID', 'Fecha', 'Grupo', 'Descripción', 'Importe', 'Salida', 'Usuario']
 };
 
 // Datatable (js)
@@ -31,10 +31,6 @@ document.addEventListener('DOMContentLoaded', function (e) {
       window.actualizarTituloFiltros();
     }
   }
-
-  const createFilterSucursal = function (containerClass, selectId, defaultOptionText) {
-    return FD.createFilterSucursal(containerClass, selectId, defaultOptionText, onFiltroMovimientoChange);
-  };
 
   const createFilterGrupo = function (containerClass, selectId, defaultOptionText) {
     return FD.createFilterAjax(
@@ -82,12 +78,10 @@ document.addEventListener('DOMContentLoaded', function (e) {
         type: 'POST',
         data: function(d) {
           // Agregar filtros de columna personalizados
-          const sucursalFilter = document.getElementById('filtro_sucursal');
           const grupoFilter = document.getElementById('filtro_grupo');
           const fechaDesdeFilter = document.getElementById('filtro_fecha_desde');
           const fechaHastaFilter = document.getElementById('filtro_fecha_hasta');
           
-          d.filtro_sucursal = sucursalFilter ? sucursalFilter.value : '';
           d.filtro_grupo = grupoFilter ? grupoFilter.value : '';
           d.filtro_fecha_desde = fechaDesdeFilter ? fechaDesdeFilter.value : '';
           d.filtro_fecha_hasta = fechaHastaFilter ? fechaHastaFilter.value : '';
@@ -107,12 +101,11 @@ document.addEventListener('DOMContentLoaded', function (e) {
       columns: [
         { data: 0 },  // ID
         { data: 1 },  // Fecha
-        { data: 2 },  // Sucursal
-        { data: 3 },  // Grupo
-        { data: 4 },  // Descripción
-        { data: 5 },  // Importe
-        { data: 6 },  // Salida
-        { data: 7 }   // Usuario
+        { data: 2 },  // Grupo
+        { data: 3 },  // Descripción
+        { data: 4 },  // Importe
+        { data: 5 },  // Salida
+        { data: 6 }   // Usuario
       ],
       
       columnDefs: [
@@ -128,15 +121,8 @@ document.addEventListener('DOMContentLoaded', function (e) {
           }
         },
         {
-          // Sucursal
-          targets: 2,
-          render: function (data, type, full, meta) {
-            return '<span class="badge bg-label-primary">' + data + '</span>';
-          }
-        },
-        {
           // Importe (formato moneda)
-          targets: 5,
+          targets: 4,
           width: '100px',
           className: 'text-center',
           render: function (data, type, full, meta) {
@@ -148,7 +134,7 @@ document.addEventListener('DOMContentLoaded', function (e) {
         },
         {
           // Salida (formato moneda)
-          targets: 6,
+          targets: 5,
           width: '100px',
           className: 'text-center',
           render: function (data, type, full, meta) {
@@ -395,7 +381,6 @@ document.addEventListener('DOMContentLoaded', function (e) {
 
   // Función para cargar los filtros
   function cargarFiltros() {
-    createFilterSucursal('.movimiento_sucursal', 'filtro_sucursal', 'Seleccionar Sucursal');
     createFilterGrupo('.movimiento_grupo', 'filtro_grupo', 'Todos los grupos');
 
     if (FD) { FD.finalize(); }
@@ -442,38 +427,9 @@ document.addEventListener('DOMContentLoaded', function (e) {
     document.getElementById('formNuevoApunte').reset();
     const hoy = new Date().toISOString().split('T')[0];
     document.getElementById('nuevo-fecha').value = hoy;
-    cargarSucursalesNuevoApunte();
     cargarGruposNuevoApunte();
     const modal = new bootstrap.Modal(document.getElementById('modalNuevoApunte'));
     modal.show();
-  }
-
-  function cargarSucursalesNuevoApunte() {
-    fetch('parts/clientes/listar/get_sucursales.php')
-      .then(response => response.json())
-      .then(data => {
-        if (data.success) {
-          const select = document.getElementById('nuevo-sucursal');
-          select.innerHTML = '<option value="">Seleccionar sucursal...</option>';
-          data.sucursales.forEach(sucursal => {
-            const option = document.createElement('option');
-            option.value = sucursal.id_sucursal;
-            option.textContent = sucursal.nombre_sucursal;
-            select.appendChild(option);
-          });
-          const select2 = $(select);
-          if (select2.length) {
-            if (select2.hasClass("select2-hidden-accessible")) {
-              select2.select2('destroy');
-            }
-            select2.select2({
-              dropdownParent: $('#modalNuevoApunte'),
-              placeholder: 'Seleccionar sucursal...',
-              allowClear: true
-            });
-          }
-        }
-      });
   }
 
   function cargarGruposNuevoApunte() {

@@ -9,11 +9,6 @@ header('Content-Type: application/json');
 
 try {
     // Verificar que se reciban los parámetros necesarios
-    if (!isset($_POST['sucursal'])) {
-        throw new Exception("Sucursal es requerida");
-    }
-    
-    $sucursal = (int)$_POST['sucursal'];
     $fecha = trim($_POST['fecha']);
     $grupos = trim($_POST['grupos']);
     $descripcion = trim($_POST['descripcion']);
@@ -49,11 +44,11 @@ try {
     $usuario = isset($usuario_id) ? $usuario_id : 'Sistema';
     
     // Insertar el nuevo movimiento
-    $query = "INSERT INTO movimientos_transferencia (fecha, grupos, descripcion, salida, entrada, usuario, sucursal) 
-              VALUES (?, ?, ?, ?, ?, ?, ?)";
+    $query = "INSERT INTO movimientos_transferencia (fecha, grupos, descripcion, salida, entrada, usuario) 
+              VALUES (?, ?, ?, ?, ?, ?)";
     
     $stmt = mysqli_prepare($conexion, $query);
-    mysqli_stmt_bind_param($stmt, 'sssddsi', $fecha, $grupos, $descripcion, $salida, $entrada, $usuario, $sucursal);
+    mysqli_stmt_bind_param($stmt, 'sssdds', $fecha, $grupos, $descripcion, $salida, $entrada, $usuario);
     
     if (!mysqli_stmt_execute($stmt)) {
         throw new Exception("Error al crear el movimiento: " . mysqli_error($conexion));
