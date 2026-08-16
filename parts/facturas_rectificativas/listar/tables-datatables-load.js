@@ -125,7 +125,22 @@ document.addEventListener('DOMContentLoaded', function (e) {
         data: function(d) {
           return d;
         },
-        dataSrc: function(json) { return json.data || []; }
+        dataSrc: function(json) {
+          if (json && json.error) {
+            console.error('Error listado facturas rectificativas:', json.error);
+          }
+          return (json && json.data) ? json.data : [];
+        },
+        error: function(xhr, error, thrown) {
+          let detalle = thrown || error || '';
+          try {
+            const j = JSON.parse(xhr.responseText);
+            if (j && j.error) {
+              detalle = j.error;
+            }
+          } catch (e) {}
+          console.error('Error AJAX:', detalle, xhr.responseText);
+        }
       },
       columns: [
         {
