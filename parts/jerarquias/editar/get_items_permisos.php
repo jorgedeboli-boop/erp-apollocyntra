@@ -26,18 +26,16 @@ try {
     $es_usuario_root = (isset($usuario_root) && $usuario_root === 'true');
 
     $columnas_section = [
-        'sucursal_section',
         'central_section',
         'recepcion_lotes_section',
         'auditoria_section',
     ];
 
-    $sucursal_section_jerarquia = 'false';
     $central_section_jerarquia = 'false';
     $recepcion_lotes_section_jerarquia = 'false';
     $auditoria_section_jerarquia = 'false';
 
-    $query_jerarquia = "SELECT sucursal_section, central_section, recepcion_lotes_section, auditoria_section FROM privilegios_usuarios WHERE id_privilegios = ?";
+    $query_jerarquia = "SELECT central_section, recepcion_lotes_section, auditoria_section FROM privilegios_usuarios WHERE id_privilegios = ?";
     $stmt_jerarquia = mysqli_prepare($conexion, $query_jerarquia);
 
     if (!$stmt_jerarquia) {
@@ -48,7 +46,6 @@ try {
     mysqli_stmt_execute($stmt_jerarquia);
     mysqli_stmt_bind_result(
         $stmt_jerarquia,
-        $sucursal_section_jerarquia,
         $central_section_jerarquia,
         $recepcion_lotes_section_jerarquia,
         $auditoria_section_jerarquia
@@ -61,7 +58,6 @@ try {
     }
 
     $jerarquia_sections = [
-        'sucursal_section' => ($sucursal_section_jerarquia === 'true') ? 'true' : 'false',
         'central_section' => ($central_section_jerarquia === 'true') ? 'true' : 'false',
         'recepcion_lotes_section' => ($recepcion_lotes_section_jerarquia === 'true') ? 'true' : 'false',
         'auditoria_section' => ($auditoria_section_jerarquia === 'true') ? 'true' : 'false',

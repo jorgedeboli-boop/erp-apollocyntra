@@ -8,9 +8,7 @@ mysqli_stmt_execute($stmt);
 $resultitemsSections = mysqli_stmt_get_result($stmt);    
 $itemsSections = mysqli_fetch_assoc($resultitemsSections);
 
-if (isset($_SESSION['sucursal_section']) && $_SESSION['sucursal_section'] === 'true') {
-    $dashboard_redirect_url = 'dashboard_sucursal.php';
-} elseif (isset($_SESSION['auditoria_section']) && $_SESSION['auditoria_section'] === 'true') {
+if (isset($_SESSION['auditoria_section']) && $_SESSION['auditoria_section'] === 'true') {
     $dashboard_redirect_url = 'dashboard_auditorias.php';
 } elseif (isset($_SESSION['recepcion_lotes_section']) && $_SESSION['recepcion_lotes_section'] === 'true') {
     $dashboard_redirect_url = 'dashboard_recepcion_lotes.php';
@@ -30,9 +28,8 @@ if (mysqli_num_rows($resultitemsSections) == 0) {
     $itemname = $itemsSections['itemName'];
     $itemnameText = $itemsSections['itemnameText'];
     $url_completa = APP_URL.'/'.$itemname.'/'.$type.'/content.php';
-    $columnas_section = ['sucursal_section', 'central_section', 'recepcion_lotes_section', 'auditoria_section'];
+    $columnas_section = ['central_section', 'recepcion_lotes_section', 'auditoria_section'];
     $nombres_section = [
-        'sucursal_section' => 'sucursal',
         'central_section' => 'central',
         'recepcion_lotes_section' => 'recepción de lotes',
         'auditoria_section' => 'auditoría',
@@ -49,12 +46,9 @@ if (mysqli_num_rows($resultitemsSections) == 0) {
         $section_activa_item = 'central_section';
     }
 
-    $sucursal_section_item = $itemsSections['sucursal_section'];
-    $_SESSION['sucursal_section_item'] = $sucursal_section_item;
     $_SESSION['section_activa_item'] = $section_activa_item;
 
     $usuario_sections = [
-        'sucursal_section' => ($_SESSION['sucursal_section'] ?? 'false') === 'true' ? 'true' : 'false',
         'central_section' => ($_SESSION['central_section'] ?? 'false') === 'true' ? 'true' : 'false',
         'recepcion_lotes_section' => ($_SESSION['recepcion_lotes_section'] ?? 'false') === 'true' ? 'true' : 'false',
         'auditoria_section' => ($_SESSION['auditoria_section'] ?? 'false') === 'true' ? 'true' : 'false',
@@ -68,9 +62,7 @@ if (mysqli_num_rows($resultitemsSections) == 0) {
         }
     }
     if ($section_activa_usuario === null) {
-        $section_activa_usuario = $usuario_sections['sucursal_section'] === 'true'
-            ? 'sucursal_section'
-            : 'central_section';
+        $section_activa_usuario = 'central_section';
     }
 
     // typ_item=main que son listados sin ficha (?id= no requerido)
@@ -79,7 +71,7 @@ if (mysqli_num_rows($resultitemsSections) == 0) {
 
     if ($section_activa_item !== $section_activa_usuario) {
         $nombre_section_item = $nombres_section[$section_activa_item] ?? $section_activa_item;
-        $id_action_user = ($section_activa_item === 'sucursal_section') ? '37' : '38';
+        $id_action_user = '38';
         $texto_action_user = "$usuario intenta acceder a la seccion $itemname que es tipo $nombre_section_item";
         registrar_accion_usuario($usuario_id, $id_action_user, $texto_action_user, $usuario_sucursal, $id_type_Item, $url_completa);
         header('Location: ' . $dashboard_redirect_url . '?error=no tienes acceso a esta seccion');

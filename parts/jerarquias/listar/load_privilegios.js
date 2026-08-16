@@ -290,7 +290,6 @@ function crearToast(tipo, mensaje) {
 function establecerSectionActivaJerarquia(privilegio) {
     const columnas = [
         'central_section',
-        'sucursal_section',
         'recepcion_lotes_section',
         'auditoria_section'
     ];
@@ -442,7 +441,6 @@ function renderizarTablaUsuariosPrivilegio(usuarios) {
                 <td>${escapeHtmlPrivilegios(usuario.id_usuario)}</td>
                 <td>${escapeHtmlPrivilegios(usuario.usuario)}</td>
                 <td><span class="badge bg-label-${estadoClass}">${escapeHtmlPrivilegios(usuario.estado_usuario)}</span></td>
-                <td>${escapeHtmlPrivilegios(usuario.sucursal_usuario)}</td>
             </tr>
         `;
     }).join('');
@@ -455,7 +453,6 @@ function renderizarTablaUsuariosPrivilegio(usuarios) {
                         <th>ID usuario</th>
                         <th>Usuario</th>
                         <th>Estado</th>
-                        <th>Sucursal</th>
                     </tr>
                 </thead>
                 <tbody>${filas}</tbody>

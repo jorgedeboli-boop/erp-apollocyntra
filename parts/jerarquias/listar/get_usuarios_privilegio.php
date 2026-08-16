@@ -52,11 +52,8 @@ try {
         SELECT
             u.id_usuario,
             u.usuario,
-            u.estado_usuario,
-            u.sucursal_usuario,
-            s.nombre_sucursal
+            u.estado_usuario
         FROM usuarios u
-        LEFT JOIN sucursal s ON s.id_sucursal = u.sucursal_usuario
         WHERE u.privilegio_usuario = ?
           AND COALESCE(u.usuario_root, 'false') <> 'true'
         ORDER BY u.usuario ASC
@@ -77,9 +74,6 @@ try {
                 'id_usuario' => (int) ($fila['id_usuario'] ?? 0),
                 'usuario' => (string) ($fila['usuario'] ?? ''),
                 'estado_usuario' => $estado === 'true' ? 'Habilitado' : 'Deshabilitado',
-                'sucursal_usuario' => trim((string) ($fila['nombre_sucursal'] ?? '')) !== ''
-                    ? (string) $fila['nombre_sucursal']
-                    : ((int) ($fila['sucursal_usuario'] ?? 0) > 0 ? (string) (int) $fila['sucursal_usuario'] : '—'),
             ];
         }
         mysqli_free_result($resUsuarios);

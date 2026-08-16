@@ -26,7 +26,6 @@ if (!isset($_SERVER['HTTP_X_REQUESTED_WITH']) || strtolower($_SERVER['HTTP_X_REQ
 
 try {
     $columnas_section = [
-        'sucursal_section',
         'central_section',
         'recepcion_lotes_section',
         'auditoria_section',
@@ -41,14 +40,11 @@ try {
         $section_activa = 'central_section';
     }
 
-    $sucursal_section = 'false';
     $central_section = 'false';
     $recepcion_lotes_section = 'false';
     $auditoria_section = 'false';
 
-    if ($section_activa === 'sucursal_section') {
-        $sucursal_section = 'true';
-    } elseif ($section_activa === 'central_section') {
+    if ($section_activa === 'central_section') {
         $central_section = 'true';
     } elseif ($section_activa === 'recepcion_lotes_section') {
         $recepcion_lotes_section = 'true';
@@ -72,11 +68,10 @@ try {
     if (empty($id_privilegio)) {
         $query = "INSERT INTO privilegios_usuarios (
             nombre_privilegio,
-            sucursal_section,
             central_section,
             recepcion_lotes_section,
             auditoria_section
-        ) VALUES (?, ?, ?, ?, ?)";
+        ) VALUES (?, ?, ?, ?)";
         $stmt = mysqli_prepare($conexion, $query);
 
         if (!$stmt) {
@@ -85,9 +80,8 @@ try {
 
         mysqli_stmt_bind_param(
             $stmt,
-            'sssss',
+            'ssss',
             $nombre_privilegio,
-            $sucursal_section,
             $central_section,
             $recepcion_lotes_section,
             $auditoria_section
@@ -104,7 +98,6 @@ try {
     } else {
         $query = "UPDATE privilegios_usuarios SET
             nombre_privilegio = ?,
-            sucursal_section = ?,
             central_section = ?,
             recepcion_lotes_section = ?,
             auditoria_section = ?
@@ -117,9 +110,8 @@ try {
 
         mysqli_stmt_bind_param(
             $stmt,
-            'sssssi',
+            'ssssi',
             $nombre_privilegio,
-            $sucursal_section,
             $central_section,
             $recepcion_lotes_section,
             $auditoria_section,
@@ -148,7 +140,6 @@ try {
         'nombre_privilegio' => $nombre_privilegio,
         'section_activa' => $section_activa,
         'jerarquia_sections' => [
-            'sucursal_section' => $sucursal_section,
             'central_section' => $central_section,
             'recepcion_lotes_section' => $recepcion_lotes_section,
             'auditoria_section' => $auditoria_section,

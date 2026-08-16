@@ -42,7 +42,7 @@ try {
     }
     
     // Consulta para obtener el privilegio
-    $query = "SELECT id_privilegios, nombre_privilegio, sucursal_section, central_section, recepcion_lotes_section, auditoria_section FROM privilegios_usuarios WHERE id_privilegios = ?";
+    $query = "SELECT id_privilegios, nombre_privilegio, central_section, recepcion_lotes_section, auditoria_section FROM privilegios_usuarios WHERE id_privilegios = ?";
     $stmt = mysqli_prepare($conexion, $query);
     
     if (!$stmt) {

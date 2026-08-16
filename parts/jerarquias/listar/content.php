@@ -53,10 +53,6 @@
               <label class="form-check-label" for="central_section_radio">Central</label>
             </div>
             <div class="form-check mb-2">
-              <input name="section_activa" class="form-check-input" type="radio" value="sucursal_section" id="sucursal_section_radio" required />
-              <label class="form-check-label" for="sucursal_section_radio">Sucursal</label>
-            </div>
-            <div class="form-check mb-2">
               <input name="section_activa" class="form-check-input" type="radio" value="recepcion_lotes_section" id="recepcion_lotes_section_radio" required />
               <label class="form-check-label" for="recepcion_lotes_section_radio">Recepción de lotes</label>
             </div>
