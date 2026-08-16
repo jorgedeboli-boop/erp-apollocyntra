@@ -7872,6 +7872,10 @@ function quitar_articulo_venta_de_auditoria($conexion, $id_articulo)
 
 function trazabilidad_articulos_venta ( $id_venta, $usuario_accion, $accion_trazabilidad, $comentarios_accion, $sucursal_accion, $sku, $identificador_venta){
     $conexion = conectar_bd();
+    $empresa_id_rel = (int) $sucursal_accion;
+    if ($empresa_id_rel <= 0 && defined('APP_ID')) {
+        $empresa_id_rel = (int) APP_ID;
+    }
     
     if( $id_venta > 0){
         $query = "INSERT INTO trazabilidad_articulos_venta (
@@ -7881,7 +7885,7 @@ function trazabilidad_articulos_venta ( $id_venta, $usuario_accion, $accion_traz
             usuario_accion,
             accion_trazabilidad,
             comentarios_accion,
-            sucursal_accion,
+            rel_id_empresa,
             id_articulo
         ) VALUES (?, ?, NOW(), ?, ?, ?, ?, ?)";
         
@@ -7892,14 +7896,14 @@ function trazabilidad_articulos_venta ( $id_venta, $usuario_accion, $accion_traz
             return false;
         }
         
-        mysqli_stmt_bind_param($stmt, 'issssii',
-            $id_venta,              // i - integer
-            $identificador_venta,    // s - string
-            $usuario_accion,         // s - string
-            $accion_trazabilidad,    // s - string
-            $comentarios_accion,     // s - string
-            $sucursal_accion,        // i - integer
-            $sku             // i - integer
+        mysqli_stmt_bind_param($stmt, 'iiissii',
+            $id_venta,
+            $identificador_venta,
+            $usuario_accion,
+            $accion_trazabilidad,
+            $comentarios_accion,
+            $empresa_id_rel,
+            $sku
         );
         
         if (!mysqli_stmt_execute($stmt)) {
@@ -7913,13 +7917,15 @@ function trazabilidad_articulos_venta ( $id_venta, $usuario_accion, $accion_traz
         
     }else{
         $query = "INSERT INTO trazabilidad_articulos_venta (
+            id_venta,
+            identificador_venta,
             fecha_accion,
             usuario_accion,
             accion_trazabilidad,
             comentarios_accion,
-            sucursal_accion,
+            rel_id_empresa,
             id_articulo
-        ) VALUES (NOW(), ?, ?, ?, ?, ?)";
+        ) VALUES (0, 0, NOW(), ?, ?, ?, ?, ?)";
         
         $stmt = mysqli_prepare($conexion, $query);
         if (!$stmt) {
@@ -7928,12 +7934,12 @@ function trazabilidad_articulos_venta ( $id_venta, $usuario_accion, $accion_traz
             return false;
         }
         
-        mysqli_stmt_bind_param($stmt, 'sssii',
-            $usuario_accion,         // s - string
-            $accion_trazabilidad,    // s - string
-            $comentarios_accion,      // s - string
-            $sucursal_accion,         // i - integer
-            $sku              // i - integer
+        mysqli_stmt_bind_param($stmt, 'issii',
+            $usuario_accion,
+            $accion_trazabilidad,
+            $comentarios_accion,
+            $empresa_id_rel,
+            $sku
         );
         
         if (!mysqli_stmt_execute($stmt)) {
@@ -9275,7 +9281,7 @@ function contar_etiquetas_articulos_a_imprimir($conexion, $varios, $por_sucursal
         if ((int) $id_articulo_get <= 0) {
             return 0;
         }
-        $sql = 'SELECT COUNT(*) AS total FROM articulos_venta WHERE id = ? LIMIT 1';
+        $sql = 'SELECT COUNT(*) AS total FROM articulos WHERE sku = ? LIMIT 1';
         $stmt = mysqli_prepare($conexion, $sql);
         if (!$stmt) {
             return 0;

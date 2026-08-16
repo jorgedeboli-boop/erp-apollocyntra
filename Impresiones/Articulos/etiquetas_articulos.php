@@ -3,7 +3,7 @@
  * Impresión de etiquetas de artículos (venta / envío / lotes).
  *
  * Parámetros habituales (GET y/o POST según el flujo):
- * - id_articulo: una etiqueta desde `articulos_venta`.
+ * - id_articulo: una etiqueta desde `articulos` (SKU).
  * - varios / por_sucursal: impresión por lotes desde central.
  * - envio=true + id_envio: etiquetas de artículos pasados a stock en un envío.
  * - reimprimir / individual: modifican trazabilidad y el cierre tras imprimir.
@@ -27,6 +27,31 @@ function etiquetas_articulos_req_str($key)
     }
 
     return '';
+}
+
+/**
+ * @param mixed $fallback
+ */
+function etiquetas_articulos_texto_estado(mysqli $conexion, $var_estado, $fallback)
+{
+    $texto = (string) $fallback;
+    $stmt = mysqli_prepare(
+        $conexion,
+        'SELECT texto_estado_articulo FROM estados_articulos WHERE var_estado_articulo = ? LIMIT 1'
+    );
+    if (!$stmt) {
+        return $texto;
+    }
+    mysqli_stmt_bind_param($stmt, 's', $var_estado);
+    mysqli_stmt_execute($stmt);
+    $res = mysqli_stmt_get_result($stmt);
+    $row = $res ? mysqli_fetch_assoc($res) : null;
+    if (!empty($row['texto_estado_articulo'])) {
+        $texto = (string) $row['texto_estado_articulo'];
+    }
+    mysqli_stmt_close($stmt);
+
+    return $texto;
 }
 
 $varios = isset($_GET['varios']) ? (string) $_GET['varios'] : '';
@@ -109,7 +134,10 @@ if ($envio_activo) {
 }
 
 $id_control_etiquetado = 0;
-$sucursal_control_etiquetado = 2;
+$sucursal_control_etiquetado = defined('APP_ID') ? (int) APP_ID : 0;
+if ($sucursal_control_etiquetado <= 0) {
+    $sucursal_control_etiquetado = 2;
+}
 $total_etiquetas = contar_etiquetas_articulos_a_imprimir(
     $conexion,
     $varios,
@@ -344,7 +372,7 @@ if ($varios === 'true') {
     }
 } else {
 
-    $sql_one = 'SELECT id, precio, descripcion, id_sucursal_destino FROM articulos_venta WHERE id = ? LIMIT 1';
+    $sql_one = 'SELECT sku AS id, precio, descripcion, empresa_id_rel FROM articulos WHERE sku = ? LIMIT 1';
     $stmt = mysqli_prepare($conexion, $sql_one);
     $rsItem = null;
     $res_one = null;
@@ -364,9 +392,9 @@ if ($varios === 'true') {
         $precio_PARSET = $rsItem['precio'];
         $precio = (int) $precio_PARSET;
         $descripcion = $rsItem['descripcion'];
-        $id_sucursal_traz = (int) $rsItem['id_sucursal_destino'];
-        if ($id_sucursal_traz <= 0) {
-            $id_sucursal_traz = $sucursal_control_etiquetado;
+        $empresa_id_traz = (int) ($rsItem['empresa_id_rel'] ?? 0);
+        if ($empresa_id_traz <= 0) {
+            $empresa_id_traz = $sucursal_control_etiquetado;
         }
         ?>
 
@@ -388,28 +416,31 @@ if ($varios === 'true') {
                 $comentarios_accion = 'Se reimprime la etiqueta de artículo desde impresión individual por el usuario: ' . $usuario . ' ';
                 $accion_trazabilidad = 'etiqueta_reimpresa';
             } else {
-                $stmt_up = mysqli_prepare($conexion, "UPDATE articulos_venta SET estado = 'enventa', update_register = CURDATE() WHERE id = ?");
+                $estado_nuevo = 'enventa';
+                $estado_articulo_txt = etiquetas_articulos_texto_estado($conexion, $estado_nuevo, 'En venta');
+                $stmt_up = mysqli_prepare(
+                    $conexion,
+                    "UPDATE articulos
+                     SET estado = ?,
+                         estado_articulo = ?,
+                         update_register = CURDATE(),
+                         fecha_en_venta = CASE
+                             WHEN fecha_en_venta IS NULL OR fecha_en_venta = '0000-00-00 00:00:00' THEN NOW()
+                             ELSE fecha_en_venta
+                         END
+                     WHERE sku = ?"
+                );
                 if ($stmt_up) {
-                    mysqli_stmt_bind_param($stmt_up, 'i', $id_articulo);
+                    mysqli_stmt_bind_param($stmt_up, 'ssi', $estado_nuevo, $estado_articulo_txt, $id_articulo);
                     mysqli_stmt_execute($stmt_up);
                     mysqli_stmt_close($stmt_up);
-                }
-
-                $stmt_up_rel = mysqli_prepare(
-                    $conexion,
-                    "UPDATE rel_articulos_estados SET estado_articulo = 'enventa' WHERE rel_id_articulo_venta = ?"
-                );
-                if ($stmt_up_rel) {
-                    mysqli_stmt_bind_param($stmt_up_rel, 'i', $id_articulo);
-                    mysqli_stmt_execute($stmt_up_rel);
-                    mysqli_stmt_close($stmt_up_rel);
                 }
 
                 $comentarios_accion = 'Artículo puesto a la venta al imprimir desde impresión individual por el usuario: ' . $usuario . ' ';
                 $accion_trazabilidad = 'enventa';
             }
 
-            trazabilidad_articulos_venta(0, $usuario_id, $accion_trazabilidad, $comentarios_accion, $id_sucursal_traz, $id_articulo, 0);
+            trazabilidad_articulos_venta(0, $usuario_id, $accion_trazabilidad, $comentarios_accion, $empresa_id_traz, $id_articulo, 0);
 
             insert_etiquetas_control_etiquetado($conexion, $id_control_etiquetado, $id_articulo, $precio_PARSET, $descripcion, $tipo_control_etiquetado);
         }
