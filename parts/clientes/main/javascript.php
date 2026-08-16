@@ -158,7 +158,6 @@ function actualizarEstadoEnPagina(nuevoEstado) {
  */
 document.addEventListener('DOMContentLoaded', function() {
     const idCliente = <?php echo $id_cliente ?: 0; ?>;
-    const idSucursalCliente = <?php echo (int)($cliente['sucursal'] ?? 0); ?>;
     if (idCliente > 0) {
         cargarImagenesCliente(idCliente);
     }
@@ -166,7 +165,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Inicialización lazy de DataTables en pestañas
     initTablasCliente(idCliente);
 
-    window.__clienteQR = { idCliente, idSucursalCliente };
+    window.__clienteQR = { idCliente };
 
     if (window.CameraQR && typeof window.CameraQR.init === 'function') {
         window.CameraQR.init({
@@ -186,15 +185,14 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function abrirModalFotoMovilCliente() {
-    const ctx = window.__clienteQR || { idCliente: 0, idSucursalCliente: 0 };
-    if (!ctx.idCliente || !ctx.idSucursalCliente) {
+    const ctx = window.__clienteQR || { idCliente: 0 };
+    if (!ctx.idCliente) {
         return;
     }
     if (window.CameraDocPanel && typeof window.CameraDocPanel.open === 'function') {
         window.CameraDocPanel.open({
             tipo: 'cliente',
-            id: ctx.idCliente,
-            idSucursal: ctx.idSucursalCliente
+            id: ctx.idCliente
         }).catch(function (err) {
             console.error('CameraDocPanel', err);
             Swal.fire({
@@ -321,8 +319,7 @@ function initTablasCliente(idCliente) {
                 { data: 3 }, // peso
                 { data: 4 }, // compra
                 { data: 5 }, // fecha
-                { data: 6 }, // sucursal
-                { data: 7 }  // estado
+                { data: 6 }  // estado
             ],
             order: [[5, 'desc']]
         });
@@ -355,8 +352,7 @@ function initTablasCliente(idCliente) {
                 { data: 3 }, // importe
                 { data: 4 }, // fecha
                 { data: 5 }, // vencimiento
-                { data: 6 }, // sucursal
-                { data: 7 }  // estado
+                { data: 6 }  // estado
             ],
             order: [[4, 'desc']]
         });
@@ -386,11 +382,10 @@ function initTablasCliente(idCliente) {
                 { data: 0 }, // Nº venta + link
                 { data: 1 }, // total
                 { data: 2 }, // fecha
-                { data: 3 }, // sucursal
-                { data: 4 }, // estado
-                { data: 5 }, // plazos
-                { data: 6 }, // pago
-                { data: 7, visible: false } // id hidden
+                { data: 3 }, // estado
+                { data: 4 }, // plazos
+                { data: 5 }, // pago
+                { data: 6, visible: false } // id hidden
             ],
             order: [[2, 'desc']]
         });

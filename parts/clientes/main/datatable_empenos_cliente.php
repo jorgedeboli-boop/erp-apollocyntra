@@ -33,10 +33,10 @@ try {
     $types = 'i';
 
     if ($searchValue !== '') {
-        $where .= " AND (l.id_lote LIKE ? OR l.identificador LIKE ? OR l.tipo_de_lote LIKE ? OR s.nombre_sucursal LIKE ? OR l.estado_lote LIKE ?)";
+        $where .= " AND (l.id_lote LIKE ? OR l.identificador LIKE ? OR l.tipo_de_lote LIKE ? OR l.estado_lote LIKE ?)";
         $like = '%' . $searchValue . '%';
-        $params = array_merge($params, [$like, $like, $like, $like, $like]);
-        $types .= 'sssss';
+        $params = array_merge($params, [$like, $like, $like, $like]);
+        $types .= 'ssss';
     }
 
     $sqlTotal = "SELECT COUNT(*) AS total FROM lotes_joyeria l {$where}";
@@ -63,10 +63,8 @@ try {
             l.precio_compra,
             l.fecha_compra,
             l.fecha_vencimiento,
-            l.estado_lote,
-            s.nombre_sucursal
+            l.estado_lote
         FROM lotes_joyeria l
-        LEFT JOIN sucursal s ON l.sucursal = s.id_sucursal
         {$where}
         ORDER BY l.fecha_compra DESC
         LIMIT ? OFFSET ?
@@ -95,7 +93,6 @@ try {
             number_format((float) ($row['precio_compra'] ?? 0), 0, ',', '.') . ' €',
             !empty($row['fecha_compra']) ? date('d/m/Y H:i', strtotime((string) $row['fecha_compra'])) : 'N/A',
             !empty($row['fecha_vencimiento']) ? date('d/m/Y', strtotime((string) $row['fecha_vencimiento'])) : 'N/A',
-            htmlspecialchars((string) ($row['nombre_sucursal'] ?? '')),
             htmlspecialchars((string) ($row['estado_lote'] ?? ''))
         ];
     }

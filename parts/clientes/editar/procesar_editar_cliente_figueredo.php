@@ -39,8 +39,7 @@ $sql = "UPDATE clientes SET
     telefono='$telefono',
     email='$email',
     observaciones='$observaciones',
-    f_vencimiento='$f_vencimiento',
-    sucursal='$sucursal'
+    f_vencimiento='$f_vencimiento'
     WHERE id_cliente = $id_cliente";
 
 $result = mysqli_query($mysqli_figueredoapp, $sql);

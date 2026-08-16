@@ -24,22 +24,17 @@
       <div class="collapse d-lg-block" id="collapse_filtros_clientes">
         <div class="d-flex justify-content-between align-items-center row gx-1 pt-4 gap-5 gap-md-0 select2-btn-height">
           
-          <div class="col-md-3 user_tipo_identificacion">
+          <div class="col-md-4 user_tipo_identificacion">
             <select id="UserTipoIdentificacion" class="form-select select2-filter text-capitalize select2-custom">
               <?php clientes_listar_imprimir_opciones_tipo_identificacion($app_country_id); ?>
             </select>
           </div>
-          <div class="col-md-3 user_provincia">
+          <div class="col-md-4 user_provincia">
             <select id="UserProvincia" class="form-select select2-filter text-capitalize select2-custom">
               <?php clientes_listar_imprimir_opciones_provincia($app_country_id); ?>
             </select>
           </div>
-          <div class="col-md-3 user_sucursal">
-            <select id="UserSucursal" class="form-select select2-filter text-capitalize select2-custom">
-              <option value="">Seleccionar Sucursal</option>
-            </select>
-          </div>
-          <div class="col-md-3 user_estado">
+          <div class="col-md-4 user_estado">
             <select id="UserEstado" class="form-select select2-filter text-capitalize select2-custom">
               <?php clientes_listar_imprimir_opciones_estado(); ?>
             </select>
@@ -61,7 +56,6 @@
                         <th>Nacionalidad</th>
                         <th>Teléfono</th>
                         <th>Provincia</th>
-                        <th>Sucursal</th>
                         <th>Estado</th>
                         <th>Fecha Alta</th>
                       </tr>

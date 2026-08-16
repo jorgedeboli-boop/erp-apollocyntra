@@ -77,9 +77,8 @@ document.addEventListener('DOMContentLoaded', function (e) {
         { data: 4 }, // Nacionalidad
         { data: 5 }, // Teléfono
         { data: 6 }, // Provincia
-        { data: 7 }, // Sucursal
-        { data: 8 }, // Estado
-        { data: 9 }  // Fecha
+        { data: 7 }, // Estado
+        { data: 8 }  // Fecha
       ],
       
       columnDefs: [
@@ -161,22 +160,8 @@ document.addEventListener('DOMContentLoaded', function (e) {
           }
         },
         {
-          // Sucursal
-          targets: 7,
-          render: function (data, type, full, meta) {
-            const sucursal = data;
-            if (sucursal && sucursal !== 'Sin sucursal') {
-              return '<span class="badge bg-label-info">' +
-                     sucursal +
-                     '</span>';
-            } else {
-              return '<span class="text-muted">Sin sucursal</span>';
-            }
-          }
-        },
-        {
           // Estado
-          targets: 8,
+          targets: 7,
           render: function (data, type, full, meta) {
             const status = data;
             
@@ -277,18 +262,15 @@ document.addEventListener('DOMContentLoaded', function (e) {
           // Agregar filtros de columna personalizados
           const tipoIdentificacionFilter = document.getElementById('UserTipoIdentificacion');
           const provinciaFilter = document.getElementById('UserProvincia');
-          const sucursalFilter = document.getElementById('UserSucursal');
           const estadoFilter = document.getElementById('UserEstado');
           
           d.filtro_tipo_identificacion = tipoIdentificacionFilter ? tipoIdentificacionFilter.value : '';
           d.filtro_provincia = provinciaFilter ? provinciaFilter.value : '';
-          d.filtro_sucursal = sucursalFilter ? sucursalFilter.value : '';
           d.filtro_estado = estadoFilter ? estadoFilter.value : '';
           
           console.log('DataTables enviando filtros:', {
             tipo_identificacion: d.filtro_tipo_identificacion,
             provincia: d.filtro_provincia,
-            sucursal: d.filtro_sucursal,
             estado: d.filtro_estado
           });
           return d;
@@ -548,7 +530,6 @@ document.addEventListener('DOMContentLoaded', function (e) {
     const searchValue = dt.search();
     const filtroTipoIdentificacion = $('#UserTipoIdentificacion').val() || '';
     const filtroProvincia = $('#UserProvincia').val() || '';
-    const filtroSucursal = $('#UserSucursal').val() || '';
     const filtroEstado = $('#UserEstado').val() || '';
     
     // Mostrar loading
@@ -566,7 +547,6 @@ document.addEventListener('DOMContentLoaded', function (e) {
     formData.append('search', searchValue);
     formData.append('filtro_tipo_identificacion', filtroTipoIdentificacion);
     formData.append('filtro_provincia', filtroProvincia);
-    formData.append('filtro_sucursal', filtroSucursal);
     formData.append('filtro_estado', filtroEstado);
     
     // Hacer fetch con los filtros
@@ -587,7 +567,7 @@ document.addEventListener('DOMContentLoaded', function (e) {
       const tempDiv = document.createElement('div');
       tempDiv.style.display = 'none';
       tempDiv.innerHTML = '<table id="' + tempTableId + '"><thead><tr>' +
-        '<th>ID</th><th>Cliente</th><th>Tipo Identificación</th><th>Número Identificación</th><th>Nacionalidad</th><th>Teléfono</th><th>Provincia</th><th>Sucursal</th><th>Estado</th><th>Fecha Alta</th>' +
+        '<th>ID</th><th>Cliente</th><th>Tipo Identificación</th><th>Número Identificación</th><th>Nacionalidad</th><th>Teléfono</th><th>Provincia</th><th>Estado</th><th>Fecha Alta</th>' +
         '</tr></thead></table>';
       document.body.appendChild(tempDiv);
       
@@ -602,9 +582,8 @@ document.addEventListener('DOMContentLoaded', function (e) {
           { data: 4 }, // Nacionalidad
           { data: 5 }, // Teléfono
           { data: 6 }, // Provincia
-          { data: 7 }, // Sucursal
-          { data: 8 }, // Estado
-          { data: 9 }  // Fecha
+          { data: 7 }, // Estado
+          { data: 8 }  // Fecha
         ],
         paging: false,
         searching: false,
@@ -615,7 +594,7 @@ document.addEventListener('DOMContentLoaded', function (e) {
       // Configuración específica según el tipo de exportación
       let exportConfig = {
         exportOptions: {
-          columns: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+          columns: [0, 1, 2, 3, 4, 5, 6, 7, 8]
         }
       };
       

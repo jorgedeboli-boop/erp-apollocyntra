@@ -25,7 +25,7 @@ try {
         // Validar campos obligatorios
         $campos_obligatorios = array(
             'id_cliente','nombre', 'apellido', 'tipo_identificacion', 'identificacion', 
-            'nacionalidad', 'f_nacimiento', 'telefono', 'f_vencimiento', 'sexo', 'sucursal'
+            'nacionalidad', 'f_nacimiento', 'telefono', 'f_vencimiento', 'sexo'
         );
         
         foreach ($campos_obligatorios as $campo) {
@@ -43,7 +43,6 @@ try {
         $f_nacimiento = $_POST['f_nacimiento'];
         $telefono = trim($_POST['telefono']);
         $f_vencimiento = $_POST['f_vencimiento'];
-        $sucursal = (int)$_POST['sucursal'];
         $email = isset($_POST['email']) ? trim($_POST['email']) : '';
         $observaciones = isset($_POST['observaciones']) ? trim($_POST['observaciones']) : '';
         $sexo = trim($_POST['sexo']);
@@ -63,13 +62,12 @@ try {
                 identificacion = ?,
                 nacionalidad = ?,
                 nacionalidad_id = ?,
-                telefono = ?,
-                sucursal = ?
+                telefono = ?
             WHERE id_cliente = ?
         ";
             
         $stmt_clientes = mysqli_prepare($conexion, $query_clientes);
-        mysqli_stmt_bind_param($stmt_clientes, 'sssissisii', $nombre, $apellido, $tipo_identificacion_texto, $tipo_identificacion, $identificacion, $nacionalidad_texto, $nacionalidad_id, $telefono, $sucursal, $id_cliente);
+        mysqli_stmt_bind_param($stmt_clientes, 'sssissisi', $nombre, $apellido, $tipo_identificacion_texto, $tipo_identificacion, $identificacion, $nacionalidad_texto, $nacionalidad_id, $telefono, $id_cliente);
         
         if (!mysqli_stmt_execute($stmt_clientes)) {
             throw new Exception("Error al actualizar en clientes: " . mysqli_stmt_error($stmt_clientes));

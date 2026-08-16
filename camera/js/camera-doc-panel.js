@@ -95,10 +95,11 @@
         var tipo = opts.tipo;
         var id = opts.id;
         var idSucursal = opts.idSucursal;
-        if (!tipo || !id || !idSucursal) {
+        if (!tipo || !id || (tipo !== 'cliente' && !idSucursal)) {
             console.error('CameraDocPanel.open: requiere tipo, id e idSucursal');
             return Promise.reject(new Error('CameraDocPanel: parámetros incompletos'));
         }
+        idSucursal = idSucursal || 0;
 
         var key = cacheKey(tipo, id, idSucursal);
         var panelCallbacks = {

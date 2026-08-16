@@ -32,12 +32,6 @@ try {
             }
         }
 
-        $sucursal = isset($_SESSION['usuario_sucursal']) ? $_SESSION['usuario_sucursal'] : '';
-        
-        if (empty($sucursal)) {
-            throw new Exception("No se pudo determinar la sucursal del usuario");
-        }
-        
         // Sanitizar datos
         $nombre = trim($_POST['nombre']);
         $apellido = trim($_POST['apellido']);
@@ -68,12 +62,12 @@ try {
         // INSERT 1: Tabla clientes
         $query_clientes = "
             INSERT INTO clientes (
-                nombre, apellido, sucursal, tipo_identificacion, tipo_identificacion_id, identificacion, nacionalidad, nacionalidad_id, telefono, creado_por, f_alta
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURDATE())
+                nombre, apellido, tipo_identificacion, tipo_identificacion_id, identificacion, nacionalidad, nacionalidad_id, telefono, creado_por, f_alta
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, CURDATE())
         ";
         
         $stmt_clientes = mysqli_prepare($conexion, $query_clientes);
-        mysqli_stmt_bind_param($stmt_clientes, 'ssisissisi', $nombre, $apellido, $sucursal, $tipo_identificacion_texto, $tipo_identificacion, $identificacion, $nacionalidad_texto, $nacionalidad_id, $telefono, $usuario_id);
+        mysqli_stmt_bind_param($stmt_clientes, 'ssissisii', $nombre, $apellido, $tipo_identificacion_texto, $tipo_identificacion, $identificacion, $nacionalidad_texto, $nacionalidad_id, $telefono, $usuario_id);
         
         if (!mysqli_stmt_execute($stmt_clientes)) {
             throw new Exception("Error al insertar en clientes: " . mysqli_stmt_error($stmt_clientes));

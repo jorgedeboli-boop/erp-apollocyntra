@@ -19,13 +19,10 @@
                           c.nacionalidad,
                           c.nacionalidad_id,
                           c.telefono,
-                          c.sucursal,
                           c.estado,
                           c.f_alta,
-                          c.delete_state,
-                          s.nombre_sucursal
+                          c.delete_state
                       FROM clientes c
-                      LEFT JOIN sucursal s ON c.sucursal = s.id_sucursal
                       WHERE c.id_cliente = ?
                   ";
       
@@ -217,16 +214,6 @@
                   <div class="form-floating form-floating-outline mb-3">
                     <input type="email" class="form-control" id="email" name="email" placeholder="cliente@ejemplo.com" value="<?php echo isset($datos_cliente['email']) ? htmlspecialchars($datos_cliente['email']) : ''; ?>" autocomplete="off" />
                     <label for="email">Email</label>
-                  </div>
-                  <div class="mt-5">
-                    <h5 class="mb-3">Sucursal</h5>
-                    <div class="form-floating form-floating-outline mb-3">
-                      <?php
-                      $sucursal_seleccionada = isset($cliente['sucursal']) ? $cliente['sucursal'] : 0;
-                      generarSelectSucursales($sucursal_seleccionada, 'sucursal', 'sucursal', true);
-                      ?>
-                      <label for="sucursal">Sucursal *</label>
-                    </div>
                   </div>
                 </div>
               </div>

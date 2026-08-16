@@ -34,24 +34,32 @@ try {
     
     $conexion_temp = conectar_bd();
     
-    $query_sucursal = "SELECT sucursal FROM clientes WHERE id_cliente = ?";
-    $stmt_sucursal = mysqli_prepare($conexion_temp, $query_sucursal);
-    mysqli_stmt_bind_param($stmt_sucursal, 'i', $id_cliente);
-    mysqli_stmt_execute($stmt_sucursal);
-    $result_sucursal = mysqli_stmt_get_result($stmt_sucursal);
+    $query_cliente = "SELECT id_cliente FROM clientes WHERE id_cliente = ?";
+    $stmt_cliente = mysqli_prepare($conexion_temp, $query_cliente);
+    mysqli_stmt_bind_param($stmt_cliente, 'i', $id_cliente);
+    mysqli_stmt_execute($stmt_cliente);
+    $result_cliente = mysqli_stmt_get_result($stmt_cliente);
     
-    if (!$result_sucursal || mysqli_num_rows($result_sucursal) === 0) {
+    if (!$result_cliente || mysqli_num_rows($result_cliente) === 0) {
         mysqli_close($conexion_temp);
         throw new Exception("Cliente no encontrado");
     }
-    
-    $cliente_data = mysqli_fetch_assoc($result_sucursal);
-    $id_sucursal = (int)$cliente_data['sucursal'];
-    mysqli_stmt_close($stmt_sucursal);
+    mysqli_stmt_close($stmt_cliente);
+
+    $tabla_fotos = '';
+    $result_tablas = mysqli_query($conexion_temp, "SHOW TABLES LIKE 'fotos_app_%'");
+    if ($result_tablas) {
+        while ($row_tabla = mysqli_fetch_row($result_tablas)) {
+            if (preg_match('/^fotos_app_(\d+)$/', $row_tabla[0])) {
+                $tabla_fotos = $row_tabla[0];
+                break;
+            }
+        }
+    }
     mysqli_close($conexion_temp);
     
-    if (!$id_sucursal) {
-        throw new Exception("Sucursal del cliente no válida");
+    if ($tabla_fotos === '') {
+        throw new Exception("No se encontró una tabla de fotos disponible");
     }
     
     // Validar tipo de archivo
@@ -117,9 +125,6 @@ try {
     
     // Conectar BD
     $conexion = conectar_bd();
-    
-    // Construir nombre de tabla dinámica
-    $tabla_fotos = "fotos_app_" . $id_sucursal;
     
     // Insertar registro en la tabla fotos_app
     $query = "

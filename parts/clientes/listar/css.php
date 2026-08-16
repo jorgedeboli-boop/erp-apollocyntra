@@ -8,7 +8,6 @@
 
 #collapse_filtros_clientes:not(.clientes-filtros-ready) .user_tipo_identificacion,
 #collapse_filtros_clientes:not(.clientes-filtros-ready) .user_provincia,
-#collapse_filtros_clientes:not(.clientes-filtros-ready) .user_sucursal,
 #collapse_filtros_clientes:not(.clientes-filtros-ready) .user_estado {
     min-height: 38px;
 }

@@ -33,10 +33,10 @@ try {
     $types = 'i';
 
     if ($searchValue !== '') {
-        $where .= " AND (av.id_venta_sucursal LIKE ? OR s.nombre_sucursal LIKE ? OR av.estado LIKE ? OR av.tipo_pago LIKE ?)";
+        $where .= " AND (av.id_venta_sucursal LIKE ? OR av.estado LIKE ? OR av.tipo_pago LIKE ?)";
         $like = '%' . $searchValue . '%';
-        $params = array_merge($params, [$like, $like, $like, $like]);
-        $types .= 'ssss';
+        $params = array_merge($params, [$like, $like, $like]);
+        $types .= 'sss';
     }
 
     $sqlTotalAll = "SELECT COUNT(*) AS total FROM ventas av WHERE av.cliente = ?";
@@ -50,7 +50,6 @@ try {
     $sqlTotal = "
         SELECT COUNT(*) AS total
         FROM ventas av
-        LEFT JOIN sucursal s ON av.id_sucursal = s.id_sucursal
         {$where}
     ";
     $stTotal = mysqli_prepare($conexion, $sqlTotal);
@@ -68,10 +67,8 @@ try {
             av.fecha,
             av.estado,
             av.venta_plazos,
-            av.tipo_pago,
-            s.nombre_sucursal
+            av.tipo_pago
         FROM ventas av
-        LEFT JOIN sucursal s ON av.id_sucursal = s.id_sucursal
         {$where}
         ORDER BY av.fecha DESC
         LIMIT ? OFFSET ?
@@ -109,7 +106,6 @@ try {
             $linkFicha,
             number_format((float) ($row['precio'] ?? 0), 0, ',', '.') . ' €',
             !empty($row['fecha']) ? date('d/m/Y H:i', strtotime((string) $row['fecha'])) : 'N/A',
-            htmlspecialchars((string) ($row['nombre_sucursal'] ?? '')),
             $estado,
             $plazos,
             $pago,

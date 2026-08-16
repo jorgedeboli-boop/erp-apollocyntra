@@ -34,7 +34,6 @@
                       c.nacionalidad,
                       c.nacionalidad_id,
                       c.telefono,
-                      c.sucursal,
                       c.f_alta
                   FROM clientes c
                   WHERE c.id_cliente = ?
@@ -264,19 +263,6 @@
             </div>
             
             <div class="row mt-4">
-              
-              <!-- Información Comercial -->
-              <div class="col-md-6">
-                <h5 class="mb-6">Información Comercial</h5>
-                
-                <div class="form-floating form-floating-outline mt-7">
-                  <?php
-                  $sucursal_seleccionada = isset($cliente['sucursal']) ? $cliente['sucursal'] : 0;
-                  generarSelectSucursales($sucursal_seleccionada, 'sucursal', 'sucursal', true);
-                  ?>
-                  <label for="sucursal" class="select_label">Sucursal *</label>
-                </div>
-              </div>
               
               <!-- Información Adicional -->
               <div class="col-md-6">

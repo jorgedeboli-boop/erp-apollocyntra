@@ -23,7 +23,7 @@ try {
         // Validar campos obligatorios
         $campos_obligatorios = array(
             'nombre', 'apellido', 'tipo_identificacion', 'identificacion', 
-            'nacionalidad', 'f_nacimiento', 'telefono', 'sucursal_cliente', 'f_vencimiento', 'sexo'
+            'nacionalidad', 'f_nacimiento', 'telefono', 'f_vencimiento', 'sexo'
         );
         
         foreach ($campos_obligatorios as $campo) {
@@ -39,7 +39,6 @@ try {
         $nacionalidad = trim($_POST['nacionalidad']);
         $f_nacimiento = $_POST['f_nacimiento'];
         $telefono = trim($_POST['telefono']);
-        $sucursal = (int)$_POST['sucursal_cliente'];
         $f_vencimiento = $_POST['f_vencimiento'];
         $email = isset($_POST['email']) ? trim($_POST['email']) : '';
         $observaciones = isset($_POST['observaciones']) ? trim($_POST['observaciones']) : '';
@@ -63,12 +62,12 @@ try {
         // INSERT 1: Tabla clientes
         $query_clientes = "
             INSERT INTO clientes (
-                nombre, apellido, sucursal, tipo_identificacion, tipo_identificacion_id, identificacion, nacionalidad, nacionalidad_id, telefono, creado_por, f_alta
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURDATE())
+                nombre, apellido, tipo_identificacion, tipo_identificacion_id, identificacion, nacionalidad, nacionalidad_id, telefono, creado_por, f_alta
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, CURDATE())
         ";
         
         $stmt_clientes = mysqli_prepare($conexion, $query_clientes);
-        mysqli_stmt_bind_param($stmt_clientes, 'ssisissisi', $nombre, $apellido, $sucursal, $tipo_identificacion_texto, $tipo_identificacion, $identificacion, $nacionalidad_texto, $nacionalidad_id, $telefono, $usuario_id);
+        mysqli_stmt_bind_param($stmt_clientes, 'ssissisii', $nombre, $apellido, $tipo_identificacion_texto, $tipo_identificacion, $identificacion, $nacionalidad_texto, $nacionalidad_id, $telefono, $usuario_id);
         
         if (!mysqli_stmt_execute($stmt_clientes)) {
             throw new Exception("Error al insertar en clientes: " . mysqli_stmt_error($stmt_clientes));

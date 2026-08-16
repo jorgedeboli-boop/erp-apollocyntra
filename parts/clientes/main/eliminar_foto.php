@@ -32,23 +32,22 @@ try {
     // Conectar BD
     $conexion = conectar_bd();
     
-    // Primero necesitamos obtener el id_cliente para conocer la sucursal
-    // Intentamos buscar en todas las posibles tablas fotos_app_X
-    // Obtenemos todas las sucursales
-    $query_sucursales = "SELECT id_sucursal FROM sucursal";
-    $result_sucursales = mysqli_query($conexion, $query_sucursales);
+    // Buscar la foto en las tablas fotos_app_*
+    $result_tablas = mysqli_query($conexion, "SHOW TABLES LIKE 'fotos_app_%'");
     
     $foto_info = null;
-    $id_sucursal = null;
+    $tabla_fotos = '';
     
-    if ($result_sucursales) {
-        while ($row_sucursal = mysqli_fetch_assoc($result_sucursales)) {
-            $sucursal_temp = (int)$row_sucursal['id_sucursal'];
-            $tabla_fotos = "fotos_app_" . $sucursal_temp;
+    if ($result_tablas) {
+        while ($row_tabla = mysqli_fetch_row($result_tablas)) {
+            if (!preg_match('/^fotos_app_\d+$/', $row_tabla[0])) {
+                continue;
+            }
+            $tabla_fotos_temp = $row_tabla[0];
             
             // Buscar la foto por id_foto Y nombre_foto a la vez para evitar colisiones
-            // entre tablas (id_foto es AUTOINCREMENT por sucursal y puede repetirse).
-            $query_info = "SELECT id_cliente, nombre_foto FROM " . $tabla_fotos . " WHERE id_foto = ? AND nombre_foto = ?";
+            // entre tablas (id_foto es AUTOINCREMENT y puede repetirse).
+            $query_info = "SELECT id_cliente, nombre_foto FROM " . $tabla_fotos_temp . " WHERE id_foto = ? AND nombre_foto = ?";
             $stmt_info = mysqli_prepare($conexion, $query_info);
             
             if ($stmt_info) {
@@ -58,7 +57,7 @@ try {
                 
                 if ($result_info && mysqli_num_rows($result_info) > 0) {
                     $foto_info = mysqli_fetch_assoc($result_info);
-                    $id_sucursal = $sucursal_temp;
+                    $tabla_fotos = $tabla_fotos_temp;
                     mysqli_stmt_close($stmt_info);
                     break;
                 }
@@ -67,7 +66,7 @@ try {
         }
     }
     
-    if (!$foto_info || !$id_sucursal) {
+    if (!$foto_info || $tabla_fotos === '') {
         throw new Exception("Foto no encontrada en la base de datos");
     }
     
@@ -75,9 +74,6 @@ try {
     if ($foto_info['nombre_foto'] !== $nombre_foto) {
         throw new Exception("El nombre de la foto no coincide");
     }
-    
-    // Construir nombre de tabla dinámica
-    $tabla_fotos = "fotos_app_" . $id_sucursal;
     
     // Eliminar registro de la base de datos
     $query_delete = "DELETE FROM " . $tabla_fotos . " WHERE id_foto = ? AND nombre_foto = ?";

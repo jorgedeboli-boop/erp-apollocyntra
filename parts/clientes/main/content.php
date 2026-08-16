@@ -17,13 +17,10 @@
                           c.identificacion,
                           c.nacionalidad,
                           c.telefono,
-                          c.sucursal,
                           c.estado,
                           c.f_alta,
-                          c.delete_state,
-                          s.nombre_sucursal
+                          c.delete_state
                       FROM clientes c
-                      LEFT JOIN sucursal s ON c.sucursal = s.id_sucursal
                       WHERE c.id_cliente = ?
                   ";
       
@@ -135,9 +132,6 @@
                           <div class="user-profile-info">
                             <h4 class="mb-2"><?php echo isset($cliente['nombre']) ? htmlspecialchars($cliente['nombre'] . ' ' . $cliente['apellido']) : 'Cliente no encontrado'; ?></h4>
                             <ul class="list-inline mb-0 d-flex align-items-center flex-wrap justify-content-sm-start justify-content-center gap-4">
-                              <li class="list-inline-item">
-                                <i class="icon-base ri ri-map-pin-line me-2 icon-24px"></i><span class="fw-medium">Sucursal: <?php echo isset($cliente['nombre_sucursal']) ? htmlspecialchars($cliente['nombre_sucursal']) : 'Sin sucursal'; ?></span>
-                              </li>
                               <li class="list-inline-item">
                                 <i class="icon-base ri ri-calendar-line me-2 icon-24px"></i><span class="fw-medium">Alta: <?php echo isset($cliente['f_alta']) ? date('d/m/Y', strtotime($cliente['f_alta'])) : 'N/A'; ?></span>
                               </li>
@@ -287,9 +281,6 @@
                       <ul class="list-unstyled mb-0 mt-3 pt-1">
                         <li class="d-flex align-items-center mb-4">
                           <i class="icon-base ri ri-calendar-line icon-24px"></i><span class="fw-medium mx-2">Fecha nacimiento:</span> <span><?php echo isset($datos_cliente['f_nacimiento']) ? date('d/m/Y', strtotime($datos_cliente['f_nacimiento'])) : 'N/A'; ?></span>
-                        </li>
-                        <li class="d-flex align-items-center mb-4">
-                          <i class="icon-base ri ri-building-line icon-24px"></i><span class="fw-medium mx-2">Sucursal:</span> <span><?php echo isset($cliente['nombre_sucursal']) ? htmlspecialchars($cliente['nombre_sucursal']) : 'Sin sucursal'; ?></span>
                         </li>
                         <li class="d-flex align-items-center mb-4">
                           <i class="icon-base ri ri-mail-check-line icon-24px"></i><span class="fw-medium mx-2">Publicidad:</span> <span><?php echo isset($datos_cliente['publicidad']) ? htmlspecialchars($datos_cliente['publicidad']) : 'N/A'; ?></span>
@@ -485,7 +476,6 @@
                             <th>Peso</th>
                             <th>Compra</th>
                             <th>Fecha</th>
-                            <th>Sucursal</th>
                             <th>Estado</th>
                           </tr>
                         </thead>
@@ -510,7 +500,6 @@
                             <th>Importe</th>
                             <th>Fecha</th>
                             <th>Vencimiento</th>
-                            <th>Sucursal</th>
                             <th>Estado</th>
                           </tr>
                         </thead>
@@ -532,7 +521,6 @@
                             <th>Nº Venta</th>
                             <th>Total</th>
                             <th>Fecha</th>
-                            <th>Sucursal</th>
                             <th>Estado</th>
                             <th>Plazos</th>
                             <th>Pago</th>

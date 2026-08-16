@@ -30,7 +30,6 @@ $query_cliente = "
         c.nacionalidad,
         c.f_nacimiento,
         c.telefono,
-        c.sucursal,
         c.f_alta,
         c.f_vencimiento
     FROM clientes c
@@ -88,15 +87,6 @@ $cliente['datos_cliente'] = $datos_cliente;
 
 echo "<h3>Datos combinados:</h3>";
 echo "<pre>" . print_r($cliente, true) . "</pre>";
-
-// Probar la función obtener_sucursales
-echo "<h3>Prueba de obtener_sucursales():</h3>";
-try {
-    $sucursales = obtener_sucursales();
-    echo "<pre>" . print_r($sucursales, true) . "</pre>";
-} catch (Exception $e) {
-    echo "<p style='color: red;'>Error en obtener_sucursales: " . $e->getMessage() . "</p>";
-}
 
 mysqli_close($conexion);
 ?>

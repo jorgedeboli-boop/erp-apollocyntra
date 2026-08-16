@@ -43,7 +43,6 @@ try {
             c.nacionalidad,
             c.f_nacimiento,
             c.telefono,
-            c.sucursal,
             c.f_alta,
             c.f_vencimiento
         FROM clientes c

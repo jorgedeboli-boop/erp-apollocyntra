@@ -1,5 +1,5 @@
 /**
- * Filtros del listado de clientes — Select2 inmediato + sucursales por AJAX.
+ * Filtros del listado de clientes — Select2 inmediato.
  */
 (function () {
   'use strict';
@@ -7,18 +7,15 @@
   const FILTER_IDS = [
     'UserTipoIdentificacion',
     'UserProvincia',
-    'UserSucursal',
     'UserEstado'
   ];
 
   const COLLAPSE_ID = 'collapse_filtros_clientes';
   const READY_CLASS = 'clientes-filtros-ready';
-  const SUCURSALES_URL = 'parts/clientes/listar/get_sucursales.php';
 
   let onChangeCallback = null;
   let onReadyCallback = null;
   let initialized = false;
-  let sucursalesLoaded = false;
 
   function getFilterSelects() {
     return FILTER_IDS
@@ -65,37 +62,6 @@
     return true;
   }
 
-  function populateSucursales() {
-    const select = document.getElementById('UserSucursal');
-    if (!select || sucursalesLoaded) {
-      return Promise.resolve();
-    }
-
-    return fetch(SUCURSALES_URL)
-      .then(function (response) {
-        return response.json();
-      })
-      .then(function (data) {
-        if (!data.success) {
-          throw new Error(data.error || 'Error al cargar sucursales');
-        }
-
-        data.sucursales.forEach(function (sucursal) {
-          select.appendChild(new Option(sucursal.nombre_sucursal, sucursal.nombre_sucursal));
-        });
-
-        sucursalesLoaded = true;
-
-        const $select = jQuery(select);
-        if ($select.data('select2')) {
-          $select.trigger('change.select2');
-        }
-      })
-      .catch(function (error) {
-        console.error('Error al cargar sucursales:', error);
-      });
-  }
-
   function init() {
     if (initialized || !document.getElementById('UserTipoIdentificacion')) {
       return initialized;
@@ -140,9 +106,7 @@
       return;
     }
 
-    populateSucursales().finally(function () {
-      triggerReady();
-    });
+    triggerReady();
   }
 
   window.ClientesFiltros = {
@@ -152,7 +116,7 @@
     },
     setOnReady: function (callback) {
       onReadyCallback = callback;
-      if (initialized && sucursalesLoaded) {
+      if (initialized) {
         callback();
       }
     }

@@ -97,21 +97,6 @@
                     <input type="email" class="form-control" id="email" name="email" placeholder="cliente@ejemplo.com" autocomplete="off" />
                     <label for="email">Email</label>
                   </div>
-                  <div class="mt-5">
-                    <h5 class="mb-3">Sucursal</h5>
-                    <div class="form-floating form-floating-outline mb-3">
-                      <select class="form-select select2 select-custom" id="sucursal_cliente" name="sucursal_cliente" required>
-                        <option value="">Seleccionar sucursal</option>
-                        <?php
-                        $sucursales = obtener_sucursales();
-                        foreach ($sucursales as $sucursal) {
-                            echo '<option value="' . $sucursal['id_sucursal'] . '">' . htmlspecialchars($sucursal['nombre_sucursal']) . '</option>';
-                        }
-                        ?>
-                      </select>
-                      <label for="sucursal_cliente">Sucursal *</label>
-                    </div>
-                  </div>
                 </div>
               </div>
               <div class="row mt-4">

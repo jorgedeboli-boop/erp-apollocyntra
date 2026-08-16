@@ -19,57 +19,58 @@ function camera_catalog_imagenes_cliente(int $id_cliente): array
         throw new RuntimeException('Error al conectar a la base de datos');
     }
 
-    $query_sucursal = 'SELECT sucursal FROM clientes WHERE id_cliente = ?';
-    $stmt_sucursal = mysqli_prepare($conexion, $query_sucursal);
-    mysqli_stmt_bind_param($stmt_sucursal, 'i', $id_cliente);
-    mysqli_stmt_execute($stmt_sucursal);
-    $result_sucursal = mysqli_stmt_get_result($stmt_sucursal);
+    $query_cliente = 'SELECT id_cliente FROM clientes WHERE id_cliente = ?';
+    $stmt_cliente = mysqli_prepare($conexion, $query_cliente);
+    mysqli_stmt_bind_param($stmt_cliente, 'i', $id_cliente);
+    mysqli_stmt_execute($stmt_cliente);
+    $result_cliente = mysqli_stmt_get_result($stmt_cliente);
 
-    if (!$result_sucursal || mysqli_num_rows($result_sucursal) === 0) {
-        mysqli_stmt_close($stmt_sucursal);
+    if (!$result_cliente || mysqli_num_rows($result_cliente) === 0) {
+        mysqli_stmt_close($stmt_cliente);
         mysqli_close($conexion);
         throw new RuntimeException('Cliente no encontrado');
     }
-
-    $cliente_data = mysqli_fetch_assoc($result_sucursal);
-    $id_sucursal = (int) $cliente_data['sucursal'];
-    mysqli_stmt_close($stmt_sucursal);
-
-    if ($id_sucursal <= 0) {
-        mysqli_close($conexion);
-        throw new RuntimeException('Sucursal del cliente no v?lida');
-    }
-
-    $tabla_fotos = 'fotos_app_' . $id_sucursal;
-    $query = '
-        SELECT id_foto, nombre_foto
-        FROM ' . $tabla_fotos . '
-        WHERE id_cliente = ?
-        ORDER BY id_foto DESC
-    ';
-    $stmt = mysqli_prepare($conexion, $query);
-    mysqli_stmt_bind_param($stmt, 'i', $id_cliente);
-    mysqli_stmt_execute($stmt);
-    $result = mysqli_stmt_get_result($stmt);
+    mysqli_stmt_close($stmt_cliente);
 
     $imagenes = [];
     $photos_dir = __DIR__ . '/../../photos/';
-    if ($result) {
-        while ($row = mysqli_fetch_assoc($result)) {
-            $ruta_archivo = $photos_dir . $row['nombre_foto'];
-            if (file_exists($ruta_archivo)) {
-                $imagenes[] = [
-                    'id_foto' => (int) $row['id_foto'],
-                    'nombre_foto' => $row['nombre_foto'],
-                    'foto' => $row['nombre_foto'],
-                    'descripcion' => '',
-                    'fecha_subida' => '',
-                ];
+    $result_tablas = mysqli_query($conexion, "SHOW TABLES LIKE 'fotos_app_%'");
+    if ($result_tablas) {
+        while ($row_tabla = mysqli_fetch_row($result_tablas)) {
+            if (!preg_match('/^fotos_app_\d+$/', $row_tabla[0])) {
+                continue;
             }
+            $query = '
+                SELECT id_foto, nombre_foto
+                FROM ' . $row_tabla[0] . '
+                WHERE id_cliente = ?
+                ORDER BY id_foto DESC
+            ';
+            $stmt = mysqli_prepare($conexion, $query);
+            if (!$stmt) {
+                continue;
+            }
+            mysqli_stmt_bind_param($stmt, 'i', $id_cliente);
+            mysqli_stmt_execute($stmt);
+            $result = mysqli_stmt_get_result($stmt);
+            if ($result) {
+                while ($row = mysqli_fetch_assoc($result)) {
+                    $ruta_archivo = $photos_dir . $row['nombre_foto'];
+                    if (file_exists($ruta_archivo)) {
+                        $imagenes[] = [
+                            'id_foto' => (int) $row['id_foto'],
+                            'nombre_foto' => $row['nombre_foto'],
+                            'foto' => $row['nombre_foto'],
+                            'descripcion' => '',
+                            'fecha_subida' => '',
+                        ];
+                    }
+                }
+            }
+            mysqli_stmt_close($stmt);
         }
     }
 
-    mysqli_stmt_close($stmt);
     mysqli_close($conexion);
 
     return $imagenes;
