@@ -9,18 +9,17 @@ header('Content-Type: application/json');
 
 try {
     // Verificar que se reciban los parámetros necesarios
-    if (!isset($_POST['id_fecha_cierre']) || !isset($_POST['id_sucursal'])) {
+    if (!isset($_POST['id_fecha_cierre']) || !isset($_POST['id_tabla'])) {
         throw new Exception("Parámetros incompletos");
     }
     
     $idFechaCierre = (int)$_POST['id_fecha_cierre'];
-    $idSucursal = (int)$_POST['id_sucursal'];
+    $idTabla = (int)$_POST['id_tabla'];
     
     // Conectar BD
     $conexion = conectar_bd();
     
-    // Nombre de la tabla
-    $tableName = "cierre_caja_$idSucursal";
+    $tableName = "cierre_caja_$idTabla";
     
     // Verificar si la tabla existe
     $checkTable = mysqli_query($conexion, "SHOW TABLES LIKE '$tableName'");

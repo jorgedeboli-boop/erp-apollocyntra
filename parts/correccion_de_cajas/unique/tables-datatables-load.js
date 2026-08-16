@@ -12,9 +12,8 @@ document.addEventListener('DOMContentLoaded', function () {
   var modalEditarApunteInstance = modalEditarApunteEl ? new bootstrap.Modal(modalEditarApunteEl) : null;
   var guardandoImporteInline = false;
   var estadoModal = {
-    id_sucursal: 0,
+    id_tabla: 0,
     fecha: '',
-    nombre_sucursal: '',
     falta_apertura: false,
     falta_cierre: false,
     apertura_id_erroneo: false,
@@ -340,8 +339,8 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   function cargarMovimientosModal() {
-    return fetch('parts/correccion_de_cajas/unique/load_movimientos_dia.php?id_sucursal=' +
-      encodeURIComponent(estadoModal.id_sucursal) +
+    return fetch('parts/correccion_de_cajas/unique/load_movimientos_dia.php?id_tabla=' +
+      encodeURIComponent(estadoModal.id_tabla) +
       '&fecha=' + encodeURIComponent(estadoModal.fecha), {
       credentials: 'same-origin',
     })
@@ -363,9 +362,8 @@ document.addEventListener('DOMContentLoaded', function () {
     resetModalCorreccionEstado();
 
     estadoModal = {
-      id_sucursal: meta.id_sucursal,
+      id_tabla: meta.id_tabla,
       fecha: meta.fecha,
-      nombre_sucursal: meta.nombre_sucursal,
       falta_apertura: meta.falta_apertura,
       falta_cierre: meta.falta_cierre,
       apertura_id_erroneo: meta.apertura_id_erroneo,
@@ -378,7 +376,6 @@ document.addEventListener('DOMContentLoaded', function () {
       movimientosPorId: {},
     };
 
-    document.getElementById('modal-correccion-sucursal').textContent = meta.nombre_sucursal;
     document.getElementById('modal-correccion-fecha').textContent = meta.fecha_texto;
     document.getElementById('modal-correccion-conflicto').textContent = construirTextoConflicto(meta);
 
@@ -429,7 +426,7 @@ document.addEventListener('DOMContentLoaded', function () {
   function enviarActualizacionMovimiento(datos) {
     var formData = new FormData();
     formData.append('id_movimiento', String(datos.id_movimiento));
-    formData.append('id_sucursal', String(datos.id_sucursal));
+    formData.append('id_tabla', String(datos.id_tabla));
     formData.append('grupos', datos.grupos);
     formData.append('concepto', datos.concepto);
     formData.append('salida', String(datos.salida));
@@ -450,7 +447,7 @@ document.addEventListener('DOMContentLoaded', function () {
     var idMovimiento = parseInt(input.getAttribute('data-id-movimiento'), 10);
     var campo = input.getAttribute('data-campo');
     var mov = estadoModal.movimientosPorId[idMovimiento];
-    if (!mov || !estadoModal.id_sucursal || !campo) {
+    if (!mov || !estadoModal.id_tabla || !campo) {
       return;
     }
 
@@ -479,7 +476,7 @@ document.addEventListener('DOMContentLoaded', function () {
     actualizarModalTrasCambio(
       enviarActualizacionMovimiento({
         id_movimiento: idMovimiento,
-        id_sucursal: estadoModal.id_sucursal,
+        id_tabla: estadoModal.id_tabla,
         grupos: mov.grupos || '',
         concepto: mov.concepto || '',
         salida: salida,
@@ -511,7 +508,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     document.getElementById('editar-correccion-id-movimiento').value = String(mov.id_movimientos);
-    document.getElementById('editar-correccion-sucursal').value = String(estadoModal.id_sucursal);
+    document.getElementById('editar-correccion-tabla').value = String(estadoModal.id_tabla);
     document.getElementById('editar-correccion-concepto').value = mov.concepto || '';
     document.getElementById('editar-correccion-entrada').value = Number(mov.entrada || 0).toFixed(2);
     document.getElementById('editar-correccion-salida').value = Number(mov.salida || 0).toFixed(2);
@@ -531,7 +528,7 @@ document.addEventListener('DOMContentLoaded', function () {
       form.reset();
     }
 
-    document.getElementById('nuevo-correccion-sucursal').value = String(estadoModal.id_sucursal);
+    document.getElementById('nuevo-correccion-tabla').value = String(estadoModal.id_tabla);
     document.getElementById('nuevo-correccion-fecha').value = estadoModal.fecha;
 
     cargarGruposNuevoApunte().finally(function () {
@@ -575,9 +572,6 @@ document.addEventListener('DOMContentLoaded', function () {
     formData.append('export_all', '1');
     formData.append('search[value]', dtCorreccionCajas.search() || '');
 
-    var filtro = document.getElementById('filtro_sucursal');
-    formData.append('filtro_sucursal', filtro ? filtro.value : '');
-
     fetch('parts/correccion_de_cajas/unique/load_list.php', {
       method: 'POST',
       body: formData,
@@ -605,7 +599,6 @@ document.addEventListener('DOMContentLoaded', function () {
             stripHtmlExport(row[0]),
             stripHtmlExport(row[1]),
             stripHtmlExport(row[2]),
-            stripHtmlExport(row[3]),
           ];
         });
 
@@ -614,7 +607,7 @@ document.addEventListener('DOMContentLoaded', function () {
         tempDiv.style.display = 'none';
         tempDiv.innerHTML =
           '<table id="' + tempTableId + '"><thead><tr>' +
-          '<th>ID</th><th>Sucursal</th><th>Fecha</th><th>Conflicto</th>' +
+          '<th>ID</th><th>Fecha</th><th>Conflicto</th>' +
           '</tr></thead></table>';
         document.body.appendChild(tempDiv);
 
@@ -624,7 +617,6 @@ document.addEventListener('DOMContentLoaded', function () {
             { data: 0 },
             { data: 1 },
             { data: 2 },
-            { data: 3 },
           ],
           paging: false,
           searching: false,
@@ -688,13 +680,12 @@ document.addEventListener('DOMContentLoaded', function () {
       pageLength: 25,
       lengthChange: false,
       language: DATATABLES_SPANISH,
-      order: [[2, 'asc']],
+      order: [[1, 'asc']],
       columns: [
         { data: 0 },
         { data: 1 },
         { data: 2 },
         { data: 3 },
-        { data: 4 },
       ],
       columnDefs: [
         {
@@ -704,13 +695,13 @@ document.addEventListener('DOMContentLoaded', function () {
           },
         },
         {
-          targets: 3,
+          targets: 2,
           render: function (data) {
             return '<span class="badge bg-label-danger rounded-pill">' + escapeHtml(data) + '</span>';
           },
         },
         {
-          targets: 4,
+          targets: 3,
           orderable: false,
           searchable: false,
           render: function (data) {
@@ -719,10 +710,9 @@ document.addEventListener('DOMContentLoaded', function () {
             }
             return (
               '<button type="button" class="btn btn-sm btn-primary btn-corregir-caja" ' +
-              'data-id-sucursal="' + escapeHtml(data.id_sucursal) + '" ' +
+              'data-id-tabla="' + escapeHtml(data.id_tabla) + '" ' +
               'data-fecha="' + escapeHtml(data.fecha) + '" ' +
               'data-fecha-texto="' + escapeHtml(data.fecha_texto) + '" ' +
-              'data-nombre-sucursal="' + escapeHtml(data.nombre_sucursal) + '" ' +
               'data-falta-apertura="' + (data.falta_apertura ? '1' : '0') + '" ' +
               'data-falta-cierre="' + (data.falta_cierre ? '1' : '0') + '" ' +
               'data-apertura-id-erroneo="' + (data.apertura_id_erroneo ? '1' : '0') + '" ' +
@@ -797,17 +787,11 @@ document.addEventListener('DOMContentLoaded', function () {
         url: 'parts/correccion_de_cajas/unique/load_list.php',
         type: 'POST',
         data: function (d) {
-          var filtro = document.getElementById('filtro_sucursal');
-          d.filtro_sucursal = filtro ? filtro.value : '';
         },
       },
     });
 
     window.dtCorreccionCajas = dtCorreccionCajas;
-
-    if (FD && typeof FD.createFilterSucursal === 'function') {
-      FD.createFilterSucursal('.correccion_sucursal', 'filtro_sucursal', 'Seleccionar Sucursal', onFiltroCorreccionChange);
-    }
 
     dtTable.addEventListener('click', function (event) {
       var btn = event.target.closest('.btn-corregir-caja');
@@ -815,10 +799,9 @@ document.addEventListener('DOMContentLoaded', function () {
         return;
       }
       abrirModalCorreccion({
-        id_sucursal: parseInt(btn.getAttribute('data-id-sucursal'), 10),
+        id_tabla: parseInt(btn.getAttribute('data-id-tabla'), 10),
         fecha: btn.getAttribute('data-fecha'),
         fecha_texto: btn.getAttribute('data-fecha-texto'),
-        nombre_sucursal: btn.getAttribute('data-nombre-sucursal'),
         falta_apertura: btn.getAttribute('data-falta-apertura') === '1',
         falta_cierre: btn.getAttribute('data-falta-cierre') === '1',
         apertura_id_erroneo: btn.getAttribute('data-apertura-id-erroneo') === '1',
@@ -872,7 +855,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     var idMovimiento = parseInt(btn.getAttribute('data-id-movimiento'), 10);
-    if (!idMovimiento || !estadoModal.id_sucursal) {
+    if (!idMovimiento || !estadoModal.id_tabla) {
       return;
     }
 
@@ -891,7 +874,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
       var formData = new FormData();
       formData.append('id_movimiento', String(idMovimiento));
-      formData.append('id_sucursal', String(estadoModal.id_sucursal));
+      formData.append('id_tabla', String(estadoModal.id_tabla));
 
       actualizarModalTrasCambio(
         fetch('parts/movimientos_de_caja/listar/delete_movimiento.php', {
@@ -910,7 +893,7 @@ document.addEventListener('DOMContentLoaded', function () {
   });
 
   document.getElementById('btn-guardar-cierre-correccion')?.addEventListener('click', function () {
-    if (!estadoModal.cierreMovimiento || !estadoModal.id_sucursal) {
+    if (!estadoModal.cierreMovimiento || !estadoModal.id_tabla) {
       Swal.fire({ icon: 'warning', title: 'Atención', text: 'No hay cierre para actualizar' });
       return;
     }
@@ -929,7 +912,7 @@ document.addEventListener('DOMContentLoaded', function () {
     actualizarModalTrasCambio(
       enviarActualizacionMovimiento({
         id_movimiento: mov.id_movimientos,
-        id_sucursal: estadoModal.id_sucursal,
+        id_tabla: estadoModal.id_tabla,
         grupos: mov.grupos || 'CAJA FINAL',
         concepto: mov.concepto || 'Cierre de caja',
         salida: salida,
@@ -956,7 +939,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     var formData = new FormData();
-    formData.append('id_sucursal', String(estadoModal.id_sucursal));
+    formData.append('id_tabla', String(estadoModal.id_tabla));
     formData.append('fecha', estadoModal.fecha);
     orden.forEach(function (id) {
       formData.append('orden[]', String(id));
@@ -1010,7 +993,7 @@ document.addEventListener('DOMContentLoaded', function () {
     actualizarModalTrasCambio(
       enviarActualizacionMovimiento({
         id_movimiento: parseInt(document.getElementById('editar-correccion-id-movimiento').value, 10),
-        id_sucursal: estadoModal.id_sucursal,
+        id_tabla: estadoModal.id_tabla,
         grupos: document.getElementById('editar-correccion-grupo').value,
         concepto: document.getElementById('editar-correccion-concepto').value,
         salida: salida,
@@ -1107,7 +1090,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     var formData = new FormData();
-    formData.append('id_sucursal', String(estadoModal.id_sucursal));
+    formData.append('id_tabla', String(estadoModal.id_tabla));
     formData.append('fecha', estadoModal.fecha);
     if (agregarApertura) {
       formData.append('agregar_apertura', '1');

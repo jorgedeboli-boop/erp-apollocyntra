@@ -11,11 +11,11 @@ if (empty($_SESSION['usuario_id'])) {
     exit;
 }
 
-$idSucursal = isset($_POST['id_sucursal']) ? (int) $_POST['id_sucursal'] : 0;
+$idTabla = isset($_POST['id_tabla']) ? (int) $_POST['id_tabla'] : 0;
 $fecha = isset($_POST['fecha']) ? trim($_POST['fecha']) : '';
 $ordenRaw = isset($_POST['orden']) ? $_POST['orden'] : [];
 
-if ($idSucursal <= 0 || $fecha === '' || !preg_match('/^\d{4}-\d{2}-\d{2}$/', $fecha)) {
+if ($idTabla <= 0 || $fecha === '' || !preg_match('/^\d{4}-\d{2}-\d{2}$/', $fecha)) {
     http_response_code(400);
     echo json_encode(['success' => false, 'message' => 'Parámetros inválidos'], JSON_UNESCAPED_UNICODE);
     exit;
@@ -33,9 +33,9 @@ try {
         throw new Exception('Error de conexión a la base de datos');
     }
 
-    $tabla = correccion_cajas_tabla_movimientos($idSucursal);
+    $tabla = correccion_cajas_tabla_movimientos($idTabla);
     if (!correccion_cajas_tabla_existe($conexion, $tabla)) {
-        throw new Exception('No existe tabla de movimientos para esta sucursal');
+        throw new Exception('No existe tabla de movimientos para esta caja');
     }
 
     mysqli_begin_transaction($conexion);

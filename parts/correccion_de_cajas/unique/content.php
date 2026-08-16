@@ -3,12 +3,7 @@
     <div class="card-header border-bottom card-header-forms">
       <div>
         <h4 class="card-title mb-0">Corrección cajas</h4>
-        <small class="text-muted">Primer conflicto pendiente por sucursal de los últimos 2 meses (fecha más antigua, excluye hoy). Si no hay errores previos, comprueba la apertura de hoy.</small>
-      </div>
-      <div class="d-flex justify-content-between align-items-center row gx-5 pt-4 gap-5 gap-md-0 select2-btn-height">
-        <div class="col-md-4 correccion_sucursal select2-btn-height">
-          <!-- El filtro de sucursal se creará dinámicamente -->
-        </div>
+        <small class="text-muted">Primer conflicto pendiente de los últimos 2 meses (fecha más antigua, excluye hoy). Si no hay errores previos, comprueba la apertura de hoy.</small>
       </div>
     </div>
     <div class="card-datatable table-responsive">
@@ -16,7 +11,6 @@
         <thead>
           <tr>
             <th>ID</th>
-            <th>SUCURSAL</th>
             <th>FECHA</th>
             <th>CONFLICTO</th>
             <th>ACCIONES</th>
@@ -36,8 +30,6 @@
       </div>
       <div class="modal-body">
         <p class="mb-2">
-          <strong id="modal-correccion-sucursal"></strong>
-          <span class="text-muted"> · </span>
           <span id="modal-correccion-fecha"></span>
         </p>
         <p class="text-danger mb-3" id="modal-correccion-conflicto"></p>
@@ -153,7 +145,7 @@
       </div>
       <div class="modal-body">
         <form id="formNuevoApunteCorreccion">
-          <input type="hidden" id="nuevo-correccion-sucursal" name="id_sucursal">
+          <input type="hidden" id="nuevo-correccion-tabla" name="id_tabla">
           <div class="mb-3">
             <label for="nuevo-correccion-fecha" class="form-label">Fecha</label>
             <input type="date" class="form-control" id="nuevo-correccion-fecha" name="fecha_apunte" required readonly>
@@ -204,7 +196,7 @@
       <div class="modal-body">
         <form id="formEditarApunteCorreccion">
           <input type="hidden" id="editar-correccion-id-movimiento" name="id_movimiento">
-          <input type="hidden" id="editar-correccion-sucursal" name="id_sucursal">
+          <input type="hidden" id="editar-correccion-tabla" name="id_tabla">
           <div class="mb-3">
             <label for="editar-correccion-grupo" class="form-label">Grupo</label>
             <select class="form-select" id="editar-correccion-grupo" name="grupos" required>

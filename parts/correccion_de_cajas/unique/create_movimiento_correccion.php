@@ -11,7 +11,7 @@ if (empty($_SESSION['usuario_id'])) {
     exit;
 }
 
-$idSucursal = isset($_POST['id_sucursal']) ? (int) $_POST['id_sucursal'] : 0;
+$idTabla = isset($_POST['id_tabla']) ? (int) $_POST['id_tabla'] : 0;
 $fechaApunte = isset($_POST['fecha_apunte']) ? trim($_POST['fecha_apunte']) : '';
 $grupos = isset($_POST['grupos']) ? trim($_POST['grupos']) : '';
 $concepto = isset($_POST['concepto']) ? trim($_POST['concepto']) : '';
@@ -19,9 +19,9 @@ $salida = isset($_POST['salida']) ? (float) $_POST['salida'] : 0;
 $entrada = isset($_POST['entrada']) ? (float) $_POST['entrada'] : 0;
 $usuarioId = (int) $_SESSION['usuario_id'];
 
-if ($idSucursal <= 0) {
+if ($idTabla <= 0) {
     http_response_code(400);
-    echo json_encode(['success' => false, 'message' => 'Sucursal inválida'], JSON_UNESCAPED_UNICODE);
+    echo json_encode(['success' => false, 'message' => 'Caja inválida'], JSON_UNESCAPED_UNICODE);
     exit;
 }
 
@@ -61,9 +61,9 @@ try {
         throw new Exception('Error de conexión a la base de datos');
     }
 
-    $tabla = correccion_cajas_tabla_movimientos($idSucursal);
+    $tabla = correccion_cajas_tabla_movimientos($idTabla);
     if (!correccion_cajas_tabla_existe($conexion, $tabla)) {
-        throw new Exception('No existe tabla de movimientos para esta sucursal');
+        throw new Exception('No existe tabla de movimientos para esta caja');
     }
 
     mysqli_begin_transaction($conexion);

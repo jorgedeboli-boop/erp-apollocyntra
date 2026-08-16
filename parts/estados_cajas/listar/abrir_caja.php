@@ -12,12 +12,11 @@ if (!isset($_SESSION['usuario_id'])) {
     exit;
 }
 
-// Verificar que se haya enviado el ID de sucursal
-if (!isset($_POST['id_sucursal']) || empty($_POST['id_sucursal'])) {
+if (!isset($_POST['id_tabla']) || empty($_POST['id_tabla'])) {
     http_response_code(400);
     echo json_encode([
         'success' => false,
-        'message' => 'ID de sucursal no proporcionado'
+        'message' => 'ID de caja no proporcionado'
     ]);
     exit;
 }
@@ -32,7 +31,7 @@ if (!isset($_POST['importe_apertura'])) {
     exit;
 }
 
-$idSucursal = intval($_POST['id_sucursal']);
+$idTabla = intval($_POST['id_tabla']);
 $importeApertura = floatval($_POST['importe_apertura']);
 $usuarioId = $_SESSION['usuario_id'];
 
@@ -44,7 +43,7 @@ try {
     }
     
     // 1. Verificar que exista un cierre de caja en el mismo día
-    $tableName = "movimientos_de_caja_" . $idSucursal;
+    $tableName = "movimientos_de_caja_" . $idTabla;
     
     // Verificar si la tabla existe
     $tableCheck = mysqli_query($conexion, "SHOW TABLES LIKE '$tableName'");
@@ -75,43 +74,20 @@ try {
         mysqli_close($conexion);
         echo json_encode([
             'success' => false,
-            'message' => 'No existe tabla de movimientos para esta sucursal'
+            'message' => 'No existe tabla de movimientos para esta caja'
         ]);
         exit;
     }
     
-    // Iniciar transacción
-    mysqli_begin_transaction($conexion);
-    
-    // 2. Actualizar el estado de la caja en la tabla sucursal
-    $queryUpdate = "UPDATE sucursal SET caja_cerrada = 'false' WHERE id_sucursal = ?";
-    $stmtUpdate = mysqli_prepare($conexion, $queryUpdate);
-    
-    if (!$stmtUpdate) {
-        throw new Exception('Error al preparar consulta de actualización: ' . mysqli_error($conexion));
-    }
-    
-    mysqli_stmt_bind_param($stmtUpdate, 'i', $idSucursal);
-    $resultUpdate = mysqli_stmt_execute($stmtUpdate);
-    mysqli_stmt_close($stmtUpdate);
-    
-    if (!$resultUpdate) {
-        throw new Exception('Error al actualizar el estado de la caja');
-    }
-    
-    // 3. Insertar movimiento de caja usando la función existente
-    // Parámetros: $grupos_caja, $concepto_caja, $total_entrada, $total_salida, $usuario_id, $usuario_sucursal
     $grupos_caja = 'CAJA INICIO';
     $concepto_caja = 'Apertura de caja';
-    $total_entrada = $importeApertura; // El importe editado por el usuario
+    $total_entrada = $importeApertura;
     $total_salida = 0;
     
-    // Cerrar la conexión actual porque insertar_movimiento_caja() abre su propia conexión
     mysqli_close($conexion);
     
-    // Llamar a la función para insertar el movimiento
     try {
-        insertar_movimiento_caja($grupos_caja, $concepto_caja, $total_entrada, $total_salida, $usuarioId, $idSucursal);
+        insertar_movimiento_caja($grupos_caja, $concepto_caja, $total_entrada, $total_salida, $usuarioId, $idTabla);
     } catch (Exception $e) {
         throw new Exception('Error al insertar movimiento de caja: ' . $e->getMessage());
     }

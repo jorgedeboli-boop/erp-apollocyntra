@@ -15,7 +15,7 @@ document.addEventListener('DOMContentLoaded', function() {
  * Función para cargar todas las estadísticas
  */
 function cargarEstadisticas() {
-    cargarEstadistica('total_sucursales', 'total-sucursales');
+    cargarEstadistica('total_cajas', 'total-cajas');
     cargarEstadistica('cajas_abiertas', 'total-cajas-abiertas');
     cargarEstadistica('cajas_cerradas', 'total-cajas-cerradas');
 }

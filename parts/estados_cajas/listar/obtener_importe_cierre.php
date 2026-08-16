@@ -12,17 +12,16 @@ if (!isset($_SESSION['usuario_id'])) {
     exit;
 }
 
-// Verificar que se haya enviado el ID de sucursal
-if (!isset($_GET['id_sucursal']) || empty($_GET['id_sucursal'])) {
+if (!isset($_GET['id_tabla']) || empty($_GET['id_tabla'])) {
     http_response_code(400);
     echo json_encode([
         'success' => false,
-        'message' => 'ID de sucursal no proporcionado'
+        'message' => 'ID de caja no proporcionado'
     ]);
     exit;
 }
 
-$idSucursal = intval($_GET['id_sucursal']);
+$idTabla = intval($_GET['id_tabla']);
 
 try {
     $conexion = conectar_bd();
@@ -31,7 +30,7 @@ try {
         throw new Exception('Error de conexión a la base de datos');
     }
     
-    $tableName = "movimientos_de_caja_" . $idSucursal;
+    $tableName = "movimientos_de_caja_" . $idTabla;
     
     // Verificar si la tabla existe
     $tableCheck = mysqli_query($conexion, "SHOW TABLES LIKE '$tableName'");

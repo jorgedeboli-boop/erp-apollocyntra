@@ -11,16 +11,11 @@
           <input type="hidden" name="filtro_fecha_desde" id="filtro_fecha_desde">
           <input type="hidden" name="filtro_fecha_hasta" id="filtro_fecha_hasta">
         </div>
-        <div class="col-md-3">
+        <div class="col-md-6">
           <div class="d-flex gx-1 gap-1">
             <button type="button" class="btn btn-primary" id="filtro_hoy">Hoy</button>
             <button type="button" class="btn btn-primary" id="filtro_mes">Mes</button>
             <button type="button" class="btn btn-primary active" id="filtro_todos">Todos</button>
-          </div>
-        </div>
-        <div class="col-md-3">
-          <div class="filtro_sucursal select2-btn-height">
-            <!-- El filtro de sucursal se creará dinámicamente -->
           </div>
         </div>
       </div>
@@ -31,7 +26,6 @@
           <tr>
             <th>Nº Arqueo</th>
             <th>Fecha Arqueo</th>
-            <th>Sucursal</th>
             <th>Caja</th>
             <th>Efectivo</th>
             <th>Diferencia</th>

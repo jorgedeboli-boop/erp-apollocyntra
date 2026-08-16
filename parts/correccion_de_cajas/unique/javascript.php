@@ -4,9 +4,7 @@ $vTablesDatatablesLoad = filemtime(__DIR__ . '/tables-datatables-load.js');
 ?>
 <script>
 window.FiltrosDinamicosConfig = {
-  readyClass: 'correccion-cajas-filtros-ready',
-  sucursalValueField: 'id_sucursal',
-  sucursalLabelField: 'nombre_sucursal'
+  readyClass: 'correccion-cajas-filtros-ready'
 };
 </script>
 <script src="parts/universal/filtros-dinamicos-listar.js?v=<?php echo $vFiltrosDinamicos; ?>"></script>

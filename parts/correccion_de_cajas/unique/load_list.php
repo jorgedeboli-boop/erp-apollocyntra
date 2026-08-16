@@ -17,8 +17,6 @@ $draw = isset($_POST['draw']) ? (int) $_POST['draw'] : 1;
 $start = isset($_POST['start']) ? (int) $_POST['start'] : 0;
 $length = isset($_POST['length']) ? (int) $_POST['length'] : 25;
 $search = isset($_POST['search']['value']) ? trim($_POST['search']['value']) : '';
-$filtroSucursal = isset($_POST['filtro_sucursal']) ? trim($_POST['filtro_sucursal']) : '';
-
 if ($start < 0) {
     $start = 0;
 }
@@ -36,29 +34,11 @@ try {
         throw new Exception('Error de conexión a la base de datos');
     }
 
-    $querySucursales = "SELECT id_sucursal, nombre_sucursal
-                        FROM sucursal
-                        WHERE estado_tienda = 'habilitada'
-                        ORDER BY nombre_sucursal ASC";
-    $resultSucursales = mysqli_query($conexion, $querySucursales);
-    if (!$resultSucursales) {
-        throw new Exception('Error al cargar sucursales: ' . mysqli_error($conexion));
-    }
-
     $conflictos = [];
-    while ($sucursal = mysqli_fetch_assoc($resultSucursales)) {
-        $idSucursal = (int) $sucursal['id_sucursal'];
-        if ($filtroSucursal !== '' && (string) $idSucursal !== $filtroSucursal) {
-            continue;
-        }
-
-        $conflictosSucursal = correccion_cajas_detectar_conflictos_sucursal(
-            $conexion,
-            $idSucursal,
-            $sucursal['nombre_sucursal']
-        );
-        if (!empty($conflictosSucursal)) {
-            $conflictos = array_merge($conflictos, $conflictosSucursal);
+    foreach (correccion_cajas_listar_ids_tablas($conexion) as $idTabla) {
+        $conflictosTabla = correccion_cajas_detectar_conflictos_tabla($conexion, $idTabla);
+        if (!empty($conflictosTabla)) {
+            $conflictos = array_merge($conflictos, $conflictosTabla);
         }
     }
 
@@ -67,7 +47,7 @@ try {
             ? mb_strtolower($search, 'UTF-8')
             : strtolower($search);
         $conflictos = array_values(array_filter($conflictos, function ($item) use ($searchLower) {
-            $texto = $item['id_sucursal'] . ' ' . $item['nombre_sucursal'] . ' ' . $item['fecha_texto'] . ' ' . $item['conflicto'];
+            $texto = $item['id_tabla'] . ' ' . $item['fecha_texto'] . ' ' . $item['conflicto'];
             $haystack = function_exists('mb_strtolower')
                 ? mb_strtolower($texto, 'UTF-8')
                 : strtolower($texto);
@@ -80,7 +60,7 @@ try {
         if ($cmpFecha !== 0) {
             return $cmpFecha;
         }
-        return strcmp($a['nombre_sucursal'], $b['nombre_sucursal']);
+        return $a['id_tabla'] <=> $b['id_tabla'];
     });
 
     $total = count($conflictos);
@@ -89,13 +69,11 @@ try {
     $data = [];
     foreach ($pagina as $item) {
         $data[] = [
-            $item['id_sucursal'],
-            htmlspecialchars($item['nombre_sucursal'], ENT_QUOTES, 'UTF-8'),
+            $item['id_tabla'],
             $item['fecha_texto'],
             htmlspecialchars($item['conflicto'], ENT_QUOTES, 'UTF-8'),
             [
-                'id_sucursal' => $item['id_sucursal'],
-                'nombre_sucursal' => $item['nombre_sucursal'],
+                'id_tabla' => $item['id_tabla'],
                 'fecha' => $item['fecha'],
                 'fecha_texto' => $item['fecha_texto'],
                 'falta_apertura' => $item['falta_apertura'],

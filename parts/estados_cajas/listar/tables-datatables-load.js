@@ -1,5 +1,5 @@
 /**
- * Page Estados de Cajas List - Basado en Sucursales
+ * Page Estados de Cajas List
  */
 
 'use strict';
@@ -29,17 +29,14 @@ document.addEventListener('DOMContentLoaded', function (e) {
       
       language: DATATABLES_SPANISH,
       columns: [
-        // columns according to JSON
-        { data: 0 }, // ID de la sucursal
-        { data: 1 }, // Nombre de la sucursal
-        { data: 2 }, // Nuevo Sistema
-        { data: 3 }, // Estado Caja
-        { data: 4 }, // Saldo
-        { data: 5 }, // Apertura
-        { data: 6 }, // Importe Apertura
-        { data: 7 }, // Cierre
-        { data: 8 }, // Importe Cierre
-        { data: 9 }  // Acciones
+        { data: 0 },
+        { data: 1 },
+        { data: 2 },
+        { data: 3 },
+        { data: 4 },
+        { data: 5 },
+        { data: 6 },
+        { data: 7 }
       ],
       
       columnDefs: [
@@ -51,37 +48,8 @@ document.addEventListener('DOMContentLoaded', function (e) {
           }
         },
         {
-          // Nombre Sucursal column
-          targets: 1,
-          responsivePriority: 4,
-          render: function (data, type, full, meta) {
-            if (typeof data === 'string' && data) {
-              return '<span class="fw-medium text-heading">' + data + '</span>';
-            } else {
-              return '<span class="text-muted">Sin nombre</span>';
-            }
-          }
-        },
-        {
-          // Nuevo Sistema
-          targets: 2,
-          render: function (data, type, full, meta) {
-            const sistema = data;
-            
-            if (!sistema || sistema === '') {
-              return '<span class="badge bg-label-secondary rounded-pill"><i class="icon-base ri ri-question-line me-1"></i>Sin datos</span>';
-            }
-            
-            if (sistema === 'false') {
-              return '<span class="badge bg-label-danger rounded-pill"><i class="icon-base ri ri-close-circle-line me-1"></i>No</span>';
-            } else {
-              return '<span class="badge bg-label-success rounded-pill"><i class="icon-base ri ri-checkbox-circle-fill me-1"></i>Sí</span>';
-            }
-          }
-        },
-        {
           // Estado Caja
-          targets: 3,
+          targets: 1,
           render: function (data, type, full, meta) {
             const caja = data;
             
@@ -101,7 +69,7 @@ document.addEventListener('DOMContentLoaded', function (e) {
         },
         {
           // Saldo
-          targets: 4,
+          targets: 2,
           render: function (data, type, full, meta) {
             if (data === null || data === undefined) {
               return '<span class="text-muted">-----</span>';
@@ -118,7 +86,7 @@ document.addEventListener('DOMContentLoaded', function (e) {
         },
         {
           // Apertura
-          targets: 5,
+          targets: 3,
           render: function (data, type, full, meta) {
             if (!data || !data.fecha) {
               return '<span class="text-muted"><i class="icon-base ri ri-time-line me-1"></i>Sin apertura</span>';
@@ -133,7 +101,7 @@ document.addEventListener('DOMContentLoaded', function (e) {
         },
         {
           // Importe Apertura
-          targets: 6,
+          targets: 4,
           render: function (data, type, full, meta) {
             if (data === null || data === undefined) {
               return '<span class="text-muted">-</span>';
@@ -150,7 +118,7 @@ document.addEventListener('DOMContentLoaded', function (e) {
         },
         {
           // Cierre
-          targets: 7,
+          targets: 5,
           render: function (data, type, full, meta) {
             if (!data || !data.fecha) {
               return '<span class="text-muted"><i class="icon-base ri ri-time-line me-1"></i>Sin cierre</span>';
@@ -165,7 +133,7 @@ document.addEventListener('DOMContentLoaded', function (e) {
         },
         {
           // Importe Cierre
-          targets: 8,
+          targets: 6,
           render: function (data, type, full, meta) {
             if (data === null || data === undefined) {
               return '<span class="text-muted">-</span>';
@@ -181,7 +149,7 @@ document.addEventListener('DOMContentLoaded', function (e) {
           }
         },
         {
-          targets: 9,
+          targets: 7,
           title: 'Acciones',
           searchable: false,
           orderable: false,
@@ -190,29 +158,25 @@ document.addEventListener('DOMContentLoaded', function (e) {
               return '<span class="text-muted">-</span>';
             }
 
-            const sucursalId = data.id;
-            const sucursalNombre = data.nombre;
-            const cajaCerrada = full[3]; // Estado de la caja (índice 3)
+            const idTabla = data.id;
+            const cajaCerrada = full[1];
             
             let botonAccion = '';
             
-            // Si la caja está abierta (false), mostrar botón Cerrar Caja
             if (cajaCerrada === 'false' || cajaCerrada === false) {
               botonAccion = `
-                <a href="cierre_caja.php?id=${sucursalId}&nombre=${encodeURIComponent(sucursalNombre)}" 
+                <a href="cierre_caja.php?id=${idTabla}" 
                    class="btn btn-sm btn-danger waves-effect waves-light" 
                    title="Cerrar Caja">
                   <i class="icon-base ri ri-lock-line me-1"></i>Cerrar Caja
                 </a>
               `;
             } 
-            // Si la caja está cerrada (true), mostrar botón Abrir Caja
             else if (cajaCerrada === 'true' || cajaCerrada === true) {
               botonAccion = `
                 <button type="button" 
                         class="btn btn-sm btn-success waves-effect waves-light btn-abrir-caja" 
-                        data-sucursal-id="${sucursalId}" 
-                        data-sucursal-nombre="${sucursalNombre}"
+                        data-id-tabla="${idTabla}"
                         title="Abrir Caja">
                   <i class="icon-base ri ri-lock-unlock-line me-1"></i>Abrir Caja
                 </button>
@@ -224,7 +188,7 @@ document.addEventListener('DOMContentLoaded', function (e) {
         }
       ],
 
-      order: [[1, 'asc']], // Ordenar por nombre de sucursal
+      order: [[0, 'asc']],
       pageLength: 25, // Mostrar 25 registros por defecto
       lengthMenu: [10, 25, 50, 100], // Opciones: 10, 25, 50, 100 (sin -1 para serverSide)
       layout: {
@@ -243,7 +207,7 @@ document.addEventListener('DOMContentLoaded', function (e) {
                       text: `<span class="d-flex align-items-center"><i class="icon-base ri ri-file-excel-line me-1"></i>Excel</span>`,
                       className: 'dropdown-item',
                       exportOptions: {
-                        columns: [0, 1, 2, 3, 4, 5, 6, 7, 8],
+                        columns: [0, 1, 2, 3, 4, 5, 6],
                         format: {
                           body: function (inner, coldex, rowdex) {
                             if (inner.length <= 0) return inner;
@@ -262,7 +226,7 @@ document.addEventListener('DOMContentLoaded', function (e) {
                       text: `<span class="d-flex align-items-center"><i class="icon-base ri ri-file-pdf-line me-1"></i>PDF</span>`,
                       className: 'dropdown-item',
                       exportOptions: {
-                        columns: [0, 1, 2, 3, 4, 5, 6, 7, 8],
+                        columns: [0, 1, 2, 3, 4, 5, 6],
                         format: {
                           body: function (inner, coldex, rowdex) {
                             if (inner.length <= 0) return inner;
@@ -329,7 +293,7 @@ document.addEventListener('DOMContentLoaded', function (e) {
                       text: `<i class="icon-base ri ri-file-copy-line me-1"></i>Copiar`,
                       className: 'dropdown-item',
                       exportOptions: {
-                        columns: [0, 1, 2, 3, 4, 5, 6, 7, 8],
+                        columns: [0, 1, 2, 3, 4, 5, 6],
                         format: {
                           body: function (inner, coldex, rowdex) {
                             if (inner.length <= 0) return inner;
@@ -373,7 +337,6 @@ document.addEventListener('DOMContentLoaded', function (e) {
         data: function(d) {
           // Agregar filtros de columna personalizados
           d.filtro_estado = document.getElementById('EstadoCaja') ? document.getElementById('EstadoCaja').value : '';
-          d.filtro_sistema = document.getElementById('NuevoSistema') ? document.getElementById('NuevoSistema').value : '';
           
           return d;
         },
@@ -396,7 +359,7 @@ document.addEventListener('DOMContentLoaded', function (e) {
           display: DataTable.Responsive.display.modal({
             header: function (row) {
               const data = row.data();
-              return 'Detalles de ' + data[1]; // Nombre de la sucursal
+              return 'Detalles de caja #' + data[0];
             }
           }),
           type: 'column',
@@ -463,48 +426,8 @@ document.addEventListener('DOMContentLoaded', function (e) {
           });
         }
 
-        // Agregar event listener para filtro de estado caja
         $(selectEstadoCaja).on('change', function() {
-          const val = $(this).val() ? `^${$(this).val()}$` : '';
-          api.column(3).search(val, true, false).draw();
-        });
-
-        // Nuevo Sistema filter
-        const selectNuevoSistema = document.createElement('select');
-        selectNuevoSistema.id = 'NuevoSistema';
-        selectNuevoSistema.className = 'form-select select2-filter text-capitalize select2-custom';
-        selectNuevoSistema.innerHTML = `<option value="">Seleccionar Nuevo Sistema</option>`;
-        document.querySelector('.user_sistema').appendChild(selectNuevoSistema);
-
-        // Agregar opciones fijas para nuevo sistema
-        const opcionesNuevoSistema = [
-          { value: 'false', text: 'No' },
-          { value: 'true', text: 'Sí' }
-        ];
-
-        opcionesNuevoSistema.forEach(opcion => {
-          const option = document.createElement('option');
-          option.value = opcion.value;
-          option.textContent = opcion.text;
-          selectNuevoSistema.appendChild(option);
-        });
-
-        // Inicializar Select2 usando el código del template
-        var select2 = $(selectNuevoSistema);
-        if (select2.length) {
-          select2.each(function () {
-            var $this = $(this);
-            select2Focus($this);
-            $this.select2({
-              dropdownParent: $this.parent()
-            });
-          });
-        }
-
-        // Agregar event listener para filtro de nuevo sistema
-        $(selectNuevoSistema).on('change', function() {
-          const val = $(this).val() ? `^${$(this).val()}$` : '';
-          api.column(2).search(val, true, false).draw();
+          dt_estados_cajas.ajax.reload();
         });
       }
     });
@@ -548,31 +471,22 @@ document.addEventListener('DOMContentLoaded', function (e) {
   }, 100);
 
   // Variables para el modal
-  let modalSucursalId = null;
-  let modalSucursalNombre = null;
+  let modalIdTabla = null;
   let modalImporteInicial = 0;
 
-  // Event listener para botón Abrir Caja (delegación de eventos)
   document.addEventListener('click', function(e) {
     if (e.target.closest('.btn-abrir-caja')) {
       const btn = e.target.closest('.btn-abrir-caja');
-      const sucursalId = btn.getAttribute('data-sucursal-id');
-      const sucursalNombre = btn.getAttribute('data-sucursal-nombre');
-      
-      abrirModalAperturaCaja(sucursalId, sucursalNombre);
+      abrirModalAperturaCaja(btn.getAttribute('data-id-tabla'));
     }
   });
 
-  // Función para abrir el modal de apertura de caja
-  function abrirModalAperturaCaja(sucursalId, sucursalNombre) {
-    modalSucursalId = sucursalId;
-    modalSucursalNombre = sucursalNombre;
+  function abrirModalAperturaCaja(idTabla) {
+    modalIdTabla = idTabla;
     
-    // Mostrar nombre de sucursal en el modal
-    document.getElementById('modal-sucursal-nombre').textContent = sucursalNombre;
+    document.getElementById('modal-caja-id').textContent = idTabla;
     
-    // Obtener el importe del último cierre para pre-rellenar
-    fetch('parts/estados_cajas/listar/obtener_importe_cierre.php?id_sucursal=' + sucursalId)
+    fetch('parts/estados_cajas/listar/obtener_importe_cierre.php?id_tabla=' + encodeURIComponent(idTabla))
       .then(response => response.json())
       .then(data => {
         if (data.success) {
@@ -626,7 +540,7 @@ document.addEventListener('DOMContentLoaded', function (e) {
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
       },
-      body: 'id_sucursal=' + modalSucursalId + '&importe_apertura=' + importe
+      body: 'id_tabla=' + encodeURIComponent(modalIdTabla) + '&importe_apertura=' + importe
     })
     .then(response => response.json())
     .then(data => {

@@ -1,10 +1,8 @@
 <?php
 /**
  * Archivo para cargar estadísticas de estados de cajas via AJAX
- * Maneja diferentes tipos de consultas para las tarjetas superiores
  */
 
-// Asegurar que no haya salida antes del JSON
 ob_clean();
 
 require_once '../../../include/session.php';
@@ -12,56 +10,72 @@ require_once '../../../include/functions.php';
 
 header('Content-Type: application/json');
 
+function estados_cajas_listar_tablas(mysqli $conexion)
+{
+    $tablas = [];
+    $result = mysqli_query($conexion, "SHOW TABLES LIKE 'movimientos_de_caja_%'");
+    if ($result) {
+        while ($row = mysqli_fetch_row($result)) {
+            if (preg_match('/^movimientos_de_caja_\d+$/', $row[0])) {
+                $tablas[] = $row[0];
+            }
+        }
+    }
+    return $tablas;
+}
+
+function estados_cajas_esta_cerrada(mysqli $conexion, $tableName)
+{
+    $query = "SELECT
+                (SELECT MAX(id_movimientos) FROM `{$tableName}` WHERE TRIM(grupos) = 'CAJA INICIO') AS id_apertura,
+                (SELECT MAX(id_movimientos) FROM `{$tableName}` WHERE cierre_caja = 'true') AS id_cierre";
+    $result = mysqli_query($conexion, $query);
+    if (!$result) {
+        return true;
+    }
+    $row = mysqli_fetch_assoc($result);
+    $idApertura = isset($row['id_apertura']) ? (int) $row['id_apertura'] : 0;
+    $idCierre = isset($row['id_cierre']) ? (int) $row['id_cierre'] : 0;
+    return $idCierre >= $idApertura;
+}
+
 try {
-    // Verificar que se haya enviado el tipo de consulta
     if (!isset($_POST['tipo'])) {
         throw new Exception("Tipo de consulta no especificado");
     }
-    
+
     $tipo = $_POST['tipo'];
     $conexion = conectar_bd();
+    $tablas = estados_cajas_listar_tablas($conexion);
     $total = 0;
-    
+
     switch ($tipo) {
-        case 'total_sucursales':
-            // Total de sucursales en la tabla sucursal
-            $query = "SELECT COUNT(*) as total FROM sucursal";
+        case 'total_cajas':
+            $total = count($tablas);
             break;
-            
+
         case 'cajas_abiertas':
-            // Cajas con caja_cerrada = 'false'
-            $query = "SELECT COUNT(*) as total FROM sucursal WHERE caja_cerrada = 'false'";
-            break;
-            
         case 'cajas_cerradas':
-            // Cajas con caja_cerrada = 'true'
-            $query = "SELECT COUNT(*) as total FROM sucursal WHERE caja_cerrada = 'true'";
+            foreach ($tablas as $tableName) {
+                $cerrada = estados_cajas_esta_cerrada($conexion, $tableName);
+                if ($tipo === 'cajas_cerradas' && $cerrada) {
+                    $total++;
+                } elseif ($tipo === 'cajas_abiertas' && !$cerrada) {
+                    $total++;
+                }
+            }
             break;
-            
+
         default:
             throw new Exception("Tipo de consulta no válido: " . $tipo);
     }
-    
-    // Ejecutar consulta
-    $result = mysqli_query($conexion, $query);
-    
-    if (!$result) {
-        throw new Exception("Error en consulta: " . mysqli_error($conexion));
-    }
-    
-    // Obtener resultado
-    $row = mysqli_fetch_assoc($result);
-    $total = (int)$row['total'];
-    
-    // Respuesta exitosa
+
     echo json_encode([
         'success' => true,
         'total' => $total,
         'tipo' => $tipo
     ]);
-    
 } catch (Exception $e) {
-    // Respuesta de error
     http_response_code(500);
     echo json_encode([
         'success' => false,
@@ -73,4 +87,3 @@ try {
         mysqli_close($conexion);
     }
 }
-?>

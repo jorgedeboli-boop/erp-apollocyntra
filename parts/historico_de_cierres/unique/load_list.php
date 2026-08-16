@@ -27,7 +27,6 @@ try {
     $orderDir = isset($_POST['order'][0]['dir']) ? $_POST['order'][0]['dir'] : 'desc';
     
     // Filtros personalizados
-    $filtroSucursal = isset($_POST['filtro_sucursal']) ? trim($_POST['filtro_sucursal']) : '';
     $filtroFechaDesde = isset($_POST['filtro_fecha_desde']) ? trim($_POST['filtro_fecha_desde']) : '';
     $filtroFechaHasta = isset($_POST['filtro_fecha_hasta']) ? trim($_POST['filtro_fecha_hasta']) : '';
     $filtroPeriodo = isset($_POST['filtro_periodo']) ? trim($_POST['filtro_periodo']) : 'todos';
@@ -40,11 +39,10 @@ try {
     $columnMap = [
         0 => 'id_fecha_cierre',
         1 => 'fecha_cierre',
-        2 => 'sucursal_nombre',
-        3 => 'caja',
-        4 => 'efectivo',
-        5 => 'diferencia',
-        6 => 'usuario'
+        2 => 'caja',
+        3 => 'efectivo',
+        4 => 'diferencia',
+        5 => 'usuario'
     ];
     
     // Validar columna de ordenamiento
@@ -55,22 +53,17 @@ try {
     $orderBy = $columnMap[$orderColumn];
     $orderDirection = strtoupper($orderDir) === 'ASC' ? 'ASC' : 'DESC';
     
-    // Obtener sucursales disponibles
-    $querySucursales = "SELECT id_sucursal, nombre_sucursal FROM sucursal WHERE estado_tienda = 'habilitada' ORDER BY nombre_sucursal";
-    $resultSucursales = mysqli_query($conexion, $querySucursales);
-    $sucursales = [];
-    
-    while ($row = mysqli_fetch_assoc($resultSucursales)) {
-        $sucursales[(int) $row['id_sucursal']] = $row['nombre_sucursal'];
-    }
-    
-    // Si se especificó un filtro de sucursal (id_sucursal), solo consultar esa sucursal
-    $filtroSucursalId = $filtroSucursal !== '' ? (int) $filtroSucursal : 0;
-    $sucursalesAConsultar = [];
-    if ($filtroSucursalId > 0 && isset($sucursales[$filtroSucursalId])) {
-        $sucursalesAConsultar = [$filtroSucursalId => $sucursales[$filtroSucursalId]];
-    } else {
-        $sucursalesAConsultar = $sucursales;
+    $tablasCierre = [];
+    $resultTablas = mysqli_query($conexion, "SHOW TABLES LIKE 'cierre_caja_%'");
+    if ($resultTablas) {
+        while ($rowTabla = mysqli_fetch_row($resultTablas)) {
+            if (preg_match('/^cierre_caja_(\d+)$/', $rowTabla[0], $m)) {
+                $tablasCierre[] = [
+                    'name' => $rowTabla[0],
+                    'id' => (int) $m[1],
+                ];
+            }
+        }
     }
     
     // Construir condiciones de búsqueda
@@ -109,23 +102,17 @@ try {
     $recordsTotal = 0;
     $recordsFiltered = 0;
     
-    // Recorrer todas las sucursales y combinar resultados
-    foreach ($sucursalesAConsultar as $idSucursal => $nombreSucursal) {
-        $tableName = "cierre_caja_$idSucursal";
+    foreach ($tablasCierre as $tablaCierre) {
+        $tableName = $tablaCierre['name'];
+        $idTabla = $tablaCierre['id'];
         
-        // Verificar si la tabla existe
-        $checkTable = mysqli_query($conexion, "SHOW TABLES LIKE '$tableName'");
-        if (mysqli_num_rows($checkTable) == 0) {
-            continue;
-        }
-        
-        // Contar registros totales de esta sucursal
+        // Contar registros totales de esta tabla
         $queryCountTotal = "SELECT COUNT(*) as total FROM $tableName";
         $resultCountTotal = mysqli_query($conexion, $queryCountTotal);
         $rowCountTotal = mysqli_fetch_assoc($resultCountTotal);
         $recordsTotal += (int)$rowCountTotal['total'];
         
-        // Contar registros filtrados de esta sucursal
+        // Contar registros filtrados de esta tabla
         $queryCountFiltered = "SELECT COUNT(*) as total
                                FROM $tableName c
                                LEFT JOIN usuarios u ON c.usuario_cierre = u.id_usuario
@@ -165,8 +152,7 @@ try {
                 
                 if ($result) {
                     while ($row = mysqli_fetch_assoc($result)) {
-                        $row['sucursal_nombre'] = $nombreSucursal;
-                        $row['id_sucursal'] = $idSucursal;
+                        $row['id_tabla'] = $idTabla;
                         $allCierres[] = $row;
                     }
                 }
@@ -176,8 +162,7 @@ try {
             $result = mysqli_query($conexion, $query);
             if ($result) {
                 while ($row = mysqli_fetch_assoc($result)) {
-                    $row['sucursal_nombre'] = $nombreSucursal;
-                    $row['id_sucursal'] = $idSucursal;
+                    $row['id_tabla'] = $idTabla;
                     $allCierres[] = $row;
                 }
             }
@@ -205,13 +190,12 @@ try {
         $data[] = [
             $row['id_fecha_cierre'],
             date('d/m/Y H:i', strtotime($row['fecha_cierre'])),
-            htmlspecialchars($row['sucursal_nombre']),
             floatval($row['caja']),
             floatval($row['efectivo']),
             floatval($row['diferencia']),
             htmlspecialchars($row['usuario']),
-            [ // Datos adicionales para el modal
-                'id_sucursal' => $row['id_sucursal'],
+            [
+                'id_tabla' => $row['id_tabla'],
                 'id_fecha_cierre' => $row['id_fecha_cierre']
             ]
         ];

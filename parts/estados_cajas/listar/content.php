@@ -5,9 +5,9 @@
         <div class="card-body">
           <div class="d-flex justify-content-between">
             <div class="me-1">
-              <p class="text-heading mb-1">Total Sucursales</p>
+              <p class="text-heading mb-1">Total Cajas</p>
               <div class="d-flex align-items-center">
-                <h4 class="mb-1 me-1" id="total-sucursales">0</h4>
+                <h4 class="mb-1 me-1" id="total-cajas">0</h4>
                 <div class="stats-loading" style="display: none;">
                   <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
                 </div>
@@ -35,7 +35,7 @@
                   <div class="spinner-border spinner-border-sm text-success" role="status"></div>
                 </div>
               </div>
-              <small class="mb-0">Sucursales operativas</small>
+              <small class="mb-0">Cajas operativas</small>
             </div>
             <div class="avatar">
               <div class="avatar-initial bg-label-success rounded-circle">
@@ -79,12 +79,6 @@
         <div class="col-md-4 user_estado">
           <!-- El filtro de estado de caja se creará dinámicamente -->
         </div>
-        <div class="col-md-4 user_sistema">
-          <!-- El filtro de nuevo sistema se creará dinámicamente -->
-        </div>
-        <div class="col-md-4">
-          <!-- Espacio vacío para mantener el layout -->
-        </div>
       </div>
     </div>
     <div class="card-datatable table-responsive">
@@ -92,8 +86,6 @@
         <thead>
           <tr>
             <th>ID</th>
-            <th>NOMBRE SUCURSAL</th>
-            <th>NUEVO SISTEMA CAJA</th>
             <th>ESTADO CAJA</th>
             <th>SALDO</th>
             <th>APERTURA</th>
@@ -118,7 +110,7 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
-        <p class="mb-3">Sucursal: <strong id="modal-sucursal-nombre"></strong></p>
+        <p class="mb-3">Caja #<strong id="modal-caja-id"></strong></p>
         <div class="mb-3">
           <label for="importe-apertura" class="form-label">Importe de Apertura</label>
           <div class="input-group">

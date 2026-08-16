@@ -15,64 +15,9 @@ document.addEventListener('DOMContentLoaded', function (e) {
   // Variable declaration for table
   const dt_cierres_table = document.querySelector('.datatables-historico-cierres');
 
-  // Helper function to create sucursal filter
-  const createFilterSucursal = (containerClass, selectId, defaultOptionText) => {
-    const select = document.createElement('select');
-    select.id = selectId;
-    select.className = 'form-select select2-filter text-capitalize select2-custom';
-    select.innerHTML = `<option value="">${defaultOptionText}</option>`;
-    document.querySelector(containerClass).appendChild(select);
-
-    // Cargar todas las sucursales desde la base de datos
-    fetch('parts/clientes/listar/get_sucursales.php')
-      .then(response => response.json())
-      .then(data => {
-        if (data.success) {
-          data.sucursales.forEach(sucursal => {
-            const option = document.createElement('option');
-            option.value = sucursal.id_sucursal;
-            option.textContent = sucursal.nombre_sucursal;
-            select.appendChild(option);
-          });
-          
-          // Inicializar Select2
-          const select2 = $(select);
-          if (select2.length) {
-            select2.each(function () {
-              var $this = $(this);
-              $this.select2({
-                dropdownParent: $this.parent()
-              });
-              
-              // Agregar evento de cambio
-              $this.on('select2:select select2:unselect', function(e) {
-                window.dt_cierres.ajax.reload();
-              });
-            });
-          }
-          
-          // También mantener el evento nativo como respaldo
-          select.addEventListener('change', function() {
-            window.dt_cierres.ajax.reload();
-          });
-        } else {
-          console.error('Error al cargar sucursales:', data.error);
-        }
-      })
-      .catch(error => {
-        console.error('Error al cargar sucursales:', error);
-      });
-
-    return select;
-  };
-
-  // Variable para el periodo activo
   window.filtro_periodo_activo = 'todos';
 
-  // Datatable with buttons
   if (dt_cierres_table) {
-    const selectSucursal = createFilterSucursal('.filtro_sucursal', 'sucursal_filter', 'Todas las sucursales');
-    
     window.dt_cierres = $(dt_cierres_table).DataTable({
       processing: true,
       serverSide: true,
@@ -80,47 +25,35 @@ document.addEventListener('DOMContentLoaded', function (e) {
         url: 'parts/historico_de_cierres/unique/load_list.php',
         type: 'POST',
         data: function(d) {
-          d.filtro_sucursal = document.getElementById('sucursal_filter') ? document.getElementById('sucursal_filter').value : '';
           d.filtro_fecha_desde = document.getElementById('filtro_fecha_desde') ? document.getElementById('filtro_fecha_desde').value : '';
           d.filtro_fecha_hasta = document.getElementById('filtro_fecha_hasta') ? document.getElementById('filtro_fecha_hasta').value : '';
           d.filtro_periodo = window.filtro_periodo_activo || 'todos';
         }
       },
       columns: [
-        { data: 0 }, // Nº Arqueo
-        { data: 1 }, // Fecha Arqueo
-        { data: 2 }, // Sucursal
-        { data: 3 }, // Caja
-        { data: 4 }, // Efectivo
-        { data: 5 }, // Diferencia
-        { data: 6 }, // Usuario
+        { data: 0 },
+        { data: 1 },
+        { data: 2 },
+        { data: 3 },
+        { data: 4 },
+        { data: 5 },
       ],
       columnDefs: [
         {
-          // Nº Arqueo - Clickeable
           targets: 0,
           className: 'text-center',
           render: function (data, type, full, meta) {
-            return '<a href="javascript:void(0);" class="btn-ver-arqueo fw-medium" data-id="' + data + '" data-sucursal="' + full[7].id_sucursal + '">' + data + '</a>';
+            return '<a href="javascript:void(0);" class="btn-ver-arqueo fw-medium" data-id="' + data + '" data-id-tabla="' + full[6].id_tabla + '">' + data + '</a>';
           }
         },
         {
-          // Fecha Arqueo
           targets: 1,
           render: function (data, type, full, meta) {
             return '<span>' + data + '</span>';
           }
         },
         {
-          // Sucursal
           targets: 2,
-          render: function (data, type, full, meta) {
-            return '<span class="badge bg-label-primary">' + data + '</span>';
-          }
-        },
-        {
-          // Caja
-          targets: 3,
           className: 'text-end',
           render: function (data, type, full, meta) {
             const valor = parseFloat(data) || 0;
@@ -129,7 +62,7 @@ document.addEventListener('DOMContentLoaded', function (e) {
         },
         {
           // Efectivo
-          targets: 4,
+          targets: 3,
           className: 'text-end',
           render: function (data, type, full, meta) {
             const valor = parseFloat(data) || 0;
@@ -138,7 +71,7 @@ document.addEventListener('DOMContentLoaded', function (e) {
         },
         {
           // Diferencia
-          targets: 5,
+          targets: 4,
           className: 'text-end',
           render: function (data, type, full, meta) {
             const valor = parseFloat(data) || 0;
@@ -148,7 +81,7 @@ document.addEventListener('DOMContentLoaded', function (e) {
         },
         {
           // Usuario
-          targets: 6,
+          targets: 5,
           render: function (data, type, full, meta) {
             return '<span>' + data + '</span>';
           }
@@ -175,7 +108,7 @@ document.addEventListener('DOMContentLoaded', function (e) {
                       text: '<span class="d-flex align-items-center"><i class="icon-base ri ri-file-excel-line me-1"></i>Excel</span>',
                       className: 'dropdown-item',
                       exportOptions: {
-                        columns: [0, 1, 2, 3, 4, 5],
+                        columns: [0, 1, 2, 3, 4],
                         format: {
                           body: function (data, row, column, node) {
                             if (typeof data === 'string') {
@@ -194,7 +127,7 @@ document.addEventListener('DOMContentLoaded', function (e) {
                       className: 'dropdown-item',
                       orientation: 'landscape',
                       exportOptions: {
-                        columns: [0, 1, 2, 3, 4, 5],
+                        columns: [0, 1, 2, 3, 4],
                         format: {
                           body: function (data, row, column, node) {
                             if (typeof data === 'string') {
@@ -229,7 +162,7 @@ document.addEventListener('DOMContentLoaded', function (e) {
                       text: '<i class="icon-base ri ri-file-copy-line me-1"></i>Copiar',
                       className: 'dropdown-item',
                       exportOptions: {
-                        columns: [0, 1, 2, 3, 4, 5],
+                        columns: [0, 1, 2, 3, 4],
                         format: {
                           body: function (data, row, column, node) {
                             if (typeof data === 'string') {
@@ -266,13 +199,13 @@ document.addEventListener('DOMContentLoaded', function (e) {
     // Event listener para ver detalle del arqueo
     $(dt_cierres_table).on('click', '.btn-ver-arqueo', function() {
       const idArqueo = $(this).data('id');
-      const idSucursal = $(this).data('sucursal');
-      abrirModalDetalleArqueo(idArqueo, idSucursal);
+      const idTabla = $(this).data('id-tabla');
+      abrirModalDetalleArqueo(idArqueo, idTabla);
     });
   }
   
   // Función para abrir el modal de detalle del arqueo
-  function abrirModalDetalleArqueo(idArqueo, idSucursal) {
+  function abrirModalDetalleArqueo(idArqueo, idTabla) {
     // Mostrar el ID en el modal
     document.getElementById('modal-arqueo-id').textContent = idArqueo;
     
@@ -280,7 +213,7 @@ document.addEventListener('DOMContentLoaded', function (e) {
     fetch('parts/historico_de_cierres/unique/get_detalle_arqueo.php', {
       method: 'POST',
       headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-      body: 'id_fecha_cierre=' + idArqueo + '&id_sucursal=' + idSucursal
+      body: 'id_fecha_cierre=' + encodeURIComponent(idArqueo) + '&id_tabla=' + encodeURIComponent(idTabla)
     })
     .then(response => response.json())
     .then(data => {

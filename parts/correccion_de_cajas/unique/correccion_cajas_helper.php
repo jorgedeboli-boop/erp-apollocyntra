@@ -1,13 +1,28 @@
 <?php
 
 /**
- * Helpers para corrección de aperturas/cierres de caja por sucursal.
+ * Helpers para corrección de aperturas/cierres de caja.
  * Compatible con PHP 7.0+.
  */
 
-function correccion_cajas_tabla_movimientos($idSucursal)
+function correccion_cajas_tabla_movimientos($idTabla)
 {
-    return 'movimientos_de_caja_' . (int) $idSucursal;
+    return 'movimientos_de_caja_' . (int) $idTabla;
+}
+
+function correccion_cajas_listar_ids_tablas(mysqli $conexion)
+{
+    $ids = [];
+    $result = mysqli_query($conexion, "SHOW TABLES LIKE 'movimientos_de_caja_%'");
+    if ($result) {
+        while ($row = mysqli_fetch_row($result)) {
+            if (preg_match('/^movimientos_de_caja_(\d+)$/', $row[0], $m)) {
+                $ids[] = (int) $m[1];
+            }
+        }
+    }
+    sort($ids);
+    return $ids;
 }
 
 function correccion_cajas_tabla_existe(mysqli $conexion, $tabla)
@@ -541,8 +556,7 @@ function correccion_cajas_construir_mensaje_conflicto(array $analisis)
 function correccion_cajas_item_listado_conflicto(
     mysqli $conexion,
     $tabla,
-    $idSucursal,
-    $nombreSucursal,
+    $idTabla,
     $fecha,
     array $analisis,
     $sufijoMensaje = ''
@@ -559,8 +573,7 @@ function correccion_cajas_item_listado_conflicto(
     }
 
     return [
-        'id_sucursal' => (int) $idSucursal,
-        'nombre_sucursal' => $nombreSucursal,
+        'id_tabla' => (int) $idTabla,
         'fecha' => $fecha,
         'fecha_texto' => date('d-m-Y', strtotime($fecha)),
         'conflicto' => $conflicto,
@@ -640,10 +653,10 @@ function correccion_cajas_reordenar_movimientos_dia(mysqli $conexion, $tabla, $f
     correccion_cajas_actualizar_autoincrement($conexion, $tabla);
 }
 
-function correccion_cajas_detectar_conflictos_sucursal(mysqli $conexion, $idSucursal, $nombreSucursal)
+function correccion_cajas_detectar_conflictos_tabla(mysqli $conexion, $idTabla)
 {
-    $idSucursal = (int) $idSucursal;
-    $tabla = correccion_cajas_tabla_movimientos($idSucursal);
+    $idTabla = (int) $idTabla;
+    $tabla = correccion_cajas_tabla_movimientos($idTabla);
     if (!correccion_cajas_tabla_existe($conexion, $tabla)) {
         return [];
     }
@@ -668,8 +681,7 @@ function correccion_cajas_detectar_conflictos_sucursal(mysqli $conexion, $idSucu
         return [correccion_cajas_item_listado_conflicto(
             $conexion,
             $tabla,
-            $idSucursal,
-            $nombreSucursal,
+            $idTabla,
             $fecha,
             $analisis
         )];
@@ -680,8 +692,7 @@ function correccion_cajas_detectar_conflictos_sucursal(mysqli $conexion, $idSucu
         return [correccion_cajas_item_listado_conflicto(
             $conexion,
             $tabla,
-            $idSucursal,
-            $nombreSucursal,
+            $idTabla,
             $hoy,
             [
                 'falta_apertura' => true,
