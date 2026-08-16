@@ -10,9 +10,10 @@
       // Consulta para obtener datos del artículo
       $query_articulo = "
           SELECT 
-              av.*
-          FROM articulos_venta av
-          WHERE av.id = ?
+              a.*,
+              a.sku AS id
+          FROM articulos a
+          WHERE a.sku = ?
       ";
       
       $stmt_articulo = mysqli_prepare($conexion, $query_articulo);

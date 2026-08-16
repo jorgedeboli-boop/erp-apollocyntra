@@ -21,7 +21,7 @@ try {
 
     $conexion = conectar_bd();
 
-    $stArt = mysqli_prepare($conexion, 'SELECT id FROM articulos_venta WHERE id = ? LIMIT 1');
+    $stArt = mysqli_prepare($conexion, 'SELECT sku FROM articulos WHERE sku = ? LIMIT 1');
     if (!$stArt) {
         throw new Exception(mysqli_error($conexion));
     }
@@ -35,7 +35,7 @@ try {
     }
     mysqli_stmt_close($stArt);
 
-    $query = 'SELECT id, src FROM articulos_venta_imagenes WHERE id_articulo_venta = ? ORDER BY id DESC';
+    $query = 'SELECT id, src FROM articulos_venta_imagenes WHERE rel_sku_articulo = ? ORDER BY id DESC';
     $stmt = mysqli_prepare($conexion, $query);
     if (!$stmt) {
         throw new Exception(mysqli_error($conexion));

@@ -100,7 +100,7 @@ document.addEventListener('DOMContentLoaded', function() {
           Swal.fire({
             icon: 'error',
             title: 'Error',
-            text: data.error || 'Error al crear el artículo',
+            text: data.error || data.message || 'Error al crear el artículo',
             confirmButtonText: 'Aceptar'
           });
         }

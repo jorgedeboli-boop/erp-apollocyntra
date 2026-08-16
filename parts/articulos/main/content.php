@@ -10,13 +10,14 @@
       // Consulta para obtener datos del artículo con información completa
       $query_articulo = "
           SELECT 
-              av.*,
+              a.*,
+              a.sku AS id,
               u.nombre_usuario,
               u.apellido_usuario,
               u.id_usuario
-          FROM articulos_venta av
-          LEFT JOIN usuarios u ON av.creado_por = u.id_usuario
-          WHERE av.id = ?
+          FROM articulos a
+          LEFT JOIN usuarios u ON a.creado_por = u.id_usuario
+          WHERE a.sku = ?
       ";
       
       $stmt_articulo = mysqli_prepare($conexion, $query_articulo);
@@ -157,7 +158,7 @@
               <ul class="list-unstyled my-3 py-1">
                 <li class="d-flex align-items-center mb-4">
                   <i class="icon-base ri ri-store-2-line icon-24px"></i><span class="fw-medium mx-2">Origen:</span>
-                  <span class="badge bg-label-<?php echo ($articulo['origen_articulo'] === 'central') ? 'primary' : 'info'; ?> rounded-pill"><?php echo htmlspecialchars($articulo['origen_articulo']); ?></span>
+                  <span class="badge bg-label-<?php echo (($articulo['origen_articulo'] ?? '') === 'central') ? 'primary' : 'info'; ?> rounded-pill"><?php echo htmlspecialchars($articulo['origen_articulo'] ?? '—'); ?></span>
                 </li>
                 <li class="d-flex align-items-center mb-4">
                   <i class="icon-base ri ri-user-line icon-24px"></i><span class="fw-medium mx-2">Creado por:</span>

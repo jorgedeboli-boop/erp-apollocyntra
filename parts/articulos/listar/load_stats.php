@@ -15,25 +15,16 @@ try {
     $filtro_tipo_fecha = isset($_POST['filtro_tipo_fecha']) ? trim($_POST['filtro_tipo_fecha']) : 'vendido';
     $tipo_stat = isset($_POST['tipo']) ? trim($_POST['tipo']) : 'total';
     
-    if ($filtro_tipo_fecha === 'enviado') {
-        $campoFecha = 'av.fecha_enviado';
-    } elseif ($filtro_tipo_fecha === 'en_venta') {
-        $campoFecha = 'av.fecha_en_venta';
+    if ($filtro_tipo_fecha === 'en_venta') {
+        $campoFecha = 'a.fecha_en_venta';
     } else {
-        $campoFecha = 'av.fecha_vendido';
+        $campoFecha = 'a.fecha_alta';
     }
     
     // Construir WHERE clause
     $whereConditions = array();
     $params = array();
     $types = '';
-    
-    // Filtro de origen
-    if (!empty($filtro_origen)) {
-        $whereConditions[] = "av.origen_articulo = ?";
-        $params[] = $filtro_origen;
-        $types .= 's';
-    }
     
     // Filtro de fecha según período y tipo de fecha
     if ($filtro_periodo === 'dia') {
@@ -63,13 +54,13 @@ try {
     // Agregar condición específica según el tipo de estadística
     switch($tipo_stat) {
         case 'total-enventa':
-            $whereConditions[] = "av.estado = 'enventa'";
+            $whereConditions[] = "a.estado = 'enventa'";
             break;
         case 'total-vendidos':
-            $whereConditions[] = "av.estado IN ('vendido', 'vendido_web')";
+            $whereConditions[] = "a.estado IN ('vendido', 'vendido_web')";
             break;
         case 'total-reservados':
-            $whereConditions[] = "av.estado = 'reservado'";
+            $whereConditions[] = "a.estado = 'reservado'";
             break;
     }
     
@@ -81,7 +72,7 @@ try {
     // Consulta para contar
     $query = "
         SELECT COUNT(*) as total
-        FROM articulos_venta av
+        FROM articulos a
         $whereClause
     ";
     

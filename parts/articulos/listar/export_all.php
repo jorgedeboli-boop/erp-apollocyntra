@@ -23,23 +23,15 @@ try {
     $filtro_periodo = isset($_POST['filtro_periodo']) ? trim($_POST['filtro_periodo']) : '';
     $filtro_tipo_fecha = isset($_POST['filtro_tipo_fecha']) ? trim($_POST['filtro_tipo_fecha']) : 'vendido';
     
-    if ($filtro_tipo_fecha === 'enviado') {
-        $campoFecha = 'av.fecha_enviado';
-    } elseif ($filtro_tipo_fecha === 'en_venta') {
-        $campoFecha = 'av.fecha_en_venta';
+    if ($filtro_tipo_fecha === 'en_venta') {
+        $campoFecha = 'a.fecha_en_venta';
     } else {
-        $campoFecha = 'av.fecha_vendido';
+        $campoFecha = 'a.fecha_alta';
     }
     
     // Construir WHERE clause
     $whereConditions = array();
     $searchParams = array();
-    
-    // Filtro de origen
-    if (!empty($filtro_origen)) {
-        $whereConditions[] = "av.origen_articulo = ?";
-        $searchParams[] = $filtro_origen;
-    }
     
     // Filtro de fecha según período y tipo de fecha
     if ($filtro_periodo === 'dia') {
@@ -65,8 +57,8 @@ try {
     // Búsqueda global
     if (!empty($searchValue)) {
         $whereConditions[] = "(
-            av.id LIKE ? OR
-            av.descripcion LIKE ?
+            a.sku LIKE ? OR
+            a.descripcion LIKE ?
         )";
         $searchTerm = '%' . $searchValue . '%';
         $searchParams[] = $searchValue;
@@ -81,19 +73,16 @@ try {
     // Consulta SIN LIMIT para obtener TODOS los registros
     $query = "
         SELECT 
-            av.id as id_articulo,
-            av.descripcion,
-            av.precio,
-            av.precio_coste,
-            av.fecha_enviado,
-            av.fecha_en_venta,
-            av.fecha_vendido,
-            av.origen_articulo,
+            a.sku as id_articulo,
+            a.descripcion,
+            a.precio,
+            a.precio_coste,
+            a.fecha_en_venta,
             u.nombre_usuario
-        FROM articulos_venta av
-        LEFT JOIN usuarios u ON av.creado_por = u.id_usuario
+        FROM articulos a
+        LEFT JOIN usuarios u ON a.creado_por = u.id_usuario
         $whereClause
-        ORDER BY av.id DESC
+        ORDER BY a.sku DESC
     ";
     
     if (!empty($searchParams)) {
@@ -117,20 +106,16 @@ try {
     // Obtener TODOS los datos
     $data = [];
     while ($row = mysqli_fetch_assoc($result)) {
-        // Formatear origen
-        $origen = ($row['origen_articulo'] === 'sucursal') ? 'Otro' : ucfirst((string) $row['origen_articulo']);
-        
-        // Formatear datos para exportación
         $data[] = [
-            $row['id_articulo'],                                                                                                                          // 0 - SKU
-            $row['descripcion'],                                                                                                                          // 1 - Descripción
-            number_format($row['precio'], 0, ',', '.') . ' €',                                                                                           // 2 - Precio (sin decimales)
-            number_format($row['precio_coste'], 0, ',', '.') . ' €',                                                                                     // 3 - Precio Coste (sin decimales)
-            !empty($row['fecha_enviado']) && $row['fecha_enviado'] !== '0000-00-00 00:00:00' ? date('d/m/Y', strtotime($row['fecha_enviado'])) : '-',  // 4 - F. Enviado
-            !empty($row['fecha_en_venta']) && $row['fecha_en_venta'] !== '0000-00-00 00:00:00' ? date('d/m/Y', strtotime($row['fecha_en_venta'])) : '-', // 5 - F. En Venta
-            !empty($row['fecha_vendido']) && $row['fecha_vendido'] !== '0000-00-00' ? date('d/m/Y', strtotime($row['fecha_vendido'])) : '-',             // 6 - F. Vendido
-            $row['nombre_usuario'] ? $row['nombre_usuario'] : 'N/A',                                                                                     // 7 - Creado Por
-            $origen                                                                                                                                       // 8 - Origen
+            $row['id_articulo'],
+            $row['descripcion'],
+            number_format($row['precio'], 0, ',', '.') . ' €',
+            number_format($row['precio_coste'], 0, ',', '.') . ' €',
+            '-',
+            !empty($row['fecha_en_venta']) && $row['fecha_en_venta'] !== '0000-00-00 00:00:00' ? date('d/m/Y', strtotime($row['fecha_en_venta'])) : '-',
+            '-',
+            $row['nombre_usuario'] ? $row['nombre_usuario'] : 'N/A',
+            '—'
         ];
     }
     

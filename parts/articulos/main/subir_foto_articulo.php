@@ -82,7 +82,7 @@ try {
     }
 
     $conexion = conectar_bd();
-    $stChk = mysqli_prepare($conexion, 'SELECT id FROM articulos_venta WHERE id = ? LIMIT 1');
+    $stChk = mysqli_prepare($conexion, 'SELECT sku FROM articulos WHERE sku = ? LIMIT 1');
     mysqli_stmt_bind_param($stChk, 'i', $id_articulo);
     mysqli_stmt_execute($stChk);
     $rChk = mysqli_stmt_get_result($stChk);
@@ -96,7 +96,7 @@ try {
 
     $ins = mysqli_prepare(
         $conexion,
-        'INSERT INTO articulos_venta_imagenes (id_articulo_venta, src) VALUES (?, ?)'
+        'INSERT INTO articulos_venta_imagenes (rel_sku_articulo, src) VALUES (?, ?)'
     );
     if (!$ins) {
         @unlink($ruta_completa);
